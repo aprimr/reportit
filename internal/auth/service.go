@@ -65,6 +65,9 @@ func (as *authService) Login(ctx context.Context, loginReq LoginRequest) (string
 	if err != nil {
 		return "", "", ErrInvalidCreds
 	}
+	if user == nil {
+		return "", "", ErrInvalidCreds
+	}
 
 	// compare password with hash password from database
 	match := utils.CheckPassword(loginReq.Password, user.PasswordHash)

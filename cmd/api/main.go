@@ -56,9 +56,9 @@ func main() {
 	})
 
 	// Start the server
-	port := ":8000"
+	port := os.Getenv("PORT")
 	fmt.Println("Server is running on port " + port)
-	err = http.ListenAndServe(port, r)
+	err = http.ListenAndServe(":"+port, r)
 	if err != nil {
 		panic("Cannot start the server")
 	}
