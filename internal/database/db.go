@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
@@ -15,12 +16,21 @@ func ConnectDB() error {
 
 	// Get database connection url from env
 	dbURL := os.Getenv("DATABASE_URL")
+	if dbURL == "" {
+		return fmt.Errorf("DATABASE_URL environment variable is not set")
+	}
 
-	// Create connection pool
-	var err error
-	DB, err = pgxpool.New(ctx, dbURL)
+	// Parse the connection string into a config struct
+	config, err := pgxpool.ParseConfig(dbURL)
 	if err != nil {
-		return fmt.Errorf("failed to connect to database: %w", err)
+		return fmt.Errorf("failed to parse database url: %w", err)
+	}
+	config.ConnConfig.DefaultQueryExecMode = pgx.QueryExecModeSimpleProtocol
+
+	// Create connection pool using the customized config
+	DB, err = pgxpool.NewWithConfig(ctx, config)
+	if err != nil {
+		return fmt.Errorf("failed to create connection pool: %w", err)
 	}
 
 	// Ping database
