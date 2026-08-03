@@ -38,6 +38,18 @@ func (ah *authHandler) Register(w http.ResponseWriter, r *http.Request) {
 		utils.WriteError(w, http.StatusBadRequest, "Email, phone and password are required")
 		return
 	}
+	if !utils.IsValidEmail(regReq.Email) {
+		utils.WriteError(w, http.StatusBadRequest, "Invalid email address")
+		return
+	}
+	if !utils.IsValidPhone(regReq.Phone) {
+		utils.WriteError(w, http.StatusBadRequest, "Invalid phone")
+		return
+	}
+	if !utils.IsValidPassword(regReq.Password) {
+		utils.WriteError(w, http.StatusBadRequest, "Invalid password. Please match the password requirements.")
+		return
+	}
 
 	// Call service layer
 	user, err := ah.authService.Register(r.Context(), regReq)
