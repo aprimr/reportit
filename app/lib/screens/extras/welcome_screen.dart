@@ -1,3 +1,4 @@
+import 'package:app/core/routes/app_routes.dart';
 import 'package:app/core/theme/app_theme.dart';
 import 'package:app/widgets/app_buttons.dart';
 import 'package:flutter/material.dart';
@@ -125,6 +126,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                     settings: const LiquidGlassSettings(
                       thickness: 80,
                       frostIntensity: 3,
+                      lightAngle: 0.7,
                     ),
                     child: LiquidGlass(
                       shape: LiquidRoundedSuperellipse(borderRadius: 30),
@@ -139,7 +141,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                               'Report It,\nGet It Resolved.',
                               style: GoogleFonts.montserrat(
                                 color: Colors.white,
-                                fontSize: 28,
+                                fontSize: 32,
                                 fontWeight: FontWeight.w600,
                                 height: 1.2,
                                 letterSpacing: -0.5,
@@ -150,7 +152,12 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
 
                             // Get Started
                             AppButtons.primary(
-                              onPressed: () {},
+                              onPressed: () {
+                                Navigator.pushReplacementNamed(
+                                  context,
+                                  AppRoutes.register,
+                                );
+                              },
                               text: "Get Started",
                             ),
 
@@ -159,7 +166,12 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                             // Sign In
                             Center(
                               child: AppButtons.text(
-                                onPressed: () {},
+                                onPressed: () {
+                                  Navigator.pushReplacementNamed(
+                                    context,
+                                    AppRoutes.login,
+                                  );
+                                },
                                 textColor: Colors.white,
                                 text: "Login",
                               ),
