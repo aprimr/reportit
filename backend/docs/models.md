@@ -6,6 +6,7 @@
 ```sql
 CREATE TABLE users(
   uid UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  fullname TEXT NOT NULL,
   email TEXT NOT NULL UNIQUE,
   phone TEXT NOT NULL UNIQUE,
   password_hash TEXT NOT NULL,
@@ -13,7 +14,7 @@ CREATE TABLE users(
   is_verified BOOL DEFAULT TRUE,
   created_at TIMESTAMPTZ DEFAULT now(),
   updated_at TIMESTAMPTZ DEFAULT now()
-);
+)
 ```
 
 ---

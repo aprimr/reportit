@@ -7,6 +7,7 @@ import (
 )
 
 type RegisterRequest struct {
+	Fullname string `json:"fullname"`
 	Email    string `json:"email"`
 	Phone    string `json:"phone"`
 	Password string `json:"password"`
@@ -19,6 +20,7 @@ type LoginRequest struct {
 
 type User struct {
 	Uid          uuid.UUID `json:"uid"`
+	Fullname     string    `json:"fullname"`
 	Email        string    `json:"email"`
 	Phone        string    `json:"phone"`
 	PasswordHash string    `json:"-"`

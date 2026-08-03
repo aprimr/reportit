@@ -30,10 +30,11 @@ func NewAuthRepository(db *pgxpool.Pool, logger *slog.Logger) AuthRepository {
 // CreateUser inserts a row for user in the users table
 func (ar *authRepository) CreateUser(ctx context.Context, regReq *RegisterRequest) (*User, error) {
 	var user User
-	query := `INSERT INTO users (email, phone, password_hash) Values($1, $2, $3) RETURNING uid, email, phone, role, is_verified, created_at, updated_at`
+	query := `INSERT INTO users (fullname, email, phone, password_hash) Values($1, $2, $3, $4) RETURNING uid, fullname, email, phone, role, is_verified, created_at, updated_at`
 
-	err := ar.db.QueryRow(ctx, query, regReq.Email, regReq.Phone, regReq.Password).Scan(
+	err := ar.db.QueryRow(ctx, query, regReq.Fullname, regReq.Email, regReq.Phone, regReq.Password).Scan(
 		&user.Uid,
+		&user.Fullname,
 		&user.Email,
 		&user.Phone,
 		&user.Role,
@@ -53,10 +54,11 @@ func (ar *authRepository) CreateUser(ctx context.Context, regReq *RegisterReques
 func (ar *authRepository) GetUserByEmailOrPhone(ctx context.Context, emailOrPhone string) (*User, error) {
 	var user User
 
-	query := `SELECT uid, email, phone, password_hash, role, is_verified, created_at, updated_at FROM users WHERE email=$1 OR phone=$1`
+	query := `SELECT uid, fullname, email, phone, password_hash, role, is_verified, created_at, updated_at FROM users WHERE email=$1 OR phone=$1`
 
 	err := ar.db.QueryRow(ctx, query, emailOrPhone).Scan(
 		&user.Uid,
+		&user.Fullname,
 		&user.Email,
 		&user.Phone,
 		&user.PasswordHash,

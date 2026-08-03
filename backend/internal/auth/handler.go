@@ -34,8 +34,12 @@ func (ah *authHandler) Register(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// validate data
-	if regReq.Email == "" || regReq.Phone == "" || regReq.Password == "" {
-		utils.WriteError(w, http.StatusBadRequest, "Email, phone and password are required")
+	if regReq.Fullname == "" || regReq.Email == "" || regReq.Phone == "" || regReq.Password == "" {
+		utils.WriteError(w, http.StatusBadRequest, "All fields are required")
+		return
+	}
+	if !utils.IsValidFullname(regReq.Fullname) {
+		utils.WriteError(w, http.StatusBadRequest, "Invalid fullname")
 		return
 	}
 	if !utils.IsValidEmail(regReq.Email) {
@@ -43,7 +47,7 @@ func (ah *authHandler) Register(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	if !utils.IsValidPhone(regReq.Phone) {
-		utils.WriteError(w, http.StatusBadRequest, "Invalid phone")
+		utils.WriteError(w, http.StatusBadRequest, "Invalid phone number")
 		return
 	}
 	if !utils.IsValidPassword(regReq.Password) {

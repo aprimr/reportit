@@ -6,9 +6,15 @@ import (
 
 // Regex patterns for validation
 var (
-	emailRegex = regexp.MustCompile(`^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$`)
-	phoneRegex = regexp.MustCompile(`^\+?[0-9]{10,15}$`)
+	fullnameRegex = regexp.MustCompile(`^[a-zA-Z\s]{6,}$`)
+	emailRegex    = regexp.MustCompile(`^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$`)
+	phoneRegex    = regexp.MustCompile(`^9[0-9]{9}$`)
 )
+
+// IsValidFullname checks if the provided name is a valid name format.
+func IsValidFullname(name string) bool {
+	return fullnameRegex.MatchString(name)
+}
 
 // IsValidEmail checks if the provided string is a valid email format.
 func IsValidEmail(email string) bool {
