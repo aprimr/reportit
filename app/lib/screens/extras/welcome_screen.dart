@@ -1,13 +1,46 @@
-import 'package:app/core/routes/app_routes.dart';
 import 'package:app/core/theme/app_theme.dart';
 import 'package:app/widgets/app_buttons.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:hugeicons/hugeicons.dart';
 import 'package:liquid_glass_plus/liquid_glass_plus.dart';
+import 'package:video_player/video_player.dart';
 
-class WelcomeScreen extends StatelessWidget {
+class WelcomeScreen extends StatefulWidget {
   const WelcomeScreen({super.key});
+
+  @override
+  State<WelcomeScreen> createState() => _WelcomeScreenState();
+}
+
+class _WelcomeScreenState extends State<WelcomeScreen> {
+  late VideoPlayerController _controller;
+  bool _isVideoInitialized = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = VideoPlayerController.asset('assets/videos/welcome.mp4')
+      ..initialize()
+          .then((_) {
+            setState(() {
+              _isVideoInitialized = true;
+            });
+            _controller.setLooping(true);
+            _controller.setVolume(0);
+            _controller.play();
+          })
+          .catchError((error) {
+            setState(() {
+              _isVideoInitialized = false;
+            });
+          });
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -15,22 +48,37 @@ class WelcomeScreen extends StatelessWidget {
       body: Stack(
         fit: StackFit.expand,
         children: [
-          // Background Image
-          Image.asset(
-            'assets/images/welcome.jpg',
-            fit: BoxFit.cover,
-            errorBuilder: (context, error, stackTrace) {
-              return Container(
-                decoration: const BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.topCenter,
-                    end: Alignment.bottomCenter,
-                    colors: [Color(0xFF1E3A5F), Color(0xFF0F172A)],
-                  ),
+          // Background Video
+          if (_isVideoInitialized)
+            SizedBox(
+              width: double.infinity,
+              height: double.infinity,
+              child: FittedBox(
+                fit: BoxFit.cover,
+                child: SizedBox(
+                  width: _controller.value.size.width,
+                  height: _controller.value.size.height,
+                  child: VideoPlayer(_controller),
                 ),
-              );
-            },
-          ),
+              ),
+            )
+          else
+            // Fallback Image
+            Image.asset(
+              'assets/images/welcome.jpg',
+              fit: BoxFit.cover,
+              errorBuilder: (context, error, stackTrace) {
+                return Container(
+                  decoration: const BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                      colors: [Color(0xFF1E3A5F), Color(0xFF0F172A)],
+                    ),
+                  ),
+                );
+              },
+            ),
 
           // Gradient Overlay
           Container(
@@ -101,7 +149,7 @@ class WelcomeScreen extends StatelessWidget {
                             const SizedBox(height: 28),
 
                             // Get Started
-                            AppButtons.secondary(
+                            AppButtons.primary(
                               onPressed: () {},
                               text: "Get Started",
                             ),

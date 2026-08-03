@@ -1,13 +1,17 @@
 import 'package:app/core/theme/app_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:hugeicons/hugeicons.dart';
+
+enum IconPos { left, right }
 
 class AppButtons {
   // Primary Button
   static Widget primary({
     required VoidCallback onPressed,
     required String text,
-    IconData? icon,
+    List<List<dynamic>>? icon,
+    IconPos iconPos = IconPos.left,
     double iconSize = 22,
     bool isLoading = false,
     double width = double.infinity,
@@ -43,8 +47,12 @@ class AppButtons {
                 mainAxisSize: MainAxisSize.min,
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  if (icon != null) ...[
-                    Icon(icon, size: iconSize),
+                  if (icon != null && iconPos == IconPos.left) ...[
+                    HugeIcon(
+                      icon: icon,
+                      size: iconSize,
+                      color: foregroundColor,
+                    ),
                     const SizedBox(width: 10),
                   ],
                   Text(
@@ -54,6 +62,14 @@ class AppButtons {
                       fontWeight: FontWeight.w600,
                     ),
                   ),
+                  if (icon != null && iconPos == IconPos.right) ...[
+                    const SizedBox(width: 10),
+                    HugeIcon(
+                      icon: icon,
+                      size: iconSize,
+                      color: foregroundColor,
+                    ),
+                  ],
                 ],
               ),
       ),
@@ -64,7 +80,8 @@ class AppButtons {
   static Widget secondary({
     required VoidCallback onPressed,
     required String text,
-    IconData? icon,
+    List<List<dynamic>>? icon,
+    IconPos iconPos = IconPos.left,
     double iconSize = 22,
     bool isLoading = false,
     double width = double.infinity,
@@ -100,8 +117,12 @@ class AppButtons {
                 mainAxisSize: MainAxisSize.min,
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  if (icon != null) ...[
-                    Icon(icon, size: iconSize),
+                  if (icon != null && iconPos == IconPos.left) ...[
+                    HugeIcon(
+                      icon: icon,
+                      size: iconSize,
+                      color: foregroundColor,
+                    ),
                     const SizedBox(width: 10),
                   ],
                   Text(
@@ -111,6 +132,14 @@ class AppButtons {
                       fontWeight: FontWeight.w600,
                     ),
                   ),
+                  if (icon != null && iconPos == IconPos.right) ...[
+                    const SizedBox(width: 10),
+                    HugeIcon(
+                      icon: icon,
+                      size: iconSize,
+                      color: foregroundColor,
+                    ),
+                  ],
                 ],
               ),
       ),
@@ -121,7 +150,8 @@ class AppButtons {
   static Widget outlined({
     required VoidCallback onPressed,
     required String text,
-    IconData? icon,
+    List<List<dynamic>>? icon,
+    IconPos iconPos = IconPos.left,
     double iconSize = 22,
     bool isLoading = false,
     double width = double.infinity,
@@ -160,8 +190,8 @@ class AppButtons {
                 mainAxisSize: MainAxisSize.min,
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  if (icon != null) ...[
-                    Icon(icon, size: iconSize),
+                  if (icon != null && iconPos == IconPos.left) ...[
+                    HugeIcon(icon: icon, size: iconSize, color: textColor),
                     const SizedBox(width: 10),
                   ],
                   Text(
@@ -171,6 +201,10 @@ class AppButtons {
                       fontWeight: FontWeight.w600,
                     ),
                   ),
+                  if (icon != null && iconPos == IconPos.right) ...[
+                    const SizedBox(width: 10),
+                    HugeIcon(icon: icon, size: iconSize, color: textColor),
+                  ],
                 ],
               ),
       ),
@@ -181,10 +215,11 @@ class AppButtons {
   static Widget text({
     required VoidCallback onPressed,
     required String text,
-    IconData? icon,
+    List<List<dynamic>>? icon,
+    IconPos iconPos = IconPos.left,
     double iconSize = 20,
     bool isLoading = false,
-    double fontSize = 18,
+    double fontSize = 16,
     Color? textColor,
     double? letterSpacing,
     FontWeight fontWeight = FontWeight.w600,
@@ -204,8 +239,8 @@ class AppButtons {
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            if (icon != null) ...[
-              Icon(icon, size: iconSize, color: effectiveColor),
+            if (icon != null && iconPos == IconPos.left) ...[
+              HugeIcon(icon: icon, size: iconSize, color: effectiveColor),
               const SizedBox(width: 8),
             ],
             if (isLoading)
@@ -232,6 +267,10 @@ class AppButtons {
                   decorationThickness: underlineThickness ?? 1.5,
                 ),
               ),
+            if (icon != null && iconPos == IconPos.right) ...[
+              const SizedBox(width: 8),
+              HugeIcon(icon: icon, size: iconSize, color: effectiveColor),
+            ],
           ],
         ),
       ),
@@ -242,7 +281,8 @@ class AppButtons {
   static Widget social({
     required VoidCallback onPressed,
     required String text,
-    required IconData icon,
+    required List<List<dynamic>> icon,
+    IconPos iconPos = IconPos.left,
     double iconSize = 24,
     bool isLoading = false,
     double width = double.infinity,
@@ -277,8 +317,10 @@ class AppButtons {
             : Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(icon, size: iconSize),
-                  const SizedBox(width: 12),
+                  if (iconPos == IconPos.left) ...[
+                    HugeIcon(icon: icon, size: iconSize, color: textColor),
+                    const SizedBox(width: 12),
+                  ],
                   Text(
                     text,
                     style: GoogleFonts.montserrat(
@@ -286,6 +328,10 @@ class AppButtons {
                       fontWeight: FontWeight.w600,
                     ),
                   ),
+                  if (iconPos == IconPos.right) ...[
+                    const SizedBox(width: 12),
+                    HugeIcon(icon: icon, size: iconSize, color: textColor),
+                  ],
                 ],
               ),
       ),
@@ -295,7 +341,7 @@ class AppButtons {
   // Icon Button
   static Widget icon({
     required VoidCallback onPressed,
-    required IconData icon,
+    required List<List<dynamic>> icon,
     double size = 52,
     Color? backgroundColor,
     Color? iconColor,
@@ -315,7 +361,7 @@ class AppButtons {
           padding: EdgeInsets.zero,
           minimumSize: const Size(0, 0),
         ),
-        child: Icon(icon, size: iconSize),
+        child: HugeIcon(icon: icon, size: iconSize, color: iconColor),
       ),
     );
   }
