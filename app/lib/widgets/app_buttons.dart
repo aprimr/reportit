@@ -97,7 +97,7 @@ class AppButtons {
       child: ElevatedButton(
         onPressed: isLoading ? null : onPressed,
         style: ElevatedButton.styleFrom(
-          backgroundColor: backgroundColor ?? Colors.white,
+          backgroundColor: backgroundColor ?? AppTheme.inputFill,
           foregroundColor: foregroundColor ?? AppTheme.textPrimary,
           elevation: 0,
           shape: RoundedRectangleBorder(

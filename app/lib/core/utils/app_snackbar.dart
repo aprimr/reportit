@@ -17,28 +17,21 @@ class AppSnackBar {
       SnackBar(
         content: Row(
           children: [
-            Container(
-              width: 32,
-              height: 32,
-              decoration: BoxDecoration(
-                color: Colors.white.withValues(alpha: 0.2),
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: Center(
-                child: HugeIcon(
-                  icon: icon,
-                  size: 18,
-                  color: iconColor ?? Colors.white,
-                ),
+            Center(
+              child: HugeIcon(
+                icon: icon,
+                size: 20,
+                strokeWidth: 3,
+                color: iconColor ?? Colors.white,
               ),
             ),
-            const SizedBox(width: 14),
+            const SizedBox(width: 10),
             Expanded(
               child: Text(
                 message,
                 style: GoogleFonts.inter(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w500,
+                  fontSize: 18,
+                  fontWeight: FontWeight.w700,
                   color: Colors.white,
                   height: 1.4,
                 ),
@@ -51,7 +44,7 @@ class AppSnackBar {
         behavior: SnackBarBehavior.floating,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
         margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
         elevation: 0,
       ),
     );
@@ -66,7 +59,7 @@ class AppSnackBar {
       context,
       message,
       backgroundColor: AppTheme.success,
-      icon: HugeIcons.strokeRoundedCheckmarkCircle01,
+      icon: HugeIcons.strokeRoundedCheckmarkSquare04,
       duration: duration,
     );
   }
@@ -80,7 +73,7 @@ class AppSnackBar {
       context,
       message,
       backgroundColor: AppTheme.error,
-      icon: HugeIcons.strokeRoundedCancel01,
+      icon: HugeIcons.strokeRoundedAlertSquare,
       duration: duration,
     );
   }
@@ -94,7 +87,7 @@ class AppSnackBar {
       context,
       message,
       backgroundColor: AppTheme.warning,
-      icon: HugeIcons.strokeRoundedAlert02,
+      icon: HugeIcons.strokeRoundedAlertDiamond,
       duration: duration,
     );
   }
@@ -107,8 +100,8 @@ class AppSnackBar {
     _show(
       context,
       message,
-      backgroundColor: AppTheme.primary,
-      icon: HugeIcons.strokeRoundedInformationCircle,
+      backgroundColor: AppTheme.secondary,
+      icon: HugeIcons.strokeRoundedInformationSquare,
       duration: duration,
     );
   }
