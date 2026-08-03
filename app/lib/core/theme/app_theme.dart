@@ -5,6 +5,10 @@ class AppTheme {
   static const Color onPrimary = Color(0xFFFFFFFF);
   static const Color secondary = Color(0xFF0EA5E9);
 
+  static const Color success = Color(0xFF16A34A);
+  static const Color warning = Color(0xFFD97706);
+  static const Color error = Color(0xFFDC2626);
+
   static const Color scaffoldBg = Color(0xFFF8FAFC);
   static const Color appBarBg = Color(0xFFFFFFFF);
   static const Color cardBg = Color(0xFFFFFFFF);
