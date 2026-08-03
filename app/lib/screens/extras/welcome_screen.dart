@@ -1,7 +1,10 @@
-import 'dart:ui';
-
+import 'package:app/core/routes/app_routes.dart';
 import 'package:app/core/theme/app_theme.dart';
+import 'package:app/widgets/app_buttons.dart';
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:hugeicons/hugeicons.dart';
+import 'package:liquid_glass_plus/liquid_glass_plus.dart';
 
 class WelcomeScreen extends StatelessWidget {
   const WelcomeScreen({super.key});
@@ -14,7 +17,7 @@ class WelcomeScreen extends StatelessWidget {
         children: [
           // Background Image
           Image.asset(
-            'assets/images/welcome_bg.png',
+            'assets/images/welcome.jpg',
             fit: BoxFit.cover,
             errorBuilder: (context, error, stackTrace) {
               return Container(
@@ -54,23 +57,15 @@ class WelcomeScreen extends StatelessWidget {
                 children: [
                   const SizedBox(height: 16),
 
-                  // Top Bar
+                  // Logo
                   Row(
-                    mainAxisAlignment: MainAxisAlignment.end,
                     children: [
-                      TextButton(
-                        onPressed: () {
-                          Navigator.pushReplacementNamed(context, '/login');
-                        },
-                        style: TextButton.styleFrom(
-                          foregroundColor: Colors.white70,
-                        ),
-                        child: const Text(
-                          'Skip',
-                          style: TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.w500,
-                          ),
+                      Text(
+                        'ReportIt',
+                        style: GoogleFonts.quicksand(
+                          fontSize: 20,
+                          fontWeight: FontWeight.w700,
+                          color: AppTheme.appBarBg,
                         ),
                       ),
                     ],
@@ -78,113 +73,47 @@ class WelcomeScreen extends StatelessWidget {
 
                   const Spacer(),
 
-                  // Glassmorphism Card
-                  Container(
-                    width: double.infinity,
-                    padding: const EdgeInsets.all(28),
-                    decoration: BoxDecoration(
-                      color: Colors.white.withValues(alpha: 0.12),
-                      borderRadius: BorderRadius.circular(24),
-                      border: Border.all(
-                        color: Colors.white.withValues(alpha: 0.2),
-                        width: 1,
-                      ),
+                  LiquidGlassLayer(
+                    settings: const LiquidGlassSettings(
+                      thickness: 80,
+                      frostIntensity: 3,
                     ),
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.circular(24),
-                      child: BackdropFilter(
-                        filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
+                    child: LiquidGlass(
+                      shape: LiquidRoundedSuperellipse(borderRadius: 30),
+                      child: Container(
+                        width: double.infinity,
+                        padding: const EdgeInsets.all(28),
                         child: Column(
                           mainAxisSize: MainAxisSize.min,
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            // Title
-                            const Text(
-                              'Your Voice\nMatters Here',
-                              style: TextStyle(
+                            Text(
+                              'Report It,\nGet It Resolved.',
+                              style: GoogleFonts.montserrat(
                                 color: Colors.white,
                                 fontSize: 28,
-                                fontWeight: FontWeight.w700,
+                                fontWeight: FontWeight.w600,
                                 height: 1.2,
                                 letterSpacing: -0.5,
                               ),
                             ),
 
-                            const SizedBox(height: 16),
+                            const SizedBox(height: 28),
 
-                            // Subtitle
-                            const Text(
-                              'Report, track, and resolve complaints seamlessly. Making every concern count.',
-                              style: TextStyle(
-                                color: Color(0xFFB8C5D6),
-                                fontSize: 15,
-                                fontWeight: FontWeight.w400,
-                                height: 1.5,
-                              ),
-                            ),
-
-                            const SizedBox(height: 32),
-
-                            // Get Started Button
-                            SizedBox(
-                              width: double.infinity,
-                              height: 52,
-                              child: ElevatedButton(
-                                onPressed: () {
-                                  Navigator.pushReplacementNamed(
-                                    context,
-                                    '/signup',
-                                  );
-                                },
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: AppTheme.primary,
-                                  foregroundColor: Colors.white,
-                                  elevation: 0,
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(12),
-                                  ),
-                                ),
-                                child: const Text(
-                                  'Get Started',
-                                  style: TextStyle(
-                                    fontSize: 15,
-                                    fontWeight: FontWeight.w600,
-                                    letterSpacing: 0.3,
-                                  ),
-                                ),
-                              ),
+                            // Get Started
+                            AppButtons.secondary(
+                              onPressed: () {},
+                              text: "Get Started",
                             ),
 
                             const SizedBox(height: 16),
 
-                            // Sign In Button
-                            SizedBox(
-                              width: double.infinity,
-                              height: 52,
-                              child: OutlinedButton(
-                                onPressed: () {
-                                  Navigator.pushReplacementNamed(
-                                    context,
-                                    '/login',
-                                  );
-                                },
-                                style: OutlinedButton.styleFrom(
-                                  foregroundColor: Colors.white,
-                                  side: BorderSide(
-                                    color: Colors.white.withValues(alpha: 0.3),
-                                    width: 1.5,
-                                  ),
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(12),
-                                  ),
-                                ),
-                                child: const Text(
-                                  'I Already Have an Account',
-                                  style: TextStyle(
-                                    fontSize: 14,
-                                    fontWeight: FontWeight.w500,
-                                  ),
-                                ),
+                            // Sign In
+                            Center(
+                              child: AppButtons.text(
+                                onPressed: () {},
+                                textColor: Colors.white,
+                                text: "Login",
                               ),
                             ),
                           ],
@@ -193,7 +122,7 @@ class WelcomeScreen extends StatelessWidget {
                     ),
                   ),
 
-                  const SizedBox(height: 40),
+                  const SizedBox(height: 50),
                 ],
               ),
             ),

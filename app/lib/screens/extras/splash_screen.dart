@@ -1,9 +1,25 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:app/core/theme/app_theme.dart';
+import 'package:app/core/routes/app_routes.dart';
 
-class SplashScreen extends StatelessWidget {
+class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
+
+  @override
+  State<SplashScreen> createState() => _SplashScreenState();
+}
+
+class _SplashScreenState extends State<SplashScreen> {
+  @override
+  void initState() {
+    super.initState();
+    Future.delayed(const Duration(seconds: 3), () {
+      if (mounted) {
+        Navigator.pushReplacementNamed(context, AppRoutes.welcome);
+      }
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -17,17 +33,17 @@ class SplashScreen extends StatelessWidget {
                 children: [
                   TextSpan(
                     text: 'Report',
-                    style: GoogleFonts.carterOne(
-                      fontSize: 32,
-                      fontWeight: FontWeight.w400,
+                    style: GoogleFonts.quicksand(
+                      fontSize: 34,
+                      fontWeight: FontWeight.w700,
                       color: AppTheme.textPrimary,
                     ),
                   ),
                   TextSpan(
                     text: 'It',
-                    style: GoogleFonts.carterOne(
-                      fontSize: 32,
-                      fontWeight: FontWeight.w500,
+                    style: GoogleFonts.quicksand(
+                      fontSize: 34,
+                      fontWeight: FontWeight.w700,
                       color: AppTheme.primary,
                     ),
                   ),
@@ -43,7 +59,7 @@ class SplashScreen extends StatelessWidget {
                 color: AppTheme.primary,
               ),
             ),
-            const SizedBox(height: 48),
+            const SizedBox(height: 58),
           ],
         ),
       ),
