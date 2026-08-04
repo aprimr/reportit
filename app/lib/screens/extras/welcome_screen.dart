@@ -3,6 +3,7 @@ import 'package:app/core/theme/app_theme.dart';
 import 'package:app/widgets/app_buttons.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:hive/hive.dart';
 import 'package:liquid_glass_plus/liquid_glass_plus.dart';
 import 'package:video_player/video_player.dart';
 
@@ -14,6 +15,7 @@ class WelcomeScreen extends StatefulWidget {
 }
 
 class _WelcomeScreenState extends State<WelcomeScreen> {
+  late Box<dynamic> box;
   late VideoPlayerController _controller;
   bool _isVideoInitialized = false;
 
@@ -35,12 +37,30 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
               _isVideoInitialized = false;
             });
           });
+
+    box = Hive.box('appBox');
   }
 
   @override
   void dispose() {
     _controller.dispose();
     super.dispose();
+  }
+
+  void _getStarted() async {
+    box.put('isWelcomed', true);
+
+    if (mounted) {
+      Navigator.pushReplacementNamed(context, AppRoutes.register);
+    }
+  }
+
+  void _login() {
+    box.put('isWelcomed', true);
+
+    if (mounted) {
+      Navigator.pushReplacementNamed(context, AppRoutes.login);
+    }
   }
 
   @override
@@ -152,12 +172,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
 
                             // Get Started
                             AppButtons.primary(
-                              onPressed: () {
-                                Navigator.pushReplacementNamed(
-                                  context,
-                                  AppRoutes.register,
-                                );
-                              },
+                              onPressed: _getStarted,
                               text: "Get Started",
                             ),
 
@@ -166,12 +181,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                             // Sign In
                             Center(
                               child: AppButtons.text(
-                                onPressed: () {
-                                  Navigator.pushReplacementNamed(
-                                    context,
-                                    AppRoutes.login,
-                                  );
-                                },
+                                onPressed: _login,
                                 textColor: Colors.white,
                                 text: "Login",
                               ),

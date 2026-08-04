@@ -45,6 +45,20 @@ class AuthService {
           : ApiError(message: e.message ?? 'Login failed');
     }
   }
+
+  Future<LoginResponse> refresh({required String refreshToken}) async {
+    try {
+      final response = await _client.post(
+        ApiEndpoints.refresh,
+        data: {'refresh_token': refreshToken},
+      );
+      return LoginResponse.fromJson(response.data);
+    } on DioException catch (e) {
+      throw e.error is ApiError
+          ? e.error as ApiError
+          : ApiError(message: e.message ?? 'Refresh failed');
+    }
+  }
 }
 
 class LoginResponse {
@@ -75,8 +89,8 @@ class TokenData {
 
   factory TokenData.fromJson(Map<String, dynamic> json) {
     return TokenData(
-      accessToken: json['accessToken'] as String,
-      refreshToken: json['refreshToken'] as String,
+      accessToken: json['access_token'] as String,
+      refreshToken: json['refresh_token'] as String,
     );
   }
 }

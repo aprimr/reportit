@@ -1,4 +1,5 @@
 import 'package:app/core/network/api_endpoints.dart';
+import 'package:app/core/storage/token_storage.dart';
 import 'package:dio/dio.dart';
 
 class DioClient {
@@ -97,7 +98,7 @@ class DioClient {
 class _AuthInterceptor extends Interceptor {
   @override
   void onRequest(RequestOptions options, RequestInterceptorHandler handler) {
-    final token = _TokenStorage.accessToken;
+    final token = TokenStorage.accessToken;
     if (token != null) {
       options.headers['Authorization'] = 'Bearer $token';
     }
@@ -106,13 +107,38 @@ class _AuthInterceptor extends Interceptor {
 
   @override
   void onError(DioException err, ErrorInterceptorHandler handler) async {
+    // Automatically get new tokens
     if (err.response?.statusCode == 401) {
-      final refreshed = await _TokenStorage.refreshToken();
-      if (refreshed != null) {
-        err.requestOptions.headers['Authorization'] = 'Bearer $refreshed';
-        final retry = await Dio().fetch(err.requestOptions);
-        handler.resolve(retry);
-        return;
+      try {
+        final refreshToken = await TokenStorage.getRefreshToken();
+
+        if (refreshToken != null && refreshToken.isNotEmpty) {
+          final dioRefresh = Dio(BaseOptions(baseUrl: ApiEndpoints.baseUrl));
+
+          final response = await dioRefresh.post(
+            ApiEndpoints.refresh,
+            data: {'refresh_token': refreshToken},
+          );
+
+          if (response.statusCode == 200 && response.data['data'] != null) {
+            final newAccessToken = response.data['data']['access_token'];
+            final newRefreshToken = response.data['data']['refresh_token'];
+
+            // Save new access and refresh tokens
+            TokenStorage.saveTokens(
+              accessToken: newAccessToken,
+              refreshToken: newRefreshToken,
+            );
+
+            // Retry failed request with the new token
+            err.requestOptions.headers['Authorization'] =
+                'Bearer $newAccessToken';
+            final retryResponse = await Dio().fetch(err.requestOptions);
+            return handler.resolve(retryResponse);
+          }
+        }
+      } catch (e) {
+        await TokenStorage.clearTokens();
       }
     }
     handler.next(err);
@@ -132,15 +158,6 @@ class _ErrorInterceptor extends Interceptor {
         message: apiError.message,
       ),
     );
-  }
-}
-
-class _TokenStorage {
-  static String? accessToken;
-  static String? refreshTokenValue;
-
-  static Future<String?> refreshToken() async {
-    return null;
   }
 }
 

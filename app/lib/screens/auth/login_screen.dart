@@ -1,29 +1,30 @@
 import 'package:app/core/network/dio_client.dart';
 import 'package:app/core/routes/app_routes.dart';
-import 'package:app/core/services/auth_service.dart';
+import 'package:app/core/storage/token_storage.dart';
 import 'package:app/core/theme/app_theme.dart';
 import 'package:app/core/utils/app_snackbar.dart';
+import 'package:app/providers/auth_provider.dart';
 import 'package:app/widgets/app_buttons.dart';
 import 'package:app/widgets/app_textfields.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:hugeicons/hugeicons.dart';
+import 'package:jwt_decoder/jwt_decoder.dart';
 
-class LoginScreen extends StatefulWidget {
+class LoginScreen extends ConsumerStatefulWidget {
   const LoginScreen({super.key});
 
   @override
-  State<LoginScreen> createState() => _LoginScreenState();
+  ConsumerState<LoginScreen> createState() => _LoginScreenState();
 }
 
-class _LoginScreenState extends State<LoginScreen> {
-  final _authService = AuthService();
+class _LoginScreenState extends ConsumerState<LoginScreen> {
   final _formKey = GlobalKey<FormState>();
   final _emailOrPhoneController = TextEditingController();
   final _passwordController = TextEditingController();
 
   bool _obscurePassword = true;
-  bool _isLoading = false;
 
   @override
   void dispose() {
@@ -35,24 +36,67 @@ class _LoginScreenState extends State<LoginScreen> {
   void _login() async {
     if (!_formKey.currentState!.validate()) return;
 
-    setState(() => _isLoading = true);
+    ref.read(authLoadingProvider.notifier).state = true;
+
+    final authService = ref.read(authServiceProvider);
 
     try {
-      final response = await _authService.login(
+      final response = await authService.login(
         emailOrPhone: _emailOrPhoneController.text.trim(),
         password: _passwordController.text.trim(),
       );
 
+      final responseMap = {
+        'success': true,
+        'message': response.message,
+        'data': {
+          'access_token': response.data.accessToken,
+          'refresh_token': response.data.refreshToken,
+        },
+      };
+
       if (mounted) {
-        AppSnackBar.success(context, response.message);
-        Navigator.pushReplacementNamed(context, AppRoutes.register);
+        await handleLoginResponse(context, responseMap);
       }
     } on ApiError catch (e) {
       if (mounted) {
         AppSnackBar.error(context, e.message);
       }
     } finally {
-      setState(() => _isLoading = false);
+      if (mounted) {
+        ref.read(authLoadingProvider.notifier).state = false;
+      }
+    }
+  }
+
+  Future<void> handleLoginResponse(
+    BuildContext context,
+    Map<String, dynamic> responseData,
+  ) async {
+    try {
+      final data = responseData['data'];
+      final accessToken = data['access_token'];
+      final refreshToken = data['refresh_token'];
+
+      await TokenStorage.saveTokens(
+        accessToken: accessToken,
+        refreshToken: refreshToken,
+      );
+
+      Map<String, dynamic> decodedToken = JwtDecoder.decode(accessToken);
+      String role = decodedToken['role'] ?? 'user';
+
+      if (!context.mounted) return;
+      AppSnackBar.success(context, responseData['message']);
+      if (role == 'admin') {
+        Navigator.pushReplacementNamed(context, AppRoutes.adminDash);
+      } else {
+        Navigator.pushReplacementNamed(context, AppRoutes.home);
+      }
+    } catch (e) {
+      if (context.mounted) {
+        AppSnackBar.error(context, 'Failed to process login data.');
+      }
     }
   }
 
@@ -82,6 +126,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final isLoading = ref.watch(authLoadingProvider);
     final canPop = ModalRoute.of(context)?.canPop ?? false;
 
     return GestureDetector(
@@ -135,7 +180,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     label: 'Email or Phone',
                     hint: 'Enter your email or phone',
                     icon: HugeIcons.strokeRoundedUser,
-                    readOnly: _isLoading,
+                    readOnly: isLoading,
                     validator: _validateEmailOrPhone,
                   ),
 
@@ -147,7 +192,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     hint: 'Enter your password',
                     icon: HugeIcons.strokeRoundedLockPassword,
                     obscure: _obscurePassword,
-                    readOnly: _isLoading,
+                    readOnly: isLoading,
                     suffixIcon: IconButton(
                       onPressed: () =>
                           setState(() => _obscurePassword = !_obscurePassword),
@@ -171,7 +216,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
                   const SizedBox(height: 32),
 
-                  _isLoading
+                  isLoading
                       ? AppButtons.loading(text: 'Logging In...')
                       : AppButtons.primary(onPressed: _login, text: 'Login'),
 

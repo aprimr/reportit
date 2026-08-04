@@ -15,6 +15,7 @@ class AppRoutes {
   static const String home = '/home';
 
   // admin routes
+  static const String adminDash = '/dashboard';
 
   static Map<String, WidgetBuilder> routes = {
     splash: (context) => const SplashScreen(),
@@ -23,6 +24,11 @@ class AppRoutes {
     login: (context) => const LoginScreen(),
     register: (context) => const RegisterScreen(),
 
+    // user
     home: (context) => const Scaffold(body: Center(child: Text('Home'))),
+
+    // admin
+    adminDash: (context) =>
+        const Scaffold(body: Center(child: Text('Admin Dash'))),
   };
 }

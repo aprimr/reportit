@@ -5,4 +5,5 @@ class ApiEndpoints {
   // Auth endpoints
   static const String login = '$apiVersion/auth/login';
   static const String register = '$apiVersion/auth/register';
+  static const String refresh = '$apiVersion/auth/refresh';
 }
