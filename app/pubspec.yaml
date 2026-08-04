@@ -38,6 +38,7 @@ dependencies:
   liquid_glass_plus: ^0.3.2
   hugeicons: ^1.1.7
   video_player: ^2.13.0
+  dio: ^5.11.0
 
 dev_dependencies:
   flutter_test:

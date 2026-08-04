@@ -1,5 +1,8 @@
+import 'package:app/core/network/dio_client.dart';
 import 'package:app/core/routes/app_routes.dart';
+import 'package:app/core/services/auth_service.dart';
 import 'package:app/core/theme/app_theme.dart';
+import 'package:app/core/utils/app_snackbar.dart';
 import 'package:app/widgets/app_buttons.dart';
 import 'package:app/widgets/app_textfields.dart';
 import 'package:flutter/material.dart';
@@ -14,6 +17,7 @@ class RegisterScreen extends StatefulWidget {
 }
 
 class _RegisterScreenState extends State<RegisterScreen> {
+  final _authService = AuthService();
   final _formKey = GlobalKey<FormState>();
   final _nameController = TextEditingController();
   final _emailController = TextEditingController();
@@ -35,17 +39,32 @@ class _RegisterScreenState extends State<RegisterScreen> {
     super.dispose();
   }
 
-  void _register() {
+  void _register() async {
     if (!_formKey.currentState!.validate()) return;
 
     setState(() => _isLoading = true);
 
-    Future.delayed(const Duration(seconds: 2), () {
+    try {
+      final response = await _authService.register(
+        fullname: _nameController.text.trim(),
+        email: _emailController.text.trim(),
+        phone: _phoneController.text.trim(),
+        password: _passwordController.text.trim(),
+      );
+
+      if (mounted) {
+        AppSnackBar.success(context, response.message);
+        Navigator.pushReplacementNamed(context, AppRoutes.login);
+      }
+    } on ApiError catch (e) {
+      if (mounted) {
+        AppSnackBar.error(context, e.message);
+      }
+    } finally {
       if (mounted) {
         setState(() => _isLoading = false);
-        Navigator.pushReplacementNamed(context, AppRoutes.home);
       }
-    });
+    }
   }
 
   @override
@@ -103,6 +122,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     label: 'Full Name',
                     hint: 'John Bahadur',
                     icon: HugeIcons.strokeRoundedUser,
+                    readOnly: _isLoading,
                     validator: (v) {
                       if (v!.trim().isEmpty) {
                         return 'Please enter your full name';
@@ -122,6 +142,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     hint: 'john.bahadur@example.com',
                     icon: HugeIcons.strokeRoundedMail01,
                     keyboardType: TextInputType.emailAddress,
+                    readOnly: _isLoading,
                     validator: (v) {
                       if (v!.trim().isEmpty) return 'Please enter your email';
                       if (v.length > 100) {
@@ -146,6 +167,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     hint: '9847800000',
                     icon: HugeIcons.strokeRoundedCall02,
                     keyboardType: TextInputType.phone,
+                    readOnly: _isLoading,
                     validator: (v) {
                       if (v == null || v.trim().isEmpty) {
                         return 'Please enter your phone number';
@@ -168,6 +190,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     hint: 'Enter your password',
                     icon: HugeIcons.strokeRoundedLockPassword,
                     obscure: _obscurePassword,
+                    readOnly: _isLoading,
                     suffixIcon: IconButton(
                       onPressed: () =>
                           setState(() => _obscurePassword = !_obscurePassword),
@@ -209,6 +232,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     hint: 'Re-enter your password',
                     icon: HugeIcons.strokeRoundedLockPassword,
                     obscure: _obscureConfirmPassword,
+                    readOnly: _isLoading,
                     suffixIcon: IconButton(
                       onPressed: () => setState(
                         () =>

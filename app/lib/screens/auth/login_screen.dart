@@ -1,5 +1,8 @@
+import 'package:app/core/network/dio_client.dart';
 import 'package:app/core/routes/app_routes.dart';
+import 'package:app/core/services/auth_service.dart';
 import 'package:app/core/theme/app_theme.dart';
+import 'package:app/core/utils/app_snackbar.dart';
 import 'package:app/widgets/app_buttons.dart';
 import 'package:app/widgets/app_textfields.dart';
 import 'package:flutter/material.dart';
@@ -14,6 +17,7 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
+  final _authService = AuthService();
   final _formKey = GlobalKey<FormState>();
   final _emailOrPhoneController = TextEditingController();
   final _passwordController = TextEditingController();
@@ -28,17 +32,28 @@ class _LoginScreenState extends State<LoginScreen> {
     super.dispose();
   }
 
-  void _login() {
+  void _login() async {
     if (!_formKey.currentState!.validate()) return;
 
     setState(() => _isLoading = true);
 
-    Future.delayed(const Duration(seconds: 2), () {
+    try {
+      final response = await _authService.login(
+        emailOrPhone: _emailOrPhoneController.text.trim(),
+        password: _passwordController.text.trim(),
+      );
+
       if (mounted) {
-        setState(() => _isLoading = false);
-        Navigator.pushReplacementNamed(context, AppRoutes.home);
+        AppSnackBar.success(context, response.message);
+        Navigator.pushReplacementNamed(context, AppRoutes.register);
       }
-    });
+    } on ApiError catch (e) {
+      if (mounted) {
+        AppSnackBar.error(context, e.message);
+      }
+    } finally {
+      setState(() => _isLoading = false);
+    }
   }
 
   String? _validateEmailOrPhone(String? v) {
@@ -82,17 +97,6 @@ class _LoginScreenState extends State<LoginScreen> {
                   icon: const Icon(Icons.arrow_back_ios_new_rounded, size: 20),
                 )
               : null,
-          actions: [
-            AppButtons.icon(
-              onPressed: () {
-                Navigator.pushNamed(context, AppRoutes.adminLogin);
-              },
-              iconColor: AppTheme.primary,
-              backgroundColor: AppTheme.appBarBg,
-              icon: HugeIcons.strokeRoundedUserShield01,
-            ),
-            SizedBox(width: 18),
-          ],
         ),
         body: SafeArea(
           child: SingleChildScrollView(
@@ -131,6 +135,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     label: 'Email or Phone',
                     hint: 'Enter your email or phone',
                     icon: HugeIcons.strokeRoundedUser,
+                    readOnly: _isLoading,
                     validator: _validateEmailOrPhone,
                   ),
 
@@ -142,6 +147,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     hint: 'Enter your password',
                     icon: HugeIcons.strokeRoundedLockPassword,
                     obscure: _obscurePassword,
+                    readOnly: _isLoading,
                     suffixIcon: IconButton(
                       onPressed: () =>
                           setState(() => _obscurePassword = !_obscurePassword),
