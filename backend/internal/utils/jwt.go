@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"errors"
 	"fmt"
 	"os"
 	"time"
@@ -45,4 +46,31 @@ func GenerateRefreshToken(uid string) (string, error) {
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 	return token.SignedString([]byte(refreshSecret))
+}
+
+// Validates the tokens and return token claims
+func ValidateToken(tokenString string, isRefresh bool) (jwt.MapClaims, error) {
+	secretKey := os.Getenv("JWT_SECRET")
+	if isRefresh {
+		secretKey = os.Getenv("REFRESH_TOKEN")
+	}
+
+	token, err := jwt.Parse(tokenString, func(t *jwt.Token) (any, error) {
+		if _, ok := t.Method.(*jwt.SigningMethodHMAC); !ok {
+			return nil, fmt.Errorf("unexpected signing method: %v", t.Header["alg"])
+		}
+
+		return []byte(secretKey), nil
+	})
+
+	if err != nil {
+		return nil, fmt.Errorf("failed to parse token: %w", err)
+	}
+
+	// Extract and validate the claims
+	if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
+		return claims, nil
+	}
+
+	return nil, errors.New("invalid token")
 }

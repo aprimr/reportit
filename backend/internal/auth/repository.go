@@ -12,7 +12,9 @@ import (
 type AuthRepository interface {
 	CreateUser(ctx context.Context, regReq *RegisterRequest) (*User, error)
 	GetUserByEmailOrPhone(ctx context.Context, emailOrPhone string) (*User, error)
+	GetUserByUid(ctx context.Context, uid string) (*User, error)
 	SaveRefreshToken(ctx context.Context, uid, tokenHash string) error
+	RotateRefreshToken(ctx context.Context, uid, oldTokenHash, newTokenHash string) error
 }
 
 type authRepository struct {
@@ -79,6 +81,35 @@ func (ar *authRepository) GetUserByEmailOrPhone(ctx context.Context, emailOrPhon
 	return &user, nil
 }
 
+// GetUserByUid fetches a user by the uid
+func (ar *authRepository) GetUserByUid(ctx context.Context, uid string) (*User, error) {
+	var user User
+
+	query := `SELECT uid, fullname, email, phone, password_hash, role, is_verified, created_at, updated_at FROM users WHERE uid=$1`
+
+	err := ar.db.QueryRow(ctx, query, uid).Scan(
+		&user.Uid,
+		&user.Fullname,
+		&user.Email,
+		&user.Phone,
+		&user.PasswordHash,
+		&user.Role,
+		&user.IsVerified,
+		&user.CreatedAt,
+		&user.UpdatedAt,
+	)
+	if err != nil {
+		if err == pgx.ErrNoRows {
+			return nil, nil
+		}
+
+		ar.logger.Error("database query failed", "error", err, "uid", uid)
+		return nil, ErrInternalError
+	}
+
+	return &user, nil
+}
+
 // SaveRefreshToken saves the refresh token in the database
 func (ar *authRepository) SaveRefreshToken(ctx context.Context, uid, tokenHash string) error {
 	query := `INSERT INTO refresh_tokens (uid, token_hash, expires_at) VALUES($1, $2, $3)`
@@ -90,4 +121,38 @@ func (ar *authRepository) SaveRefreshToken(ctx context.Context, uid, tokenHash s
 	}
 
 	return nil
+}
+
+// RotateRefreshToken deletes the old token from the database and stores the new token
+func (ar *authRepository) RotateRefreshToken(ctx context.Context, uid, oldTokenHash, newTokenHash string) error {
+	// Start db transaction
+	tx, err := ar.db.Begin(ctx)
+	if err != nil {
+		ar.logger.Error("failed to begin transaction", "error", err, "uid", uid)
+		return ErrInternalError
+	}
+	defer tx.Rollback(ctx)
+
+	// Delete the old token from database
+	cmdTag, err := tx.Exec(ctx, `DELETE FROM refresh_tokens WHERE token_hash=$1 AND uid=$2 AND expires_at > NOW()`, oldTokenHash, uid)
+	if err != nil {
+		return ErrInternalError
+	}
+	if cmdTag.RowsAffected() == 0 {
+		ar.logger.Warn("alert: possible refresh token reuse detected", "uid", uid)
+
+		// Delete all active refresh tokens
+		_, _ = tx.Exec(ctx, `DELETE FROM refresh_tokens WHERE uid=$1`, uid)
+		_ = tx.Commit(ctx)
+		return ErrSessionExpired
+	}
+
+	// Insert new token in the database
+	_, err = tx.Exec(ctx, `INSERT INTO refresh_tokens (uid, token_hash, expires_at) VALUES($1, $2, $3)`, uid, newTokenHash, time.Now().Add(time.Hour*24*30))
+	if err != nil {
+		ar.logger.Warn("failed to insert new refres token in database", "error", err, "uid", uid)
+		return ErrInternalError
+	}
+
+	return tx.Commit(ctx)
 }

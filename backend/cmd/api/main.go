@@ -6,8 +6,8 @@ import (
 	"net/http"
 	"os"
 
-	"github.com/aprimr/ccms/internal/auth"
-	"github.com/aprimr/ccms/internal/database"
+	"github.com/aprimr/reportit/internal/auth"
+	"github.com/aprimr/reportit/internal/database"
 	"github.com/go-chi/chi/v5"
 	"github.com/joho/godotenv"
 )
@@ -46,6 +46,7 @@ func main() {
 		r.Route("/auth", func(r chi.Router) {
 			r.Post("/login", authHandler.Login)
 			r.Post("/register", authHandler.Register)
+			r.Post("/refresh", authHandler.RefreshToken)
 		})
 	})
 

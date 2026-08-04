@@ -4,12 +4,13 @@ import (
 	"context"
 	"log/slog"
 
-	"github.com/aprimr/ccms/internal/utils"
+	"github.com/aprimr/reportit/internal/utils"
 )
 
 type AuthService interface {
 	Register(ctx context.Context, regReq RegisterRequest) (*User, error)
 	Login(ctx context.Context, loginReq LoginRequest) (string, string, error)
+	RefreshToken(ctx context.Context, refreshToken string) (string, string, error)
 }
 
 type authService struct {
@@ -104,4 +105,61 @@ func (as *authService) Login(ctx context.Context, loginReq LoginRequest) (string
 	}
 
 	return accessToken, refreshToken, nil
+}
+
+// RefreshToken validates the refresh token and extracts the uid from the token
+func (as *authService) RefreshToken(ctx context.Context, refreshToken string) (string, string, error) {
+	// Validate refresh token
+	claims, err := utils.ValidateToken(refreshToken, true)
+	if err != nil {
+		as.logger.Error("failed to validate refresh token", "error", err)
+		return "", "", ErrTokenInvalid
+	}
+
+	// Extract uid from refresh token claims
+	uid, ok := claims["uid"].(string)
+	if !ok {
+		return "", "", ErrTokenInvalid
+	}
+
+	// Hash old refresh token for comparing it with the token stored in database
+	oldTokenHash, err := utils.HashString(refreshToken)
+	if err != nil {
+		as.logger.Error("failed to hash refresh token", "error", err, "uid", uid)
+		return "", "", ErrInternalError
+	}
+
+	// Get user details
+	user, err := as.authRepo.GetUserByUid(ctx, uid)
+	if err != nil {
+		return "", "", err
+	}
+
+	// Generate new access token
+	newAccessToken, err := utils.GenerateAccessToken(uid, user.Email, user.Phone, user.Role)
+	if err != nil {
+		as.logger.Error("failed to generate access token", "error", err, "uid", uid)
+		return "", "", ErrInternalError
+	}
+
+	// Generate a new refresh token and hash it
+	newRefreshToken, err := utils.GenerateRefreshToken(uid)
+	if err != nil {
+		as.logger.Error("failed to generate new refresh token", "error", err, "uid", uid)
+		return "", "", ErrInternalError
+	}
+	newHashedRefreshToken, err := utils.HashString(newRefreshToken)
+	if err != nil {
+		as.logger.Error("failed to hash new refresh token", "error", err, "uid", uid)
+		return "", "", ErrInternalError
+	}
+
+	// Call repository
+	err = as.authRepo.RotateRefreshToken(ctx, uid, oldTokenHash, newHashedRefreshToken)
+	if err != nil {
+		as.logger.Error("failed to rotate access token", "error", err, "uid", uid)
+		return "", "", ErrInternalError
+	}
+
+	return newAccessToken, newRefreshToken, nil
 }

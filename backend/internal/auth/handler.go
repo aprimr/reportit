@@ -1,15 +1,18 @@
 package auth
 
 import (
+	"context"
 	"encoding/json"
+	"errors"
 	"net/http"
 
-	"github.com/aprimr/ccms/internal/utils"
+	"github.com/aprimr/reportit/internal/utils"
 )
 
 type AuthHandler interface {
 	Register(w http.ResponseWriter, r *http.Request)
 	Login(w http.ResponseWriter, r *http.Request)
+	RefreshToken(w http.ResponseWriter, r *http.Request)
 }
 
 type authHandler struct {
@@ -29,7 +32,7 @@ func (ah *authHandler) Register(w http.ResponseWriter, r *http.Request) {
 	// Decode JSON
 	err := json.NewDecoder(r.Body).Decode(&regReq)
 	if err != nil {
-		utils.WriteError(w, http.StatusBadRequest, "Invalid JSON")
+		utils.WriteError(w, http.StatusBadRequest, "Invalid request body")
 		return
 	}
 
@@ -58,7 +61,11 @@ func (ah *authHandler) Register(w http.ResponseWriter, r *http.Request) {
 	// Call service layer
 	user, err := ah.authService.Register(r.Context(), regReq)
 	if err != nil {
-		utils.WriteError(w, http.StatusBadRequest, err.Error())
+		if errors.Is(err, ErrEmailOrPhoneTaken) {
+			utils.WriteError(w, http.StatusBadRequest, err.Error())
+			return
+		}
+		utils.WriteError(w, http.StatusInternalServerError, err.Error())
 		return
 	}
 
@@ -72,7 +79,7 @@ func (ah *authHandler) Login(w http.ResponseWriter, r *http.Request) {
 	// Decode JSON
 	err := json.NewDecoder(r.Body).Decode(&loginReq)
 	if err != nil {
-		utils.WriteError(w, http.StatusBadRequest, "Invalid JSON")
+		utils.WriteError(w, http.StatusBadRequest, "Invalid request body")
 		return
 	}
 
@@ -85,14 +92,48 @@ func (ah *authHandler) Login(w http.ResponseWriter, r *http.Request) {
 	// Call service layer
 	accessToken, refreshToken, err := ah.authService.Login(r.Context(), loginReq)
 	if err != nil {
-		utils.WriteError(w, http.StatusBadRequest, err.Error())
+		if errors.Is(err, ErrInvalidCreds) {
+			utils.WriteError(w, http.StatusBadRequest, err.Error())
+			return
+		}
+		utils.WriteError(w, http.StatusInternalServerError, err.Error())
 		return
 	}
 
 	tokens := map[string]string{
-		"accessToken":  accessToken,
-		"refreshToken": refreshToken,
+		"access_token":  accessToken,
+		"refresh_token": refreshToken,
 	}
 
 	utils.WriteJSON(w, http.StatusCreated, tokens, "Login successfull")
+}
+
+// RefreshToken rotates the access and refresh tokens
+func (ah *authHandler) RefreshToken(w http.ResponseWriter, r *http.Request) {
+	var refreshTokenRequest RefreshTokenRequest
+
+	// Decode JSON
+	err := json.NewDecoder(r.Body).Decode(&refreshTokenRequest)
+	if err != nil {
+		utils.WriteError(w, http.StatusBadRequest, "Invalid request body")
+		return
+	}
+
+	// Call service layer
+	accessToken, refreshToken, err := ah.authService.RefreshToken(context.Background(), refreshTokenRequest.RefreshToken)
+	if err != nil {
+		if errors.Is(err, ErrTokenInvalid) || errors.Is(err, ErrSessionExpired) {
+			utils.WriteError(w, http.StatusUnauthorized, err.Error())
+			return
+		}
+		utils.WriteError(w, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	response := map[string]string{
+		"access_token":  accessToken,
+		"refresh_token": refreshToken,
+	}
+
+	utils.WriteJSON(w, http.StatusOK, response, "Tokens refreshed successfully")
 }
