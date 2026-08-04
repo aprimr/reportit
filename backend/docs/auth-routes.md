@@ -12,9 +12,10 @@ Base Route: `/api/v1`
 #### Request Body
 ```json
 {
+  "fullname": "user user",
   "email": "user@example.com",
-  "phone": "98478```00",
-  "password": "password123!"
+  "phone": "9847800000",
+  "password": "Password123!"
 }
 ```
 
@@ -24,9 +25,10 @@ Base Route: `/api/v1`
   "success": true,
   "message": "Registration successfull",
   "data": {
-    "uid": "231ceaf6-6c46-4623-8c87-c2acde91df3a",
+    "uid": "231ceaf6-6c46-4623-8...",
+    "fullname": "user user",
     "email": "user@example.com",
-    "phone": "98478```00",
+    "phone": "9847800000",
     "role": "user",
     "is_verified": true,
     "created_at": "2026-08-02T12:00:04.330385Z",
@@ -44,7 +46,7 @@ Base Route: `/api/v1`
 ```json
 {
   "emailOrPhone": "user@example.com",
-  "password": "SecurePassword123!"
+  "password": "Password123!"
 }
 ```
 

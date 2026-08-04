@@ -1,4 +1,3 @@
-import 'package:app/core/routes/app_routes.dart';
 import 'package:app/core/theme/app_theme.dart';
 import 'package:app/widgets/app_buttons.dart';
 import 'package:app/widgets/app_textfields.dart';
@@ -6,14 +5,14 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:hugeicons/hugeicons.dart';
 
-class LoginScreen extends StatefulWidget {
-  const LoginScreen({super.key});
+class AdminLoginScreen extends StatefulWidget {
+  const AdminLoginScreen({super.key});
 
   @override
-  State<LoginScreen> createState() => _LoginScreenState();
+  State<AdminLoginScreen> createState() => _AdminLoginScreenState();
 }
 
-class _LoginScreenState extends State<LoginScreen> {
+class _AdminLoginScreenState extends State<AdminLoginScreen> {
   final _formKey = GlobalKey<FormState>();
   final _emailOrPhoneController = TextEditingController();
   final _passwordController = TextEditingController();
@@ -36,7 +35,6 @@ class _LoginScreenState extends State<LoginScreen> {
     Future.delayed(const Duration(seconds: 2), () {
       if (mounted) {
         setState(() => _isLoading = false);
-        Navigator.pushReplacementNamed(context, AppRoutes.home);
       }
     });
   }
@@ -82,17 +80,6 @@ class _LoginScreenState extends State<LoginScreen> {
                   icon: const Icon(Icons.arrow_back_ios_new_rounded, size: 20),
                 )
               : null,
-          actions: [
-            AppButtons.icon(
-              onPressed: () {
-                Navigator.pushNamed(context, AppRoutes.adminLogin);
-              },
-              iconColor: AppTheme.primary,
-              backgroundColor: AppTheme.appBarBg,
-              icon: HugeIcons.strokeRoundedUserShield01,
-            ),
-            SizedBox(width: 18),
-          ],
         ),
         body: SafeArea(
           child: SingleChildScrollView(
@@ -104,7 +91,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Login',
+                    'Admin Login',
                     style: GoogleFonts.montserrat(
                       fontSize: 32,
                       fontWeight: FontWeight.w600,
@@ -115,7 +102,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   const SizedBox(height: 8),
 
                   Text(
-                    'Welcome back! Login to continue',
+                    'Access the complaint management dashboard',
                     style: GoogleFonts.inter(
                       fontSize: 16,
                       fontWeight: FontWeight.w400,
@@ -130,7 +117,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     controller: _emailOrPhoneController,
                     label: 'Email or Phone',
                     hint: 'Enter your email or phone',
-                    icon: HugeIcons.strokeRoundedUser,
+                    icon: HugeIcons.strokeRoundedUserLock01,
                     validator: _validateEmailOrPhone,
                   ),
 
@@ -167,34 +154,10 @@ class _LoginScreenState extends State<LoginScreen> {
 
                   _isLoading
                       ? AppButtons.loading(text: 'Logging In...')
-                      : AppButtons.primary(onPressed: _login, text: 'Login'),
-
-                  const SizedBox(height: 16),
-
-                  Center(
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text(
-                          "Don't have an account? ",
-                          style: GoogleFonts.montserrat(
-                            fontSize: 16,
-                            color: AppTheme.textSecondary,
-                            fontWeight: FontWeight.w500,
-                          ),
+                      : AppButtons.primary(
+                          onPressed: _login,
+                          text: 'Login as Admin',
                         ),
-                        AppButtons.text(
-                          onPressed: () {
-                            Navigator.pushReplacementNamed(
-                              context,
-                              AppRoutes.register,
-                            );
-                          },
-                          text: 'Register',
-                        ),
-                      ],
-                    ),
-                  ),
 
                   const SizedBox(height: 32),
                 ],
