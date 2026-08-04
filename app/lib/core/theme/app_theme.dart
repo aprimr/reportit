@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class AppTheme {
   static const Color primary = Color(0xFF2563EB);
@@ -57,7 +58,12 @@ class AppTheme {
       ),
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
-        fillColor: inputFill,
+        fillColor: WidgetStateColor.resolveWith((states) {
+          if (states.contains(WidgetState.disabled)) {
+            return AppTheme.textHint.withAlpha(52);
+          }
+          return AppTheme.inputFill;
+        }),
         contentPadding: const EdgeInsets.symmetric(
           horizontal: 16,
           vertical: 14,
@@ -74,6 +80,10 @@ class AppTheme {
           borderRadius: BorderRadius.circular(radiusMd),
           borderSide: const BorderSide(color: inputFocusedBorder, width: 1.5),
         ),
+        disabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(radiusMd),
+          borderSide: BorderSide.none,
+        ),
         errorBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(radiusMd),
           borderSide: const BorderSide(color: Color(0xFFEF4444)),
@@ -82,7 +92,7 @@ class AppTheme {
           borderRadius: BorderRadius.circular(radiusMd),
           borderSide: const BorderSide(color: Color(0xFFEF4444), width: 1.5),
         ),
-        hintStyle: const TextStyle(
+        hintStyle: GoogleFonts.poppins(
           color: textHint,
           fontSize: 14,
           fontWeight: FontWeight.w400,

@@ -20,7 +20,7 @@ class AppSnackBar {
             Center(
               child: HugeIcon(
                 icon: icon,
-                size: 20,
+                size: 16,
                 strokeWidth: 3,
                 color: iconColor ?? Colors.white,
               ),
@@ -30,7 +30,7 @@ class AppSnackBar {
               child: Text(
                 message,
                 style: GoogleFonts.inter(
-                  fontSize: 18,
+                  fontSize: 14,
                   fontWeight: FontWeight.w700,
                   color: Colors.white,
                   height: 1.4,
