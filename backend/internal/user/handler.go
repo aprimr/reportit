@@ -131,5 +131,5 @@ func (uh *userHandler) ChangePassword(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	utils.WriteJSON(w, http.StatusOK, nil, "password update successful")
+	utils.WriteJSON(w, http.StatusOK, nil, "password updated successfully")
 }

@@ -14,7 +14,7 @@ Base Route: `/api/v1`
 {
   "fullname": "user user",
   "email": "user@example.com",
-  "phone": "98478```00",
+  "phone": "9847800000",
   "password": "Password123!"
 }
 ```
@@ -28,7 +28,7 @@ Base Route: `/api/v1`
     "uid": "231ceaf6-6c46-4623-8...",
     "fullname": "user user",
     "email": "user@example.com",
-    "phone": "98478```00",
+    "phone": "9847800000",
     "role": "user",
     "is_verified": true,
     "created_at": "2026-08-02T12:00:04.330385Z",
