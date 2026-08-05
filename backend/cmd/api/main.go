@@ -9,6 +9,7 @@ import (
 	"github.com/aprimr/reportit/internal/auth"
 	"github.com/aprimr/reportit/internal/database"
 	"github.com/aprimr/reportit/internal/middlewares"
+	"github.com/aprimr/reportit/internal/user"
 	"github.com/go-chi/chi/v5"
 	"github.com/joho/godotenv"
 )
@@ -32,12 +33,15 @@ func main() {
 	}
 	defer database.CloseDB()
 
-	// Middlewares
-
 	// Auth Dependencies
 	authRepo := auth.NewAuthRepository(database.DB, logger)
 	authService := auth.NewAuthService(authRepo, logger)
 	authHandler := auth.NewAuthHandler(authService)
+
+	// User Dependencies
+	userRepo := user.NewUserRepository(database.DB, logger)
+	userService := user.NewUserService(userRepo, logger)
+	userHandler := user.NewUserHandler(userService)
 
 	// Init chi router
 	r := chi.NewRouter()
@@ -56,6 +60,15 @@ func main() {
 				r.Post("/logout", authHandler.Logout)
 				r.Post("/logout-all", authHandler.LogoutFromAllDevice)
 			})
+		})
+
+		// protected user routes
+		r.Route("/user", func(r chi.Router) {
+			r.Use(middlewares.AuthMiddleware())
+
+			r.Get("/", userHandler.FetchProfile)
+			r.Patch("/fullname", userHandler.UpdateFullname)
+			r.Patch("/password", userHandler.ChangePassword)
 		})
 	})
 
