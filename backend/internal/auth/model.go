@@ -30,6 +30,10 @@ type User struct {
 	UpdatedAt    time.Time `json:"updated_at"`
 }
 
+type LogoutRequest struct {
+	RefreshToken string `json:"refresh_token"`
+}
+
 type RefreshTokenRequest struct {
 	RefreshToken string `json:"refresh_token"`
 }

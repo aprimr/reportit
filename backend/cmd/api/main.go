@@ -8,6 +8,7 @@ import (
 
 	"github.com/aprimr/reportit/internal/auth"
 	"github.com/aprimr/reportit/internal/database"
+	"github.com/aprimr/reportit/internal/middlewares"
 	"github.com/go-chi/chi/v5"
 	"github.com/joho/godotenv"
 )
@@ -47,6 +48,14 @@ func main() {
 			r.Post("/login", authHandler.Login)
 			r.Post("/register", authHandler.Register)
 			r.Post("/refresh", authHandler.RefreshToken)
+
+			// protected auth routes
+			r.Group(func(r chi.Router) {
+				r.Use(middlewares.AuthMiddleware())
+
+				r.Post("/logout", authHandler.Logout)
+				r.Post("/logout-all", authHandler.LogoutFromAllDevice)
+			})
 		})
 	})
 

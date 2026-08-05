@@ -10,6 +10,8 @@ import (
 type AuthService interface {
 	Register(ctx context.Context, regReq RegisterRequest) (*User, error)
 	Login(ctx context.Context, loginReq LoginRequest) (string, string, error)
+	Logout(ctx context.Context, refreshToken string) error
+	LogoutFromAllDevice(ctx context.Context, Uid string) error
 	RefreshToken(ctx context.Context, refreshToken string) (string, string, error)
 }
 
@@ -105,6 +107,36 @@ func (as *authService) Login(ctx context.Context, loginReq LoginRequest) (string
 	}
 
 	return accessToken, refreshToken, nil
+}
+
+// Logout deletes the refresh token for the current device
+func (as *authService) Logout(ctx context.Context, refreshToken string) error {
+	// Hash refresh token
+	refreshTokenHash, err := utils.HashString(refreshToken)
+	if err != nil {
+		as.logger.Error("failed to hash refresh token", "error", err)
+		return ErrInternalError
+	}
+
+	// Call repository
+	err = as.authRepo.DeleteRefreshToken(ctx, refreshTokenHash)
+	if err != nil {
+		as.logger.Error("failed to delete refresh token", "error", err)
+		return err
+	}
+	return nil
+}
+
+// LogoutFromAllDevice deletes all the refresh token for the user
+func (as *authService) LogoutFromAllDevice(ctx context.Context, uid string) error {
+	// Call repository
+	err := as.authRepo.DeleteUserRefreshTokens(ctx, uid)
+	if err != nil {
+		as.logger.Error("failed to delete user's all refresh tokens", "error", err)
+		return err
+	}
+
+	return nil
 }
 
 // RefreshToken validates the refresh token and extracts the uid from the token

@@ -15,6 +15,8 @@ type AuthRepository interface {
 	GetUserByUid(ctx context.Context, uid string) (*User, error)
 	SaveRefreshToken(ctx context.Context, uid, tokenHash string) error
 	RotateRefreshToken(ctx context.Context, uid, oldTokenHash, newTokenHash string) error
+	DeleteRefreshToken(ctx context.Context, refreshTokenHash string) error
+	DeleteUserRefreshTokens(ctx context.Context, uid string) error
 }
 
 type authRepository struct {
@@ -155,4 +157,30 @@ func (ar *authRepository) RotateRefreshToken(ctx context.Context, uid, oldTokenH
 	}
 
 	return tx.Commit(ctx)
+}
+
+// DeleteRefreshTokenByTokenId deletes the refresh token from the database
+func (ar *authRepository) DeleteRefreshToken(ctx context.Context, refreshTokenHash string) error {
+	query := `DELETE FROM refresh_tokens WHERE token_hash=$1`
+
+	_, err := ar.db.Exec(ctx, query, refreshTokenHash)
+	if err != nil {
+		ar.logger.Error("failed to delete refresh token from database", "error", err)
+		return ErrInternalError
+	}
+
+	return nil
+}
+
+// DeleteUserRefreshTokens deletes all the refresh token for a user from the database
+func (ar *authRepository) DeleteUserRefreshTokens(ctx context.Context, uid string) error {
+	query := `DELETE FROM refresh_tokens WHERE uid=$1`
+
+	_, err := ar.db.Exec(ctx, query, uid)
+	if err != nil {
+		ar.logger.Error("failed to delete user's refresh tokens from database", "error", err, "uid", uid)
+		return ErrInternalError
+	}
+
+	return nil
 }
