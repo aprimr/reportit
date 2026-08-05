@@ -168,6 +168,11 @@ class ApiError {
 
   ApiError({required this.message, this.statusCode, this.errors});
 
+  static String _capitalize(String text) {
+    if (text.isEmpty) return text;
+    return text[0].toUpperCase() + text.substring(1);
+  }
+
   factory ApiError.fromDio(DioException err) {
     final data = err.response?.data;
 
@@ -176,7 +181,7 @@ class ApiError {
 
       return ApiError(
         message: extractedMessage is String
-            ? extractedMessage
+            ? _capitalize(extractedMessage)
             : _defaultMessage(err.type),
         statusCode: err.response?.statusCode,
         errors: data['errors'] as Map<String, dynamic>?,
