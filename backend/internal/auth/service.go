@@ -166,6 +166,9 @@ func (as *authService) RefreshToken(ctx context.Context, refreshToken string) (s
 	if err != nil {
 		return "", "", err
 	}
+	if user == nil {
+		return "", "", ErrTokenInvalid
+	}
 
 	// Generate new access token
 	newAccessToken, err := utils.GenerateAccessToken(uid, user.Email, user.Phone, user.Role)

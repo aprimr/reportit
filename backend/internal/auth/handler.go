@@ -136,7 +136,7 @@ func (ah *authHandler) Logout(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	utils.WriteJSON(w, http.StatusOK, "", "logout successful")
+	utils.WriteJSON(w, http.StatusOK, nil, "logout successful")
 }
 
 // LogoutFromAllDevice Handler
@@ -155,7 +155,7 @@ func (ah *authHandler) LogoutFromAllDevice(w http.ResponseWriter, r *http.Reques
 		return
 	}
 
-	utils.WriteJSON(w, http.StatusOK, "", "logged out from all devices")
+	utils.WriteJSON(w, http.StatusOK, nil, "logged out from all devices")
 }
 
 // RefreshToken rotates the access and refresh tokens
