@@ -113,7 +113,7 @@ func (ah *authHandler) Login(w http.ResponseWriter, r *http.Request) {
 
 // Logout Handler
 func (ah *authHandler) Logout(w http.ResponseWriter, r *http.Request) {
-	// Get uid from middleware
+	// Get uid from request context
 	uid := middlewares.GetUidFromContext(r.Context())
 	if uid == "" {
 		utils.WriteError(w, http.StatusUnauthorized, ErrUnauthorized.Error())
@@ -141,7 +141,7 @@ func (ah *authHandler) Logout(w http.ResponseWriter, r *http.Request) {
 
 // LogoutFromAllDevice Handler
 func (ah *authHandler) LogoutFromAllDevice(w http.ResponseWriter, r *http.Request) {
-	// Get uid from middleware
+	// Get uid from request context
 	uid := middlewares.GetUidFromContext(r.Context())
 	if uid == "" {
 		utils.WriteError(w, http.StatusUnauthorized, ErrUnauthorized.Error())
