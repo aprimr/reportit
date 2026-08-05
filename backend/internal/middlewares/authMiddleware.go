@@ -30,7 +30,7 @@ func AuthMiddleware() func(http.Handler) http.Handler {
 			// Extract access token from auth header
 			parts := strings.Split(authHeader, " ")
 			if len(parts) != 2 || strings.ToLower(parts[0]) != "bearer" {
-				http.Error(w, "invalid authorization header format", http.StatusUnauthorized)
+				utils.WriteError(w, http.StatusUnauthorized, "invalid authorization header format")
 				return
 			}
 			tokenString := parts[1]
@@ -38,7 +38,7 @@ func AuthMiddleware() func(http.Handler) http.Handler {
 			// Verify  JWT token
 			claims, err := utils.ValidateToken(tokenString, false)
 			if err != nil {
-				http.Error(w, "invalid or expired access token", http.StatusUnauthorized)
+				utils.WriteError(w, http.StatusUnauthorized, "invalid or expired access token")
 				return
 			}
 
