@@ -97,9 +97,12 @@ class DioClient {
 
 class _AuthInterceptor extends Interceptor {
   @override
-  void onRequest(RequestOptions options, RequestInterceptorHandler handler) {
-    final token = TokenStorage.accessToken;
-    if (token != null) {
+  void onRequest(
+    RequestOptions options,
+    RequestInterceptorHandler handler,
+  ) async {
+    final token = await TokenStorage.getAccessToken();
+    if (token != null && token.isNotEmpty) {
       options.headers['Authorization'] = 'Bearer $token';
     }
     handler.next(options);
@@ -109,6 +112,14 @@ class _AuthInterceptor extends Interceptor {
   void onError(DioException err, ErrorInterceptorHandler handler) async {
     // Automatically get new tokens
     if (err.response?.statusCode == 401) {
+      final path = err.requestOptions.path;
+
+      if (path.contains('password') ||
+          path.contains('login') ||
+          path.contains('refresh')) {
+        return handler.next(err);
+      }
+
       try {
         final refreshToken = await TokenStorage.getRefreshToken();
 
@@ -124,8 +135,8 @@ class _AuthInterceptor extends Interceptor {
             final newAccessToken = response.data['data']['access_token'];
             final newRefreshToken = response.data['data']['refresh_token'];
 
-            // Save new access and refresh tokens
-            TokenStorage.saveTokens(
+            // Save new tokens securely
+            await TokenStorage.saveTokens(
               accessToken: newAccessToken,
               refreshToken: newRefreshToken,
             );
@@ -167,6 +178,9 @@ class ApiError {
   final Map<String, dynamic>? errors;
 
   ApiError({required this.message, this.statusCode, this.errors});
+
+  @override
+  String toString() => message;
 
   static String _capitalize(String text) {
     if (text.isEmpty) return text;
