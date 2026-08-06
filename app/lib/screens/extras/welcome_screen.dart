@@ -101,23 +101,6 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
               },
             ),
 
-          // Gradient Overlay
-          Container(
-            decoration: const BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topCenter,
-                end: Alignment.bottomCenter,
-                stops: [0.0, 0.4, 0.7, 1.0],
-                colors: [
-                  Colors.transparent,
-                  Colors.transparent,
-                  Color(0x3311151E),
-                  Color(0xDD11151E),
-                ],
-              ),
-            ),
-          ),
-
           // Content
           SafeArea(
             child: Padding(
