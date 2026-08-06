@@ -1,3 +1,4 @@
+import 'package:app/screens/user/home_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:app/screens/extras/splash_screen.dart';
 import 'package:app/screens/extras/welcome_screen.dart';
@@ -25,7 +26,7 @@ class AppRoutes {
     register: (context) => const RegisterScreen(),
 
     // user
-    home: (context) => const Scaffold(body: Center(child: Text('Home'))),
+    home: (context) => const HomeScreen(),
 
     // admin
     adminDash: (context) =>

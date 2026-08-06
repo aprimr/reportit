@@ -6,4 +6,12 @@ class ApiEndpoints {
   static const String login = '$apiVersion/auth/login';
   static const String register = '$apiVersion/auth/register';
   static const String refresh = '$apiVersion/auth/refresh';
+  // (protected)
+  static const String logout = '$apiVersion/auth/logout';
+  static const String logoutAll = '$apiVersion/auth/logout-all';
+
+  // User endpoints (protected)
+  static const String fetchProfile = '$apiVersion/user/';
+  static const String updateFullname = '$apiVersion/user/fullname';
+  static const String changePassword = '$apiVersion/user/password';
 }
