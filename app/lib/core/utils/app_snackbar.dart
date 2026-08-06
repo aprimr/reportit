@@ -4,6 +4,11 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:hugeicons/hugeicons.dart';
 
 class AppSnackBar {
+  static String _capitalize(String text) {
+    if (text.isEmpty) return text;
+    return text[0].toUpperCase() + text.substring(1);
+  }
+
   static void _show(
     BuildContext context,
     String message, {
@@ -28,7 +33,7 @@ class AppSnackBar {
             const SizedBox(width: 10),
             Expanded(
               child: Text(
-                message,
+                _capitalize(message),
                 style: GoogleFonts.inter(
                   fontSize: 14,
                   fontWeight: FontWeight.w500,

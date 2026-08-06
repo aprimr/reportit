@@ -1,6 +1,9 @@
 import 'package:app/core/model/user_model.dart';
 import 'package:app/core/routes/app_routes.dart';
+import 'package:app/core/services/auth_service.dart';
+import 'package:app/core/storage/token_storage.dart';
 import 'package:app/core/theme/app_theme.dart';
+import 'package:app/providers/auth_provider.dart';
 import 'package:app/providers/user_provider.dart';
 import 'package:app/screens/skeleton/user/profile_skeleton.dart';
 import 'package:app/widgets/app_buttons.dart';
@@ -21,6 +24,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   @override
   Widget build(BuildContext context) {
     final user = ref.watch(userProvider);
+    final auth = ref.watch(authServiceProvider);
 
     if (user == null) {
       return const ProfileSkeletonScreen();
@@ -63,14 +67,14 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                       ),
                       _divider(),
                       _menuTile(
-                        icon: HugeIcons.strokeRoundedFileEdit,
+                        icon: HugeIcons.strokeRoundedReceiptText,
                         title: 'My complaints',
                         subtitle: '20 complaints',
                         isLast: true,
                       ),
                     ]),
                     const SizedBox(height: 30),
-                    _dangerZone(context),
+                    _dangerZone(context, auth),
                     const SizedBox(height: 8),
                   ]),
                 ),
@@ -347,76 +351,118 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     );
   }
 
-  Widget _dangerZone(BuildContext context) {
+  Widget _dangerZone(BuildContext context, AuthService auth) {
     return _card([
       _menuTile(
         icon: HugeIcons.strokeRoundedSendToMobile02,
         title: 'Log out of all devices',
         subtitle: 'Ends every active session',
         color: AppTheme.error,
-        onTap: () => _confirmLogout(context, allDevices: true),
+        onTap: () => _confirmLogout(context, auth, allDevices: true),
       ),
       _divider(),
       _menuTile(
         icon: HugeIcons.strokeRoundedLogout01,
         title: 'Logout',
         color: AppTheme.error,
-        onTap: () => _confirmLogout(context, allDevices: false),
+        onTap: () => _confirmLogout(context, auth, allDevices: false),
         isLast: true,
       ),
     ]);
   }
 
-  void _confirmLogout(BuildContext context, {required bool allDevices}) {
+  void _confirmLogout(
+    BuildContext context,
+    AuthService auth, {
+    required bool allDevices,
+  }) {
     showDialog(
       context: context,
-      builder: (ctx) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: Text(
-          allDevices ? 'Log out of all devices?' : 'Log out?',
-          style: GoogleFonts.montserrat(
-            fontSize: 20,
-            fontWeight: FontWeight.w600,
-            color: AppTheme.textPrimary,
-          ),
-        ),
-        content: Text(
-          allDevices
-              ? 'This will end every active session on all your devices. You\'ll need to sign in again everywhere.'
-              : 'You\'ll need to sign in again to access your account on this device.',
-          style: GoogleFonts.inter(fontSize: 14, color: AppTheme.textSecondary),
-        ),
-        actionsPadding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx),
-            child: Text(
-              'Cancel',
-              style: GoogleFonts.inter(
-                fontWeight: FontWeight.w600,
-                color: AppTheme.textSecondary,
-              ),
-            ),
-          ),
-          FilledButton(
-            style: FilledButton.styleFrom(
-              backgroundColor: AppTheme.error,
+      barrierDismissible: false,
+      builder: (ctx) {
+        bool isLoading = false;
+        return StatefulBuilder(
+          builder: (dialogContext, setDialogState) {
+            return AlertDialog(
               shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
+                borderRadius: BorderRadius.circular(16),
               ),
-            ),
-            onPressed: () {
-              Navigator.pop(ctx);
-              // TODO: call the sign-out / revoke-all-sessions endpoint here.
-              Navigator.pushReplacementNamed(context, AppRoutes.welcome);
-            },
-            child: Text(
-              allDevices ? 'Log out everywhere' : 'Logout',
-              style: GoogleFonts.inter(fontWeight: FontWeight.w600),
-            ),
-          ),
-        ],
-      ),
+              title: Text(
+                allDevices ? 'Log out of all devices?' : 'Log out?',
+                style: GoogleFonts.montserrat(
+                  fontSize: 20,
+                  fontWeight: FontWeight.w600,
+                  color: AppTheme.textPrimary,
+                ),
+              ),
+              content: Text(
+                allDevices
+                    ? 'This will end every active session on all devices. You\'ll need to sign in again everywhere.'
+                    : 'You\'ll need to sign in again to access your account on this device.',
+                style: GoogleFonts.inter(
+                  fontSize: 14,
+                  color: AppTheme.textSecondary,
+                ),
+              ),
+              actionsPadding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+              actions: [
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    AppButtons.secondary(
+                      text: allDevices
+                          ? 'Yes, Log out everywhere'
+                          : 'Yes, Logout',
+                      fontSize: 14,
+                      foregroundColor: AppTheme.onPrimary,
+                      backgroundColor: AppTheme.error,
+                      isLoading: isLoading,
+                      onPressed: () async {
+                        setDialogState(() => isLoading = true);
+
+                        var refreshToken = await TokenStorage.getRefreshToken();
+                        try {
+                          if (allDevices) {
+                            await auth.logoutFromAllDevices();
+                          }
+                          if (refreshToken != null && refreshToken.isNotEmpty) {
+                            await auth.logout(refreshToken: refreshToken);
+                          }
+                        } catch (e) {
+                          // Handle error if needed
+                        } finally {
+                          await TokenStorage.clearTokens();
+
+                          if (context.mounted) {
+                            Navigator.pushNamedAndRemoveUntil(
+                              context,
+                              AppRoutes.login,
+                              (route) => false,
+                            );
+                          }
+                        }
+                      },
+                    ),
+
+                    const SizedBox(height: 20),
+                    Center(
+                      child: AppButtons.text(
+                        onPressed: !isLoading
+                            ? () => Navigator.pop(ctx)
+                            : () => {},
+                        text: "No, Keep me logged in",
+                        fontSize: 14,
+                        textColor: AppTheme.textSecondary,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                  ],
+                ),
+              ],
+            );
+          },
+        );
+      },
     );
   }
 

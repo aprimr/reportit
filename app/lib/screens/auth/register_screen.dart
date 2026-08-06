@@ -167,7 +167,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                     controller: _phoneController,
                     label: 'Phone Number',
                     hint: '9847800000',
-                    icon: HugeIcons.strokeRoundedCall02,
+                    icon: HugeIcons.strokeRoundedCall,
                     keyboardType: TextInputType.phone,
                     readOnly: isLoading,
                     validator: (v) {
