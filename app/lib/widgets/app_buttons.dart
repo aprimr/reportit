@@ -403,7 +403,7 @@ class AppButtons {
             Text(
               text,
               style: GoogleFonts.montserrat(
-                fontSize: 20,
+                fontSize: 18,
                 fontWeight: FontWeight.w600,
               ),
             ),
