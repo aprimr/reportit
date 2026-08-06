@@ -6,9 +6,9 @@ class AppTheme {
   static const Color onPrimary = Color(0xFFFFFFFF);
   static const Color secondary = Color(0xFF0EA5E9);
 
-  static const Color success = Color(0xFF10B981); // Emerald Green
-  static const Color warning = Color(0xFFF59E0B); // Amber Yellow
-  static const Color error = Color(0xFFEF4444); // Vibrant Red
+  static const Color success = Color(0xFF10B981);
+  static const Color warning = Color(0xFFF59E0B);
+  static const Color error = Color(0xFFEF4444);
 
   static const Color scaffoldBg = Color(0xFFF8FAFC);
   static const Color appBarBg = Color(0xFFFFFFFF);
