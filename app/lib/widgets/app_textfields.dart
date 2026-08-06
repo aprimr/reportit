@@ -33,7 +33,7 @@ class AppTextfields {
     required TextEditingController controller,
     required String label,
     required String hint,
-    required List<List<dynamic>> icon,
+    List<List<dynamic>>? icon,
     Widget? suffixIcon,
     VoidCallback? onSuffixTap,
     bool obscure = false,
@@ -80,7 +80,7 @@ class AppTextfields {
   static Widget input({
     required TextEditingController controller,
     required String hint,
-    required List<List<dynamic>> icon,
+    List<List<dynamic>>? icon,
     Widget? suffixIcon,
     VoidCallback? onSuffixTap,
     bool obscure = false,
@@ -106,14 +106,16 @@ class AppTextfields {
       ),
       decoration: InputDecoration(
         hintText: hint,
-        prefixIcon: Padding(
-          padding: const EdgeInsets.only(left: 14, right: 10),
-          child: HugeIcon(
-            icon: icon,
-            size: iconSize,
-            color: iconColor ?? AppTheme.textSecondary,
-          ),
-        ),
+        prefixIcon: icon != null
+            ? Padding(
+                padding: const EdgeInsets.only(left: 14, right: 10),
+                child: HugeIcon(
+                  icon: icon,
+                  size: iconSize,
+                  color: iconColor ?? AppTheme.textSecondary,
+                ),
+              )
+            : null,
         prefixIconConstraints: const BoxConstraints(minWidth: 46),
         suffixIcon: suffixIcon != null
             ? GestureDetector(
@@ -158,7 +160,7 @@ class AppTextfields {
   static Widget textArea({
     required TextEditingController controller,
     required String hint,
-    required List<List<dynamic>> icon,
+    List<List<dynamic>>? icon,
     Widget? suffixIcon,
     VoidCallback? onSuffixTap,
     String? label,
