@@ -43,19 +43,6 @@ class AppTheme {
         outline: inputBorder,
         outlineVariant: divider,
       ),
-      appBarTheme: const AppBarTheme(
-        backgroundColor: appBarBg,
-        elevation: 0,
-        scrolledUnderElevation: 0,
-        centerTitle: false,
-        iconTheme: IconThemeData(color: textPrimary, size: 24),
-        titleTextStyle: TextStyle(
-          color: textPrimary,
-          fontSize: 20,
-          fontWeight: FontWeight.w700,
-          letterSpacing: -0.3,
-        ),
-      ),
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
         fillColor: WidgetStateColor.resolveWith((states) {

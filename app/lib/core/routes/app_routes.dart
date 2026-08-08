@@ -1,3 +1,4 @@
+import 'package:app/screens/user/complaint/create_complaint.dart';
 import 'package:app/screens/user/home_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:app/screens/extras/splash_screen.dart';
@@ -14,6 +15,7 @@ class AppRoutes {
 
   // user routes
   static const String home = '/home';
+  static const String create = '/create';
 
   // admin routes
   static const String adminDash = '/dashboard';
@@ -27,6 +29,7 @@ class AppRoutes {
 
     // user
     home: (context) => const HomeScreen(),
+    create: (context) => const CreateComplaintScreen(),
 
     // admin
     adminDash: (context) =>
