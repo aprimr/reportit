@@ -167,9 +167,9 @@ class AppButtons {
       child: OutlinedButton(
         onPressed: isLoading ? null : onPressed,
         style: OutlinedButton.styleFrom(
-          foregroundColor: textColor ?? Colors.white,
+          foregroundColor: textColor ?? AppTheme.textSecondary,
           side: BorderSide(
-            color: borderColor ?? Colors.white.withAlpha(77),
+            color: borderColor ?? AppTheme.textSecondary.withAlpha(70),
             width: 1.5,
           ),
           elevation: 0,
@@ -199,6 +199,7 @@ class AppButtons {
                     style: GoogleFonts.montserrat(
                       fontSize: fontSize,
                       fontWeight: FontWeight.w600,
+                      color: textColor,
                     ),
                   ),
                   if (icon != null && iconPos == IconPos.right) ...[
@@ -347,6 +348,7 @@ class AppButtons {
     Color? iconColor,
     double iconSize = 24,
     double elevation = 0,
+    double radius = 14,
   }) {
     return SizedBox(
       width: size,
@@ -357,11 +359,18 @@ class AppButtons {
           backgroundColor: backgroundColor ?? AppTheme.primary,
           foregroundColor: iconColor ?? Colors.white,
           elevation: elevation,
-          shape: const CircleBorder(),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(radius),
+          ),
           padding: EdgeInsets.zero,
           minimumSize: const Size(0, 0),
         ),
-        child: HugeIcon(icon: icon, size: iconSize, color: iconColor),
+        child: HugeIcon(
+          icon: icon,
+          size: iconSize,
+          color: iconColor,
+          strokeWidth: 1.5,
+        ),
       ),
     );
   }
@@ -410,6 +419,38 @@ class AppButtons {
           ],
         ),
       ),
+    );
+  }
+
+  // Switch Button
+  static Widget toggle({
+    required String label,
+    required bool value,
+    required ValueChanged<bool> onChanged,
+    Color? activeColor,
+    Color? textColor,
+    double? textSize = 16,
+  }) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Expanded(
+          child: Text(
+            label,
+            style: GoogleFonts.montserrat(
+              fontSize: textSize,
+              fontWeight: FontWeight.w600,
+              color: textColor ?? AppTheme.textPrimary,
+            ),
+          ),
+        ),
+        Switch(
+          value: value,
+          onChanged: onChanged,
+          activeThumbColor: activeColor ?? AppTheme.primary,
+          inactiveThumbColor: AppTheme.textSecondary,
+        ),
+      ],
     );
   }
 }

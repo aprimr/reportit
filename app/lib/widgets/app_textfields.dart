@@ -47,6 +47,7 @@ class AppTextfields {
     double iconSize = 22,
     Color? iconColor,
     int maxLines = 1,
+    int? maxChars,
   }) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -71,6 +72,7 @@ class AppTextfields {
           iconSize: iconSize,
           iconColor: iconColor,
           maxLines: maxLines,
+          maxChars: maxChars,
         ),
       ],
     );
@@ -90,44 +92,58 @@ class AppTextfields {
     double iconSize = 22,
     Color? iconColor,
     int maxLines = 1,
+    int? maxChars,
   }) {
-    return TextFormField(
-      controller: controller,
-      obscureText: obscure,
-      readOnly: readOnly,
-      enabled: !readOnly,
-      keyboardType: keyboardType,
-      validator: validator,
-      maxLines: maxLines,
-      style: GoogleFonts.inter(
-        fontSize: 15,
-        fontWeight: FontWeight.w400,
-        color: AppTheme.textPrimary,
-      ),
-      decoration: InputDecoration(
-        hintText: hint,
-        prefixIcon: icon != null
-            ? Padding(
-                padding: const EdgeInsets.only(left: 14, right: 10),
-                child: HugeIcon(
-                  icon: icon,
-                  size: iconSize,
-                  color: iconColor ?? AppTheme.textSecondary,
-                ),
-              )
-            : null,
-        prefixIconConstraints: const BoxConstraints(minWidth: 46),
-        suffixIcon: suffixIcon != null
-            ? GestureDetector(
-                onTap: onSuffixTap,
-                child: Padding(
-                  padding: const EdgeInsets.only(right: 14),
-                  child: suffixIcon,
-                ),
-              )
-            : null,
-        suffixIconConstraints: const BoxConstraints(minWidth: 46),
-      ),
+    return StatefulBuilder(
+      builder: (context, setState) {
+        controller.addListener(() {
+          setState(() {});
+        });
+
+        return TextFormField(
+          controller: controller,
+          obscureText: obscure,
+          readOnly: readOnly,
+          enabled: !readOnly,
+          keyboardType: keyboardType,
+          validator: validator,
+          maxLines: maxLines,
+          maxLength: maxChars,
+          style: GoogleFonts.inter(
+            fontSize: 15,
+            fontWeight: FontWeight.w400,
+            color: AppTheme.textPrimary,
+          ),
+          decoration: InputDecoration(
+            hintText: hint,
+            counterText: maxChars != null
+                ? '${controller.text.length}/$maxChars'
+                : null,
+            counterStyle: GoogleFonts.poppins(fontSize: 12),
+            prefixIcon: icon != null
+                ? Padding(
+                    padding: const EdgeInsets.only(left: 14, right: 10),
+                    child: HugeIcon(
+                      icon: icon,
+                      size: iconSize,
+                      color: iconColor ?? AppTheme.textSecondary,
+                    ),
+                  )
+                : null,
+            prefixIconConstraints: const BoxConstraints(minWidth: 46),
+            suffixIcon: suffixIcon != null
+                ? GestureDetector(
+                    onTap: onSuffixTap,
+                    child: Padding(
+                      padding: const EdgeInsets.only(right: 14),
+                      child: suffixIcon,
+                    ),
+                  )
+                : null,
+            suffixIconConstraints: const BoxConstraints(minWidth: 46),
+          ),
+        );
+      },
     );
   }
 
@@ -173,6 +189,7 @@ class AppTextfields {
     bool readOnly = false,
     double iconSize = 22,
     Color? iconColor,
+    int? maxChars,
   }) {
     final area = input(
       controller: controller,
@@ -185,6 +202,7 @@ class AppTextfields {
       maxLines: maxLines,
       iconSize: iconSize,
       iconColor: iconColor,
+      maxChars: maxChars,
     );
 
     if (label != null) {
