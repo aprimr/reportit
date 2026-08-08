@@ -17,7 +17,7 @@ const (
 	UserAccessTokenKey contextKey = "access_token"
 )
 
-func AuthMiddleware() func(http.Handler) http.Handler {
+func AuthMiddleware(userAuthMiddleware bool) func(http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			// Extract Auth header from request
@@ -39,6 +39,16 @@ func AuthMiddleware() func(http.Handler) http.Handler {
 			claims, err := utils.ValidateToken(tokenString, false)
 			if err != nil {
 				utils.WriteError(w, http.StatusUnauthorized, "invalid or expired access token")
+				return
+			}
+
+			// verify user or admin role
+			role, _ := claims["role"].(string)
+			if userAuthMiddleware && role != "user" {
+				utils.WriteError(w, http.StatusForbidden, "access denied")
+				return
+			} else if !userAuthMiddleware && role != "admin" {
+				utils.WriteError(w, http.StatusForbidden, "access denied")
 				return
 			}
 

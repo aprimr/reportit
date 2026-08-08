@@ -55,7 +55,7 @@ func main() {
 
 			// protected auth routes
 			r.Group(func(r chi.Router) {
-				r.Use(middlewares.AuthMiddleware())
+				r.Use(middlewares.AuthMiddleware(true))
 
 				r.Post("/logout", authHandler.Logout)
 				r.Post("/logout-all", authHandler.LogoutFromAllDevice)
@@ -64,7 +64,7 @@ func main() {
 
 		// protected user routes
 		r.Route("/user", func(r chi.Router) {
-			r.Use(middlewares.AuthMiddleware())
+			r.Use(middlewares.AuthMiddleware(true))
 
 			r.Get("/", userHandler.FetchProfile)
 			r.Patch("/fullname", userHandler.UpdateFullname)
