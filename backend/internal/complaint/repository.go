@@ -57,7 +57,7 @@ func (cr *complaintRepository) Create(ctx context.Context, uid string, complaint
 	return &complaint, nil
 }
 
-// Feches a complaint from the database by its id
+// Fetches a complaint from the database by its id
 func (cr *complaintRepository) FetchById(ctx context.Context, id string) (*Complaint, error) {
 	var complaint Complaint
 

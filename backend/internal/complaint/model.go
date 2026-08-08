@@ -42,3 +42,12 @@ type CreateComplaintRequest struct {
 type DeleteComplaintRequest struct {
 	Id string `json:"id"`
 }
+
+type ComplaintFetchParams struct {
+	Uid    string
+	Search string
+	Status string
+	Sort   string
+	Limit  int
+	Cursor string
+}

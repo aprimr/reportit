@@ -10,6 +10,7 @@ import (
 type ComplaintService interface {
 	CreateComplaint(ctx context.Context, uid string, complaintReq CreateComplaintRequest) (*Complaint, error)
 	DeleteComplaint(ctx context.Context, id string) error
+	GetComplaint(ctx context.Context, id string) (*Complaint, error)
 }
 
 type complaintService struct {
@@ -35,6 +36,7 @@ func (cs *complaintService) DeleteComplaint(ctx context.Context, id string) erro
 	// Fetch complaint from its id
 	complaint, err := cs.complaintRepo.FetchById(ctx, id)
 	if err != nil {
+		cs.logger.Error("failed to fetch complaint", "error", err)
 		return err
 	}
 
@@ -60,4 +62,15 @@ func (cs *complaintService) DeleteComplaint(ctx context.Context, id string) erro
 	}()
 
 	return nil
+}
+
+func (cs *complaintService) GetComplaint(ctx context.Context, id string) (*Complaint, error) {
+	// Call repository
+	complaint, err := cs.complaintRepo.FetchById(ctx, id)
+	if err != nil {
+		cs.logger.Error("failed to fetch complaint", "error", err)
+		return nil, err
+	}
+
+	return complaint, nil
 }

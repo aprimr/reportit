@@ -14,6 +14,7 @@ import (
 type ComplaintHandler interface {
 	CreateComplaint(w http.ResponseWriter, r *http.Request)
 	DeleteComplaint(w http.ResponseWriter, r *http.Request)
+	GetComplaint(w http.ResponseWriter, r *http.Request)
 }
 
 type complaintHandler struct {
@@ -163,4 +164,27 @@ func (ch *complaintHandler) DeleteComplaint(w http.ResponseWriter, r *http.Reque
 	}
 
 	utils.WriteJSON(w, http.StatusOK, nil, "complaint delete successful")
+}
+
+// Get a complaint by its id
+func (ch *complaintHandler) GetComplaint(w http.ResponseWriter, r *http.Request) {
+	// Get id from url params
+	id := chi.URLParam(r, "id")
+	if strings.TrimSpace(id) == "" {
+		utils.WriteError(w, http.StatusBadRequest, "missing complaint id")
+		return
+	}
+
+	// Call service
+	complaint, err := ch.complaintService.GetComplaint(r.Context(), id)
+	if err != nil {
+		if errors.Is(err, ErrComplaintNotFound) {
+			utils.WriteError(w, http.StatusNotFound, ErrComplaintNotFound.Error())
+			return
+		}
+		utils.WriteError(w, http.StatusInternalServerError, ErrInternalError.Error())
+		return
+	}
+
+	utils.WriteJSON(w, http.StatusOK, complaint, "complaint fetch successful")
 }
