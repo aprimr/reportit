@@ -89,6 +89,7 @@ func main() {
 			r.Use(middlewares.AuthMiddleware(true))
 
 			r.Post("/", complaintHandler.CreateComplaint)
+			r.Delete("/", complaintHandler.DeleteComplaint)
 		})
 	})
 

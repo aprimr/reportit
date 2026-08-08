@@ -1,6 +1,7 @@
 package complaint
 
 import (
+	"encoding/json"
 	"errors"
 	"net/http"
 	"strconv"
@@ -12,6 +13,7 @@ import (
 
 type ComplaintHandler interface {
 	CreateComplaint(w http.ResponseWriter, r *http.Request)
+	DeleteComplaint(w http.ResponseWriter, r *http.Request)
 }
 
 type complaintHandler struct {
@@ -105,10 +107,10 @@ func (ch *complaintHandler) CreateComplaint(w http.ResponseWriter, r *http.Reque
 		}
 		defer file.Close()
 
-		// Call UploadImage service
-		url, err := ch.complaintService.UploadImage(r.Context(), file)
+		// Call cloudinaru util
+		url, err := utils.UploadImage(r.Context(), file)
 		if err != nil {
-			utils.WriteError(w, http.StatusInternalServerError, ErrInternalError.Error())
+			utils.WriteError(w, http.StatusInternalServerError, "failed to upload images")
 			return
 		}
 
@@ -138,4 +140,34 @@ func (ch *complaintHandler) CreateComplaint(w http.ResponseWriter, r *http.Reque
 	}
 
 	utils.WriteJSON(w, http.StatusCreated, complaint, "complaint create successful")
+}
+
+// Delete a complaint
+func (ch *complaintHandler) DeleteComplaint(w http.ResponseWriter, r *http.Request) {
+	// Parse JSON
+	var deleteRequest DeleteComplaintRequest
+	err := json.NewDecoder(r.Body).Decode(&deleteRequest)
+	if err != nil {
+		utils.WriteError(w, http.StatusBadRequest, "invalid request body")
+		return
+	}
+
+	// validate data
+	if strings.TrimSpace(deleteRequest.Id) == "" {
+		utils.WriteError(w, http.StatusBadRequest, "invalid request body")
+		return
+	}
+
+	// Call service layer
+	err = ch.complaintService.DeleteComplaint(r.Context(), deleteRequest.Id)
+	if err != nil {
+		if errors.Is(err, ErrComplaintDeleteFailed) {
+			utils.WriteError(w, http.StatusNotFound, ErrComplaintNotFound.Error())
+			return
+		}
+		utils.WriteError(w, http.StatusInternalServerError, ErrComplaintDeleteFailed.Error())
+		return
+	}
+
+	utils.WriteJSON(w, http.StatusOK, nil, "complaint delete successful")
 }

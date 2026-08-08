@@ -38,3 +38,7 @@ type CreateComplaintRequest struct {
 
 	IsPublic bool `json:"is_public"`
 }
+
+type DeleteComplaintRequest struct {
+	Id string `json:"id"`
+}
