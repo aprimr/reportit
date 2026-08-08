@@ -12,6 +12,7 @@ type ComplaintService interface {
 	DeleteComplaint(ctx context.Context, id string) error
 	GetComplaint(ctx context.Context, id string) (*Complaint, error)
 	GetMyComplaints(ctx context.Context, params ComplaintFetchParams) ([]Complaint, error)
+	GetAllComplaints(ctx context.Context, params ComplaintFetchParams) ([]Complaint, error)
 }
 
 type complaintService struct {
@@ -79,6 +80,17 @@ func (cs *complaintService) GetComplaint(ctx context.Context, id string) (*Compl
 func (cs *complaintService) GetMyComplaints(ctx context.Context, params ComplaintFetchParams) ([]Complaint, error) {
 	// Call repository
 	complaint, err := cs.complaintRepo.FetchUserComplaints(ctx, params)
+	if err != nil {
+		cs.logger.Error("failed to get user complaints", "error", err, "uid", params.Uid)
+		return nil, err
+	}
+
+	return complaint, nil
+}
+
+func (cs *complaintService) GetAllComplaints(ctx context.Context, params ComplaintFetchParams) ([]Complaint, error) {
+	// Call repository
+	complaint, err := cs.complaintRepo.FetchAllComplaints(ctx, params)
 	if err != nil {
 		cs.logger.Error("failed to get user complaints", "error", err, "uid", params.Uid)
 		return nil, err

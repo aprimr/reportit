@@ -16,6 +16,7 @@ type ComplaintHandler interface {
 	DeleteComplaint(w http.ResponseWriter, r *http.Request)
 	GetComplaint(w http.ResponseWriter, r *http.Request)
 	GetMyComplaints(w http.ResponseWriter, r *http.Request)
+	GetAllComplaints(w http.ResponseWriter, r *http.Request)
 }
 
 type complaintHandler struct {
@@ -226,6 +227,51 @@ func (ch *complaintHandler) GetMyComplaints(w http.ResponseWriter, r *http.Reque
 		utils.WriteError(w, http.StatusInternalServerError, ErrInternalError.Error())
 		return
 	}
+	if complaints == nil {
+		complaints = []Complaint{}
+	}
+
+	utils.WriteJSON(w, http.StatusOK, complaints, "complaints fetch successful")
+}
+
+func (ch *complaintHandler) GetAllComplaints(w http.ResponseWriter, r *http.Request) {
+	// Get uid from request header
+	uid := middlewares.GetUidFromContext(r.Context())
+	if uid == "" {
+		utils.WriteError(w, http.StatusUnauthorized, ErrUnauthorized.Error())
+		return
+	}
+
+	// Get role from request header
+	role := middlewares.GetRoleFromContext(r.Context())
+	isAdmin := role == "admin"
+
+	queryVals := r.URL.Query()
+
+	limit := 10
+	lim, err := strconv.Atoi(queryVals.Get("limit"))
+	if err == nil && lim > 0 {
+		if lim > 50 {
+			lim = 50
+		}
+		limit = lim
+	}
+
+	params := ComplaintFetchParams{
+		Search:  queryVals.Get("search"),
+		Status:  queryVals.Get("status"),
+		Sort:    queryVals.Get("sort"),
+		Cursor:  queryVals.Get("cursor"),
+		Limit:   limit,
+		IsAdmin: isAdmin,
+	}
+
+	complaints, err := ch.complaintService.GetAllComplaints(r.Context(), params)
+	if err != nil {
+		utils.WriteError(w, http.StatusInternalServerError, ErrInternalError.Error())
+		return
+	}
+
 	if complaints == nil {
 		complaints = []Complaint{}
 	}

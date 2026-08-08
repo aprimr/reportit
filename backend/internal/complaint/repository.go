@@ -15,6 +15,7 @@ type ComplaintRepository interface {
 	FetchById(ctx context.Context, id string) (*Complaint, error)
 	Delete(ctx context.Context, id string) error
 	FetchUserComplaints(ctx context.Context, params ComplaintFetchParams) ([]Complaint, error)
+	FetchAllComplaints(ctx context.Context, params ComplaintFetchParams) ([]Complaint, error)
 }
 
 type complaintRepository struct {

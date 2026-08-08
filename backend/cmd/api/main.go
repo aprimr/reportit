@@ -84,16 +84,19 @@ func main() {
 			r.Patch("/password", userHandler.ChangePassword)
 		})
 
-		// protected complaint routes
+		// complaint routes
 		r.Route("/complaint", func(r chi.Router) {
-			r.Use(middlewares.AuthMiddleware(true))
+			// user comlaint routes
+			r.Group(func(r chi.Router) {
+				r.Use(middlewares.AuthMiddleware(true))
 
-			r.Get("/{id}", complaintHandler.GetComplaint)
-			r.Get("/me", complaintHandler.GetMyComplaints)
-			// r.Get("/", ) Get all complaints
+				r.Get("/{id}", complaintHandler.GetComplaint)
+				r.Get("/me", complaintHandler.GetMyComplaints)
+				r.Get("/all", complaintHandler.GetAllComplaints)
 
-			r.Post("/", complaintHandler.CreateComplaint)
-			r.Delete("/{id}", complaintHandler.DeleteComplaint)
+				r.Post("/", complaintHandler.CreateComplaint)
+				r.Delete("/{id}", complaintHandler.DeleteComplaint)
+			})
 		})
 	})
 
