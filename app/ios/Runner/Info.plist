@@ -17,6 +17,11 @@
 		<!-- Location Permission -->
 		<key>NSLocationWhenInUseUsageDescription</key>
 		<string>This app needs access to location when open.</string>
+		<!-- Camera Permission -->
+		<key>NSPhotoLibraryUsageDescription</key>
+		<string>We need access to your photo library to attach images to complaints.</string>
+		<key>NSCameraUsageDescription</key>
+		<string>We need access to your camera to take photos of complaints.</string>
 		<key>CFBundleName</key>
 		<string>reportit</string>
 		<key>CFBundlePackageType</key>

@@ -1,3 +1,4 @@
+import 'package:app/core/routes/app_routes.dart';
 import 'package:app/core/theme/app_theme.dart';
 import 'package:app/providers/user_provider.dart';
 import 'package:app/screens/user/feed/feed_screen.dart';
@@ -5,6 +6,7 @@ import 'package:app/screens/user/map/map_screen.dart';
 import 'package:app/screens/user/mycomplaints/my_complaints_screen.dart';
 import 'package:app/screens/user/profile/profile_screen.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hugeicons/hugeicons.dart';
 
@@ -34,8 +36,19 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     });
   }
 
+  @override
+  void didChangeDependencies() {
+    if (_currentIndex == 2) {
+      SystemChrome.setEnabledSystemUIMode(
+        SystemUiMode.manual,
+        overlays: [SystemUiOverlay.bottom],
+      );
+    }
+    super.didChangeDependencies();
+  }
+
   void _onCreateComplaint() {
-    // TODO: navigate to create-complaint flow
+    Navigator.pushNamed(context, AppRoutes.create);
   }
 
   @override

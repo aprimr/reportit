@@ -21,6 +21,8 @@ class _MapScreenState extends State<MapScreen> {
   String? _mapStyle;
   bool _mapReady = false;
 
+  MapType _currentMapType = MapType.terrain;
+  List<List<dynamic>> _currentMapIcon = HugeIcons.strokeRoundedMaping;
   LatLng _currentCoords = const LatLng(28.0508594, 82.4062224);
 
   final Set<Marker> _markers = {};
@@ -50,6 +52,8 @@ class _MapScreenState extends State<MapScreen> {
 
   void _fetchLocation() async {
     Position? position = await _locationService.getCurrentCoordinates();
+
+    if (!mounted) return;
     if (position != null) {
       LatLng userCoords = LatLng(position.latitude, position.longitude);
       setState(() {
@@ -87,6 +91,21 @@ class _MapScreenState extends State<MapScreen> {
     );
   }
 
+  void _changeMap() {
+    setState(() {
+      if (_currentMapType == MapType.terrain) {
+        _currentMapType = MapType.satellite;
+        _currentMapIcon = HugeIcons.strokeRoundedSatellite02;
+      } else if (_currentMapType == MapType.satellite) {
+        _currentMapType = MapType.hybrid;
+        _currentMapIcon = HugeIcons.strokeRoundedLayers01;
+      } else {
+        _currentMapType = MapType.terrain;
+        _currentMapIcon = HugeIcons.strokeRoundedMaping;
+      }
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     final topPadding = MediaQuery.of(context).padding.top;
@@ -104,6 +123,7 @@ class _MapScreenState extends State<MapScreen> {
                 target: _currentCoords,
                 zoom: 14.0,
               ),
+              mapType: _currentMapType,
               style: _mapStyle,
               markers: _markers,
               myLocationEnabled: true,
@@ -142,6 +162,20 @@ class _MapScreenState extends State<MapScreen> {
                     ),
                   ],
                 ),
+              ),
+            ),
+
+          // Floating action btn for change map type
+          if (_mapReady)
+            Positioned(
+              right: 16,
+              bottom: bottomPadding + 24 + 72,
+              child: AppButtons.icon(
+                onPressed: _changeMap,
+                icon: _currentMapIcon,
+                backgroundColor: AppTheme.onPrimary,
+                iconColor: AppTheme.primary,
+                elevation: 4,
               ),
             ),
 
