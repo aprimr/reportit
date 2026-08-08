@@ -72,7 +72,7 @@ func (ah *authHandler) Register(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	utils.WriteJSON(w, http.StatusCreated, user, "registration successfull")
+	utils.WriteJSON(w, http.StatusCreated, user, "registration successful")
 }
 
 // Login Handler implements the AuthHandler interface and extends the authHandler struct
@@ -108,7 +108,7 @@ func (ah *authHandler) Login(w http.ResponseWriter, r *http.Request) {
 		"refresh_token": refreshToken,
 	}
 
-	utils.WriteJSON(w, http.StatusCreated, tokens, "login successfull")
+	utils.WriteJSON(w, http.StatusCreated, tokens, "login successful")
 }
 
 // Logout Handler
