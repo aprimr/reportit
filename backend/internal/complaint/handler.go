@@ -1,7 +1,6 @@
 package complaint
 
 import (
-	"encoding/json"
 	"errors"
 	"net/http"
 	"strconv"
@@ -9,6 +8,7 @@ import (
 
 	"github.com/aprimr/reportit/internal/middlewares"
 	"github.com/aprimr/reportit/internal/utils"
+	"github.com/go-chi/chi/v5"
 )
 
 type ComplaintHandler interface {
@@ -144,22 +144,15 @@ func (ch *complaintHandler) CreateComplaint(w http.ResponseWriter, r *http.Reque
 
 // Delete a complaint
 func (ch *complaintHandler) DeleteComplaint(w http.ResponseWriter, r *http.Request) {
-	// Parse JSON
-	var deleteRequest DeleteComplaintRequest
-	err := json.NewDecoder(r.Body).Decode(&deleteRequest)
-	if err != nil {
-		utils.WriteError(w, http.StatusBadRequest, "invalid request body")
-		return
-	}
-
-	// validate data
-	if strings.TrimSpace(deleteRequest.Id) == "" {
-		utils.WriteError(w, http.StatusBadRequest, "invalid request body")
+	// Get id from url params
+	id := chi.URLParam(r, "id")
+	if strings.TrimSpace(id) == "" {
+		utils.WriteError(w, http.StatusBadRequest, "missing complaint id")
 		return
 	}
 
 	// Call service layer
-	err = ch.complaintService.DeleteComplaint(r.Context(), deleteRequest.Id)
+	err := ch.complaintService.DeleteComplaint(r.Context(), id)
 	if err != nil {
 		if errors.Is(err, ErrComplaintDeleteFailed) {
 			utils.WriteError(w, http.StatusNotFound, ErrComplaintNotFound.Error())
