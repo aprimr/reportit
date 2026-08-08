@@ -119,7 +119,11 @@ class AppTextfields {
             counterText: maxChars != null
                 ? '${controller.text.length}/$maxChars'
                 : null,
-            counterStyle: GoogleFonts.poppins(fontSize: 12),
+            counterStyle: GoogleFonts.inter(
+              fontSize: 10.5,
+              fontWeight: FontWeight.w500,
+              color: AppTheme.textSecondary,
+            ),
             prefixIcon: icon != null
                 ? Padding(
                     padding: const EdgeInsets.only(left: 14, right: 10),

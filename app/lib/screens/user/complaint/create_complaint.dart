@@ -91,16 +91,7 @@ class _CreateComplaintScreenState extends State<CreateComplaintScreen> {
                   const SizedBox(height: 20),
 
                   // Category
-                  Text(
-                    'Category',
-                    style: GoogleFonts.montserrat(
-                      fontSize: 13,
-                      fontWeight: FontWeight.w600,
-                      color: AppTheme.textPrimary,
-                      letterSpacing: 0.3,
-                    ),
-                  ),
-                  const SizedBox(height: 10),
+                  AppTextfields.label("Category"),
                   Wrap(
                     spacing: 8,
                     runSpacing: 8,
@@ -181,16 +172,7 @@ class _CreateComplaintScreenState extends State<CreateComplaintScreen> {
                   const SizedBox(height: 20),
 
                   // Location
-                  Text(
-                    'Location',
-                    style: GoogleFonts.montserrat(
-                      fontSize: 13,
-                      fontWeight: FontWeight.w600,
-                      color: AppTheme.textPrimary,
-                      letterSpacing: 0.3,
-                    ),
-                  ),
-                  const SizedBox(height: 10),
+                  AppTextfields.label("Location"),
                   Row(
                     children: [
                       Expanded(
@@ -218,6 +200,7 @@ class _CreateComplaintScreenState extends State<CreateComplaintScreen> {
                   AppButtons.toggle(
                     value: _isPublic,
                     label: "Post to feed",
+
                     onChanged: (newValue) {
                       setState(() {
                         _isPublic = newValue;

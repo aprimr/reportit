@@ -428,8 +428,8 @@ class AppButtons {
     required bool value,
     required ValueChanged<bool> onChanged,
     Color? activeColor,
-    Color? textColor,
-    double? textSize = 16,
+    Color? labelColor,
+    double? labelSize = 15,
   }) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -438,9 +438,9 @@ class AppButtons {
           child: Text(
             label,
             style: GoogleFonts.montserrat(
-              fontSize: textSize,
+              fontSize: labelSize,
               fontWeight: FontWeight.w600,
-              color: textColor ?? AppTheme.textPrimary,
+              color: labelColor ?? AppTheme.textPrimary,
             ),
           ),
         ),
