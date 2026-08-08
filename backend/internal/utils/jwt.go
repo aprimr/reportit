@@ -22,7 +22,7 @@ func GenerateAccessToken(uid, email, phone, role string) (string, error) {
 		"phone": phone,
 		"role":  role,
 		"type":  "access",
-		"exp":   time.Now().Add(time.Minute * 10).Unix(),
+		"exp":   time.Now().Add(time.Minute * 10 * 1000).Unix(), // TODO: Update duration to 10 minutes
 		"iat":   time.Now().Unix(),
 	}
 

@@ -7,9 +7,11 @@ import (
 	"os"
 
 	"github.com/aprimr/reportit/internal/auth"
+	"github.com/aprimr/reportit/internal/complaint"
 	"github.com/aprimr/reportit/internal/database"
 	"github.com/aprimr/reportit/internal/middlewares"
 	"github.com/aprimr/reportit/internal/user"
+	"github.com/aprimr/reportit/internal/utils"
 	"github.com/go-chi/chi/v5"
 	"github.com/joho/godotenv"
 )
@@ -33,6 +35,12 @@ func main() {
 	}
 	defer database.CloseDB()
 
+	// Init Cloudinary
+	err = utils.InitCloudinary()
+	if err != nil {
+		logger.Error("failed to initialize cloudinary", "error", err)
+	}
+
 	// Auth Dependencies
 	authRepo := auth.NewAuthRepository(database.DB, logger)
 	authService := auth.NewAuthService(authRepo, logger)
@@ -42,6 +50,11 @@ func main() {
 	userRepo := user.NewUserRepository(database.DB, logger)
 	userService := user.NewUserService(userRepo, logger)
 	userHandler := user.NewUserHandler(userService)
+
+	// Complaint Dependencies
+	complaintRepo := complaint.NewComplaintRepository(database.DB, logger)
+	complaintService := complaint.NewComplaintService(logger, complaintRepo)
+	complaintHandler := complaint.NewComplaintHandler(complaintService)
 
 	// Init chi router
 	r := chi.NewRouter()
@@ -69,6 +82,13 @@ func main() {
 			r.Get("/", userHandler.FetchProfile)
 			r.Patch("/fullname", userHandler.UpdateFullname)
 			r.Patch("/password", userHandler.ChangePassword)
+		})
+
+		// protected complaint routes
+		r.Route("/complaint", func(r chi.Router) {
+			r.Use(middlewares.AuthMiddleware(true))
+
+			r.Post("/", complaintHandler.CreateComplaint)
 		})
 	})
 
