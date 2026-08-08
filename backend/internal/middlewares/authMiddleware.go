@@ -14,6 +14,7 @@ const (
 	UserUidKey         contextKey = "uid"
 	UserEmailKey       contextKey = "email"
 	UserPhoneKey       contextKey = "phone"
+	UserRoleKey        contextKey = "role"
 	UserAccessTokenKey contextKey = "access_token"
 )
 
@@ -55,6 +56,7 @@ func AuthMiddleware(userAuthMiddleware bool) func(http.Handler) http.Handler {
 			ctx := context.WithValue(r.Context(), UserUidKey, claims["uid"])
 			ctx = context.WithValue(ctx, UserEmailKey, claims["email"])
 			ctx = context.WithValue(ctx, UserPhoneKey, claims["phone"])
+			ctx = context.WithValue(ctx, UserRoleKey, claims["role"])
 
 			next.ServeHTTP(w, r.WithContext(ctx))
 		})
@@ -79,6 +81,13 @@ func GetEmailFromContext(ctx context.Context) string {
 func GetPhoneFromContext(ctx context.Context) string {
 	if phone, ok := ctx.Value(UserPhoneKey).(string); ok {
 		return phone
+	}
+	return ""
+}
+
+func GetRoleFromContext(ctx context.Context) string {
+	if role, ok := ctx.Value(UserRoleKey).(string); ok {
+		return role
 	}
 	return ""
 }

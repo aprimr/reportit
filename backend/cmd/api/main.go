@@ -88,9 +88,9 @@ func main() {
 		r.Route("/complaint", func(r chi.Router) {
 			r.Use(middlewares.AuthMiddleware(true))
 
-			// r.Get("/", ) Get all complaints
-			// r.Get("/me", )  Get user's complaints
 			r.Get("/{id}", complaintHandler.GetComplaint)
+			r.Get("/me", complaintHandler.GetMyComplaints)
+			// r.Get("/", ) Get all complaints
 
 			r.Post("/", complaintHandler.CreateComplaint)
 			r.Delete("/{id}", complaintHandler.DeleteComplaint)

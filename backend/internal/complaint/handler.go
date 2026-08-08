@@ -15,6 +15,7 @@ type ComplaintHandler interface {
 	CreateComplaint(w http.ResponseWriter, r *http.Request)
 	DeleteComplaint(w http.ResponseWriter, r *http.Request)
 	GetComplaint(w http.ResponseWriter, r *http.Request)
+	GetMyComplaints(w http.ResponseWriter, r *http.Request)
 }
 
 type complaintHandler struct {
@@ -187,4 +188,47 @@ func (ch *complaintHandler) GetComplaint(w http.ResponseWriter, r *http.Request)
 	}
 
 	utils.WriteJSON(w, http.StatusOK, complaint, "complaint fetch successful")
+}
+
+// Get user's complaints
+func (ch *complaintHandler) GetMyComplaints(w http.ResponseWriter, r *http.Request) {
+	// Get uid from request header
+	uid := middlewares.GetUidFromContext(r.Context())
+	if uid == "" {
+		utils.WriteError(w, http.StatusUnauthorized, ErrUnauthorized.Error())
+		return
+	}
+
+	queryVals := r.URL.Query()
+
+	// parse query params
+	limit := 10
+	lim, err := strconv.Atoi(queryVals.Get("limit"))
+	if err == nil && lim > 0 {
+		if lim > 50 {
+			lim = 50
+		}
+		limit = lim
+	}
+
+	params := ComplaintFetchParams{
+		Uid:    uid,
+		Search: queryVals.Get("search"),
+		Status: queryVals.Get("status"),
+		Sort:   queryVals.Get("sort"),
+		Limit:  limit,
+		Cursor: queryVals.Get("cursor"),
+	}
+
+	// Call service layer
+	complaints, err := ch.complaintService.GetMyComplaints(r.Context(), params)
+	if err != nil {
+		utils.WriteError(w, http.StatusInternalServerError, ErrInternalError.Error())
+		return
+	}
+	if complaints == nil {
+		complaints = []Complaint{}
+	}
+
+	utils.WriteJSON(w, http.StatusOK, complaints, "complaints fetch successful")
 }
