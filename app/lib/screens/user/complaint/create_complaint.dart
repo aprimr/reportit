@@ -1,11 +1,20 @@
+import 'dart:io';
+
+import 'package:app/core/services/location_service.dart';
+import 'package:app/core/services/media_service.dart';
 import 'package:app/core/theme/app_theme.dart';
+import 'package:app/core/utils/app_snackbar.dart';
 import 'package:app/widgets/app_appbar.dart';
 import 'package:app/widgets/app_buttons.dart';
 import 'package:app/widgets/app_textfields.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:hugeicons/hugeicons.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:liquid_glass_plus/liquid_glass_plus.dart';
 
 class CreateComplaintScreen extends StatefulWidget {
   const CreateComplaintScreen({super.key});
@@ -15,13 +24,17 @@ class CreateComplaintScreen extends StatefulWidget {
 }
 
 class _CreateComplaintScreenState extends State<CreateComplaintScreen> {
+  final _location = LocationService();
+  final _media = MediaService();
   final _formKey = GlobalKey<FormState>();
   final _titleController = TextEditingController();
   final _descriptionController = TextEditingController();
   final _locationController = TextEditingController();
 
   String? _selectedCategory;
+  Position? curPosition;
   bool _isPublic = true;
+  List<XFile?> _images = [];
   bool _isLoading = false;
   // double? _latitude;
   // double? _longitude;
@@ -51,6 +64,195 @@ class _CreateComplaintScreenState extends State<CreateComplaintScreen> {
     _descriptionController.dispose();
     _locationController.dispose();
     super.dispose();
+  }
+
+  void _showImagePicker() {
+    showModalBottomSheet(
+      context: context,
+      showDragHandle: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(12)),
+      ),
+      builder: (context) => SafeArea(
+        child: Padding(
+          padding: EdgeInsets.all(8),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              ListTile(
+                leading: const Icon(Icons.camera_alt),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                title: Text(
+                  'Take a Photo',
+                  style: GoogleFonts.montserrat(fontWeight: FontWeight.w600),
+                ),
+                onTap: () async {
+                  Navigator.of(context).pop();
+                  final photo = await _media.captureImageFromCamera();
+                  if (photo != null) {
+                    setState(() => _images.add(photo));
+                  }
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.photo_library),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                title: Text(
+                  'Choose from Gallery',
+                  style: GoogleFonts.montserrat(fontWeight: FontWeight.w600),
+                ),
+                onTap: () async {
+                  Navigator.of(context).pop();
+                  final photo = await _media.pickImageFromGallery();
+                  if (photo != null) {
+                    setState(() => _images.add(photo));
+                  }
+                },
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _showLocatioPickerMap() {
+    LatLng selectedLocation = curPosition != null
+        ? LatLng(curPosition!.latitude, curPosition!.longitude)
+        : const LatLng(27.9381, 82.5404);
+
+    showModalBottomSheet(
+      context: context,
+      useSafeArea: true,
+      isDismissible: false,
+      isScrollControlled: true,
+      enableDrag: false,
+      builder: (context) => SafeArea(
+        child: Stack(
+          children: [
+            // Map
+            GoogleMap(
+              initialCameraPosition: CameraPosition(
+                target: selectedLocation,
+                zoom: 15,
+              ),
+              myLocationEnabled: true,
+              myLocationButtonEnabled: false,
+              zoomControlsEnabled: false,
+              compassEnabled: false,
+              onCameraMove: (position) {
+                selectedLocation = position.target;
+              },
+            ),
+
+            // Marker
+            const Center(
+              child: Padding(
+                padding: EdgeInsets.only(bottom: 35),
+                child: Icon(Icons.location_pin, size: 45, color: Colors.red),
+              ),
+            ),
+
+            // Header
+            Positioned(
+              top: 16,
+              left: 16,
+              right: 16,
+              child: Row(
+                children: [
+                  // Back Button
+                  LiquidGlassLayer(
+                    settings: const LiquidGlassSettings(
+                      thickness: 40,
+                      frostIntensity: 4,
+                    ),
+                    child: LiquidGlass(
+                      shape: const LiquidRoundedSuperellipse(borderRadius: 30),
+                      child: Material(
+                        color: Colors.transparent,
+                        child: InkWell(
+                          borderRadius: BorderRadius.circular(30),
+                          onTap: () => Navigator.of(context).pop(),
+                          child: const SizedBox.square(
+                            dimension: 48,
+                            child: Icon(
+                              Icons.arrow_back_ios_new,
+                              size: 20,
+                              color: AppTheme.textSecondary,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+
+                  // Text
+                  Expanded(
+                    child: LiquidGlassLayer(
+                      settings: const LiquidGlassSettings(
+                        thickness: 40,
+                        frostIntensity: 4,
+                      ),
+                      child: LiquidGlass(
+                        shape: const LiquidRoundedSuperellipse(
+                          borderRadius: 20,
+                        ),
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 16,
+                            vertical: 12,
+                          ),
+                          child: Text(
+                            'Point the marker to the location',
+                            style: GoogleFonts.montserrat(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w600,
+                              color: AppTheme.textSecondary,
+                            ),
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+
+            // Button
+            Positioned(
+              bottom: 24,
+              left: 20,
+              right: 20,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  AppButtons.icon(
+                    backgroundColor: AppTheme.inputFill,
+                    iconColor: AppTheme.primary,
+                    elevation: 1,
+                    icon: HugeIcons.strokeRoundedGps01,
+                    radius: 30,
+                    onPressed: () {},
+                  ),
+                  SizedBox(height: 12),
+                  AppButtons.primary(
+                    text: "Confirm Location",
+                    borderRadius: 30,
+                    onPressed: () {},
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 
   void _submit() {
@@ -162,7 +364,7 @@ class _CreateComplaintScreenState extends State<CreateComplaintScreen> {
                       if (v!.trim().isEmpty) {
                         return 'Please enter a description';
                       }
-                      if (v.trim().length <= 15) {
+                      if (v.trim().length <= 200) {
                         return 'Description must be at least 200 characters.';
                       }
                       return null;
@@ -171,25 +373,43 @@ class _CreateComplaintScreenState extends State<CreateComplaintScreen> {
 
                   const SizedBox(height: 20),
 
+                  // Attach Images
+                  AppTextfields.label("Attach Images"),
+                  attachImages(),
+                  const SizedBox(height: 20),
+
                   // Location
                   AppTextfields.label("Location"),
                   Row(
                     children: [
                       Expanded(
+                        flex: 5,
                         child: AppButtons.outlined(
-                          onPressed: () {},
-                          text: "Pick location from map",
+                          text: "Pick on map",
                           fontSize: 16,
+                          onPressed: _showLocatioPickerMap,
                         ),
                       ),
                       const SizedBox(width: 10),
-                      AppButtons.icon(
-                        onPressed: () {},
-                        backgroundColor: AppTheme.primary.withValues(
-                          alpha: 0.08,
+                      Expanded(
+                        flex: 6,
+                        child: AppButtons.primary(
+                          text: "Use my location",
+                          fontSize: 16,
+                          icon: HugeIcons.strokeRoundedGps01,
+                          foregroundColor: AppTheme.primary,
+                          backgroundColor: AppTheme.primary.withAlpha(30),
+                          onPressed: () async {
+                            curPosition = await _location
+                                .getCurrentCoordinates();
+
+                            if (!context.mounted) return;
+                            AppSnackBar.success(
+                              context,
+                              curPosition.toString(),
+                            );
+                          },
                         ),
-                        iconColor: AppTheme.primary,
-                        icon: HugeIcons.strokeRoundedGps01,
                       ),
                     ],
                   ),
@@ -225,6 +445,112 @@ class _CreateComplaintScreenState extends State<CreateComplaintScreen> {
             ),
           ),
         ),
+      ),
+    );
+  }
+
+  Widget attachImages() {
+    return SizedBox(
+      height: 150,
+      child: ListView(
+        scrollDirection: Axis.horizontal,
+        children: [
+          // Select image
+          if (_images.length < 4) ...{
+            Row(
+              children: [
+                InkWell(
+                  onTap: _showImagePicker,
+                  borderRadius: BorderRadius.circular(12),
+                  child: Container(
+                    width: 95,
+                    height: 150,
+                    decoration: BoxDecoration(
+                      color: AppTheme.inputFill,
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(
+                        width: 2,
+                        color: AppTheme.inputBorder,
+                        style: BorderStyle.solid,
+                      ),
+                    ),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        HugeIcon(
+                          icon: HugeIcons.strokeRoundedImage02,
+                          color: AppTheme.textSecondary,
+                          size: 28,
+                        ),
+                        SizedBox(height: 6),
+                        Text(
+                          "Add Image",
+                          style: GoogleFonts.montserrat(
+                            color: AppTheme.textSecondary,
+                            fontSize: 12,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+
+                // Spacer
+                SizedBox(width: 8),
+              ],
+            ),
+          },
+
+          // Image display
+          ..._images.where((image) => image != null).map((image) {
+            final index = _images.indexOf(image);
+            return Row(
+              children: [
+                Stack(
+                  children: [
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(12),
+                      child: Image.file(
+                        File(image!.path),
+                        width: 95,
+                        height: 150,
+                        fit: BoxFit.cover,
+                      ),
+                    ),
+                    // Delete Button Overlay
+                    Positioned(
+                      top: 3,
+                      right: 3,
+                      child: InkWell(
+                        onTap: () {
+                          setState(() {
+                            _images.removeAt(index);
+                          });
+                        },
+                        child: Container(
+                          padding: const EdgeInsets.all(4),
+                          decoration: BoxDecoration(
+                            color: Colors.black.withAlpha(150),
+                            shape: BoxShape.circle,
+                          ),
+                          child: const Icon(
+                            Icons.close,
+                            size: 14,
+                            color: Colors.white,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+
+                // Spacer
+                SizedBox(width: 8),
+              ],
+            );
+          }),
+        ],
       ),
     );
   }
