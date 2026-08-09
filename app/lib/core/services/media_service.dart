@@ -12,7 +12,6 @@ class MediaService {
       );
       return image;
     } catch (e) {
-      print("Error capturing image: $e");
       return null;
     }
   }
@@ -26,7 +25,6 @@ class MediaService {
       );
       return image;
     } catch (e) {
-      print("Error picking image: $e");
       return null;
     }
   }

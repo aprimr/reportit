@@ -31,13 +31,12 @@ class _CreateComplaintScreenState extends State<CreateComplaintScreen> {
   final _descriptionController = TextEditingController();
   final _locationController = TextEditingController();
 
+  GoogleMapController? _mapController;
   String? _selectedCategory;
-  Position? curPosition;
+  Position? _locationCoords;
   bool _isPublic = true;
-  List<XFile?> _images = [];
-  bool _isLoading = false;
-  // double? _latitude;
-  // double? _longitude;
+  final List<XFile?> _images = [];
+  final bool _isLoading = false;
 
   static const _categories = [
     {'label': 'Road', 'icon': HugeIcons.strokeRoundedRoad01},
@@ -120,11 +119,58 @@ class _CreateComplaintScreenState extends State<CreateComplaintScreen> {
     );
   }
 
-  void _showLocatioPickerMap() {
-    LatLng selectedLocation = curPosition != null
-        ? LatLng(curPosition!.latitude, curPosition!.longitude)
-        : const LatLng(27.9381, 82.5404);
+  void _showLocatioPickerMap() async {
+    LatLng? markedLocation;
+    final currentCoords = await _location.getCurrentCoordinates();
+    if (currentCoords == null) {
+      if (!mounted) return;
+      AppSnackBar.error(
+        context,
+        'Failed to open map. Please make sure your location is turned on.',
+      );
+      return;
+    }
+    LatLng mapPos = LatLng(currentCoords.latitude, currentCoords.longitude);
 
+    if (!mounted) return;
+
+    Future<void> recenter() async {
+      Position? currentCoords = await _location.getCurrentCoordinates();
+
+      if (currentCoords == null) return;
+
+      await _mapController?.animateCamera(
+        CameraUpdate.newCameraPosition(
+          CameraPosition(
+            target: LatLng(currentCoords.latitude, currentCoords.longitude),
+            zoom: 14.0,
+          ),
+        ),
+      );
+    }
+
+    Future<void> confirmLocation() async {
+      setState(() {
+        _locationCoords = Position(
+          latitude: markedLocation!.latitude,
+          longitude: markedLocation!.longitude,
+          timestamp: DateTime.now(),
+          accuracy: 100.0,
+          altitude: 0.0,
+          altitudeAccuracy: 0.0,
+          heading: 0.0,
+          headingAccuracy: 0.0,
+          speed: 0.0,
+          speedAccuracy: 0.0,
+        );
+      });
+
+      if (!mounted) return;
+      Navigator.pop(context);
+      AppSnackBar.success(context, "picked $currentCoords");
+    }
+
+    if (!context.mounted) return;
     showModalBottomSheet(
       context: context,
       useSafeArea: true,
@@ -136,16 +182,16 @@ class _CreateComplaintScreenState extends State<CreateComplaintScreen> {
           children: [
             // Map
             GoogleMap(
-              initialCameraPosition: CameraPosition(
-                target: selectedLocation,
-                zoom: 15,
-              ),
+              initialCameraPosition: CameraPosition(target: mapPos, zoom: 15),
               myLocationEnabled: true,
               myLocationButtonEnabled: false,
               zoomControlsEnabled: false,
               compassEnabled: false,
               onCameraMove: (position) {
-                selectedLocation = position.target;
+                markedLocation = position.target;
+              },
+              onMapCreated: (controller) {
+                _mapController = controller;
               },
             ),
 
@@ -238,13 +284,13 @@ class _CreateComplaintScreenState extends State<CreateComplaintScreen> {
                     elevation: 1,
                     icon: HugeIcons.strokeRoundedGps01,
                     radius: 30,
-                    onPressed: () {},
+                    onPressed: recenter,
                   ),
-                  SizedBox(height: 12),
+                  SizedBox(height: 16),
                   AppButtons.primary(
                     text: "Confirm Location",
                     borderRadius: 30,
-                    onPressed: () {},
+                    onPressed: confirmLocation,
                   ),
                 ],
               ),
@@ -400,13 +446,13 @@ class _CreateComplaintScreenState extends State<CreateComplaintScreen> {
                           foregroundColor: AppTheme.primary,
                           backgroundColor: AppTheme.primary.withAlpha(30),
                           onPressed: () async {
-                            curPosition = await _location
+                            _locationCoords = await _location
                                 .getCurrentCoordinates();
 
                             if (!context.mounted) return;
                             AppSnackBar.success(
                               context,
-                              curPosition.toString(),
+                              _locationCoords.toString(),
                             );
                           },
                         ),
