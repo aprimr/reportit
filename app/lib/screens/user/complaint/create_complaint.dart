@@ -31,6 +31,9 @@ class _CreateComplaintScreenState extends State<CreateComplaintScreen> {
   final _descriptionController = TextEditingController();
   final _locationController = TextEditingController();
 
+  MapType _currentMapType = MapType.terrain;
+  List<List<dynamic>> _currentMapIcon = HugeIcons.strokeRoundedMaping;
+
   GoogleMapController? _mapController;
   String? _selectedCategory;
   Position? _locationCoords;
@@ -132,8 +135,6 @@ class _CreateComplaintScreenState extends State<CreateComplaintScreen> {
     }
     LatLng mapPos = LatLng(currentCoords.latitude, currentCoords.longitude);
 
-    if (!mounted) return;
-
     Future<void> recenter() async {
       Position? currentCoords = await _location.getCurrentCoordinates();
 
@@ -165,138 +166,173 @@ class _CreateComplaintScreenState extends State<CreateComplaintScreen> {
         );
       });
 
-      if (!mounted) return;
       Navigator.pop(context);
-      AppSnackBar.success(context, "picked $currentCoords");
     }
 
-    if (!context.mounted) return;
+    if (!mounted) return;
     showModalBottomSheet(
       context: context,
       useSafeArea: true,
       isDismissible: false,
       isScrollControlled: true,
       enableDrag: false,
-      builder: (context) => SafeArea(
-        child: Stack(
-          children: [
-            // Map
-            GoogleMap(
-              initialCameraPosition: CameraPosition(target: mapPos, zoom: 15),
-              myLocationEnabled: true,
-              myLocationButtonEnabled: false,
-              zoomControlsEnabled: false,
-              compassEnabled: false,
-              onCameraMove: (position) {
-                markedLocation = position.target;
-              },
-              onMapCreated: (controller) {
-                _mapController = controller;
-              },
-            ),
+      builder: (context) => StatefulBuilder(
+        builder: (context, setSheetState) {
+          return SafeArea(
+            child: Stack(
+              children: [
+                // Map
+                GoogleMap(
+                  initialCameraPosition: CameraPosition(
+                    target: mapPos,
+                    zoom: 15,
+                  ),
+                  myLocationEnabled: true,
+                  myLocationButtonEnabled: false,
+                  zoomControlsEnabled: false,
+                  compassEnabled: false,
+                  mapType: _currentMapType,
+                  onCameraMove: (position) {
+                    markedLocation = position.target;
+                  },
+                  onMapCreated: (controller) {
+                    _mapController = controller;
+                  },
+                ),
 
-            // Marker
-            const Center(
-              child: Padding(
-                padding: EdgeInsets.only(bottom: 35),
-                child: Icon(Icons.location_pin, size: 45, color: Colors.red),
-              ),
-            ),
-
-            // Header
-            Positioned(
-              top: 16,
-              left: 16,
-              right: 16,
-              child: Row(
-                children: [
-                  // Back Button
-                  LiquidGlassLayer(
-                    settings: const LiquidGlassSettings(
-                      thickness: 40,
-                      frostIntensity: 4,
+                // Marker
+                Center(
+                  child: Padding(
+                    padding: EdgeInsets.only(bottom: 30),
+                    child: Image.asset(
+                      "assets/icon/splash_ic.png",
+                      height: 45,
+                      width: 55,
                     ),
-                    child: LiquidGlass(
-                      shape: const LiquidRoundedSuperellipse(borderRadius: 30),
-                      child: Material(
-                        color: Colors.transparent,
-                        child: InkWell(
-                          borderRadius: BorderRadius.circular(30),
-                          onTap: () => Navigator.of(context).pop(),
-                          child: const SizedBox.square(
-                            dimension: 48,
-                            child: Icon(
-                              Icons.arrow_back_ios_new,
-                              size: 20,
-                              color: AppTheme.textSecondary,
+                  ),
+                ),
+
+                // Header
+                Positioned(
+                  top: 16,
+                  left: 16,
+                  right: 16,
+                  child: Row(
+                    children: [
+                      // Back Button
+                      LiquidGlassLayer(
+                        settings: const LiquidGlassSettings(
+                          thickness: 40,
+                          frostIntensity: 4,
+                        ),
+                        child: LiquidGlass(
+                          shape: const LiquidRoundedSuperellipse(
+                            borderRadius: 30,
+                          ),
+                          child: Material(
+                            color: Colors.transparent,
+                            child: InkWell(
+                              borderRadius: BorderRadius.circular(30),
+                              onTap: () => Navigator.of(context).pop(),
+                              child: SizedBox.square(
+                                dimension: 48,
+                                child: Icon(
+                                  Icons.arrow_back_ios_new,
+                                  size: 20,
+                                  color: AppTheme.textPrimary.withAlpha(200),
+                                ),
+                              ),
                             ),
                           ),
                         ),
                       ),
-                    ),
-                  ),
-                  const SizedBox(width: 12),
+                      const SizedBox(width: 12),
 
-                  // Text
-                  Expanded(
-                    child: LiquidGlassLayer(
-                      settings: const LiquidGlassSettings(
-                        thickness: 40,
-                        frostIntensity: 4,
-                      ),
-                      child: LiquidGlass(
-                        shape: const LiquidRoundedSuperellipse(
-                          borderRadius: 20,
-                        ),
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 16,
-                            vertical: 12,
+                      // Text
+                      Expanded(
+                        child: LiquidGlassLayer(
+                          settings: const LiquidGlassSettings(
+                            thickness: 40,
+                            frostIntensity: 4,
                           ),
-                          child: Text(
-                            'Point the marker to the location',
-                            style: GoogleFonts.montserrat(
-                              fontSize: 14,
-                              fontWeight: FontWeight.w600,
-                              color: AppTheme.textSecondary,
+                          child: LiquidGlass(
+                            shape: const LiquidRoundedSuperellipse(
+                              borderRadius: 20,
                             ),
-                            overflow: TextOverflow.ellipsis,
+                            child: Padding(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 16,
+                                vertical: 12,
+                              ),
+                              child: Text(
+                                'Point the pin to the location',
+                                style: GoogleFonts.montserrat(
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w600,
+                                  color: AppTheme.textPrimary.withAlpha(200),
+                                ),
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
                           ),
                         ),
                       ),
-                    ),
+                    ],
                   ),
-                ],
-              ),
-            ),
+                ),
 
-            // Button
-            Positioned(
-              bottom: 24,
-              left: 20,
-              right: 20,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.end,
-                children: [
-                  AppButtons.icon(
-                    backgroundColor: AppTheme.inputFill,
-                    iconColor: AppTheme.primary,
-                    elevation: 1,
-                    icon: HugeIcons.strokeRoundedGps01,
-                    radius: 30,
-                    onPressed: recenter,
+                // Button
+                Positioned(
+                  bottom: 24,
+                  left: 20,
+                  right: 20,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: [
+                      AppButtons.icon(
+                        backgroundColor: AppTheme.onPrimary,
+                        iconColor: AppTheme.primary,
+                        elevation: 1,
+                        icon: _currentMapIcon,
+                        radius: 30,
+                        onPressed: () {
+                          setSheetState(() {
+                            if (_currentMapType == MapType.terrain) {
+                              _currentMapType = MapType.satellite;
+                              _currentMapIcon =
+                                  HugeIcons.strokeRoundedSatellite02;
+                            } else if (_currentMapType == MapType.satellite) {
+                              _currentMapType = MapType.hybrid;
+                              _currentMapIcon = HugeIcons.strokeRoundedLayers01;
+                            } else {
+                              _currentMapType = MapType.terrain;
+                              _currentMapIcon = HugeIcons.strokeRoundedMaping;
+                            }
+                          });
+                        },
+                      ),
+                      SizedBox(height: 16),
+                      AppButtons.icon(
+                        backgroundColor: AppTheme.onPrimary,
+                        iconColor: AppTheme.primary,
+                        elevation: 1,
+                        icon: HugeIcons.strokeRoundedGps01,
+                        radius: 30,
+                        onPressed: recenter,
+                      ),
+                      SizedBox(height: 16),
+                      AppButtons.primary(
+                        text: "Confirm Location",
+                        borderRadius: 30,
+                        onPressed: confirmLocation,
+                      ),
+                    ],
                   ),
-                  SizedBox(height: 16),
-                  AppButtons.primary(
-                    text: "Confirm Location",
-                    borderRadius: 30,
-                    onPressed: confirmLocation,
-                  ),
-                ],
-              ),
+                ),
+              ],
             ),
-          ],
-        ),
+          );
+        },
       ),
     );
   }
@@ -426,39 +462,90 @@ class _CreateComplaintScreenState extends State<CreateComplaintScreen> {
 
                   // Location
                   AppTextfields.label("Location"),
-                  Row(
-                    children: [
-                      Expanded(
-                        flex: 5,
-                        child: AppButtons.outlined(
-                          text: "Pick on map",
-                          fontSize: 16,
-                          onPressed: _showLocatioPickerMap,
+                  if (_locationCoords == null) ...{
+                    Row(
+                      children: [
+                        Expanded(
+                          flex: 5,
+                          child: AppButtons.outlined(
+                            text: "Pick on map",
+                            fontSize: 16,
+                            onPressed: _showLocatioPickerMap,
+                          ),
                         ),
-                      ),
-                      const SizedBox(width: 10),
-                      Expanded(
-                        flex: 6,
-                        child: AppButtons.primary(
-                          text: "Use my location",
-                          fontSize: 16,
-                          icon: HugeIcons.strokeRoundedGps01,
-                          foregroundColor: AppTheme.primary,
-                          backgroundColor: AppTheme.primary.withAlpha(30),
-                          onPressed: () async {
-                            _locationCoords = await _location
-                                .getCurrentCoordinates();
+                        const SizedBox(width: 10),
+                        Expanded(
+                          flex: 6,
+                          child: AppButtons.primary(
+                            text: "Use my location",
+                            fontSize: 16,
+                            icon: HugeIcons.strokeRoundedGps01,
+                            foregroundColor: AppTheme.primary,
+                            backgroundColor: AppTheme.primary.withAlpha(30),
+                            onPressed: () async {
+                              final position = await _location
+                                  .getCurrentCoordinates();
 
-                            if (!context.mounted) return;
-                            AppSnackBar.success(
-                              context,
-                              _locationCoords.toString(),
-                            );
-                          },
+                              if (!context.mounted) return;
+
+                              setState(() {
+                                _locationCoords = position;
+                              });
+                            },
+                          ),
                         ),
+                      ],
+                    ),
+                  } else ...{
+                    Container(
+                      padding: const EdgeInsets.only(
+                        left: 18,
+                        top: 1.5,
+                        bottom: 1.5,
                       ),
-                    ],
-                  ),
+                      decoration: BoxDecoration(
+                        color: AppTheme.inputFill,
+                        border: Border.all(
+                          width: 1.5,
+                          color: AppTheme.inputFill,
+                        ),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Row(
+                        children: [
+                          Expanded(
+                            child: GestureDetector(
+                              // TODO: remove this wrapper
+                              onTap: () {
+                                Clipboard.setData(
+                                  ClipboardData(
+                                    text:
+                                        "${_locationCoords!.latitude}, ${_locationCoords!.longitude}",
+                                  ),
+                                );
+                              },
+                              child: Text(
+                                "Ghorahi Dang",
+                                overflow: TextOverflow.ellipsis,
+                                style: GoogleFonts.montserrat(
+                                  fontSize: 16,
+                                  color: AppTheme.textPrimary,
+                                ),
+                              ),
+                            ),
+                          ),
+                          IconButton(
+                            icon: const Icon(Icons.close, size: 20),
+                            onPressed: () {
+                              setState(() {
+                                _locationCoords = null;
+                              });
+                            },
+                          ),
+                        ],
+                      ),
+                    ),
+                  },
 
                   const SizedBox(height: 10),
 
