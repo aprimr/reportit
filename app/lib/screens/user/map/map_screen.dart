@@ -175,7 +175,8 @@ class _MapScreenState extends State<MapScreen> {
                 icon: _currentMapIcon,
                 backgroundColor: AppTheme.onPrimary,
                 iconColor: AppTheme.primary,
-                elevation: 4,
+                elevation: 2,
+                radius: 30,
               ),
             ),
 
@@ -186,8 +187,9 @@ class _MapScreenState extends State<MapScreen> {
               bottom: bottomPadding + 24,
               child: AppButtons.icon(
                 onPressed: _recenter,
-                icon: HugeIcons.strokeRoundedLocation06,
-                elevation: 4,
+                icon: HugeIcons.strokeRoundedGps01,
+                elevation: 2,
+                radius: 30,
               ),
             ),
         ],
