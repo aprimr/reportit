@@ -31,3 +31,26 @@ The `refresh_tokens` table tracks active session tokens to manage user authentic
 | **`token_hash`** | TEXT | NOT NULL |
 | **`expires_at`** | TIMESTAMP WITH TIME ZONE | NOT NULL |
 | **`created_at`** | TIMESTAMP WITH TIME ZONE | DEFAULT `now()` |
+
+## 3. Complaints Table (`complaints`)
+
+The `complaints` table stores user-submitted reports, tracking their details, media attachments, geolocation, and status.
+
+### Columns
+| Column | Type | Constraints / Defaults |
+| :--- | :--- | :--- |
+| **`id` (PK)** | UUID | PRIMARY KEY, DEFAULT `gen_random_uuid()` |
+| **`uid` (FK)** | UUID | REFERENCES users(uid) ON DELETE CASCADE |
+| **`title`** | TEXT | NOT NULL |
+| **`description`** | TEXT | NOT NULL |
+| **`category`** | TEXT | NOT NULL |
+| **`image_urls`** | TEXT[] | NOT NULL |
+| **`latitude`** | DOUBLE PRECISION | NOT NULL |
+| **`longitude`** | DOUBLE PRECISION | NOT NULL |
+| **`is_public`** | BOOLEAN | NOT NULL, DEFAULT `true` |
+| **`status`** | TEXT | NOT NULL, DEFAULT `'open'` |
+| **`admin_remarks`** | TEXT | — |
+| **`verified_at`** | TIMESTAMP WITH TIME ZONE | — |
+| **`rejected_at`** | TIMESTAMP WITH TIME ZONE | — |
+| **`resolved_at`** | TIMESTAMP WITH TIME ZONE | — |
+| **`created_at`** | TIMESTAMP WITH TIME ZONE | DEFAULT `now()` |

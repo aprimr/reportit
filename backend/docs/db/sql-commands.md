@@ -32,3 +32,31 @@ CREATE TABLE refresh_tokens (
   created_at TIMESTAMPTZ DEFAULT now()
 );
 ```
+
+# COMPLAINTS
+
+`complaints`
+
+```sql
+CREATE TABLE complaints (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  uid UUID REFERENCES users(uid) ON DELETE CASCADE,
+  title TEXT NOT NULL,
+  description TEXT NOT NULL,
+  category TEXT NOT NULL,
+  image_urls TEXT[] NOT NULL,
+
+  latitude FLOAT8 NOT NULL,
+  longitude FLOAT8 NOT NULL,
+
+  is_public BOOLEAN NOT NULL DEFAULT true,
+  status TEXT NOT NULL DEFAULT 'open',
+  admin_remarks TEXT,
+
+  verified_at TIMESTAMPTZ DEFAULT NULL,
+  rejected_at TIMESTAMPTZ DEFAULT NULL,
+  resolved_at TIMESTAMPTZ DEFAULT NULL,
+  
+  created_at TIMESTAMPTZ DEFAULT now()
+)
+```

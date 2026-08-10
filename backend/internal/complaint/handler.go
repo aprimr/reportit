@@ -234,6 +234,7 @@ func (ch *complaintHandler) GetMyComplaints(w http.ResponseWriter, r *http.Reque
 	utils.WriteJSON(w, http.StatusOK, complaints, "complaints fetch successful")
 }
 
+// Get all complaints
 func (ch *complaintHandler) GetAllComplaints(w http.ResponseWriter, r *http.Request) {
 	// Get uid from request header
 	uid := middlewares.GetUidFromContext(r.Context())
