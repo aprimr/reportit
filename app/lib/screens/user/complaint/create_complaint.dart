@@ -29,7 +29,6 @@ class _CreateComplaintScreenState extends State<CreateComplaintScreen> {
   final _formKey = GlobalKey<FormState>();
   final _titleController = TextEditingController();
   final _descriptionController = TextEditingController();
-  final _locationController = TextEditingController();
 
   MapType _currentMapType = MapType.terrain;
   List<List<dynamic>> _currentMapIcon = HugeIcons.strokeRoundedMaping;
@@ -37,6 +36,7 @@ class _CreateComplaintScreenState extends State<CreateComplaintScreen> {
   GoogleMapController? _mapController;
   String? _selectedCategory;
   Position? _locationCoords;
+  String? _locationName;
   bool _isPublic = true;
   final List<XFile?> _images = [];
   final bool _isLoading = false;
@@ -64,7 +64,6 @@ class _CreateComplaintScreenState extends State<CreateComplaintScreen> {
   void dispose() {
     _titleController.dispose();
     _descriptionController.dispose();
-    _locationController.dispose();
     super.dispose();
   }
 
@@ -151,7 +150,12 @@ class _CreateComplaintScreenState extends State<CreateComplaintScreen> {
     }
 
     Future<void> confirmLocation() async {
+      String locationName = await _location.getAddressFromCoordinates(
+        markedLocation!.latitude,
+        markedLocation!.longitude,
+      );
       setState(() {
+        _locationName = locationName;
         _locationCoords = Position(
           latitude: markedLocation!.latitude,
           longitude: markedLocation!.longitude,
@@ -485,11 +489,17 @@ class _CreateComplaintScreenState extends State<CreateComplaintScreen> {
                             onPressed: () async {
                               final position = await _location
                                   .getCurrentCoordinates();
+                              final locationName = await _location
+                                  .getAddressFromCoordinates(
+                                    position!.latitude,
+                                    position.longitude,
+                                  );
 
                               if (!context.mounted) return;
 
                               setState(() {
                                 _locationCoords = position;
+                                _locationName = locationName;
                               });
                             },
                           ),
@@ -525,7 +535,7 @@ class _CreateComplaintScreenState extends State<CreateComplaintScreen> {
                                 );
                               },
                               child: Text(
-                                "Ghorahi Dang",
+                                _locationName.toString(),
                                 overflow: TextOverflow.ellipsis,
                                 style: GoogleFonts.montserrat(
                                   fontSize: 16,
