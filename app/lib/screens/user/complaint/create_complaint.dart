@@ -4,11 +4,13 @@ import 'package:app/core/services/location_service.dart';
 import 'package:app/core/services/media_service.dart';
 import 'package:app/core/theme/app_theme.dart';
 import 'package:app/core/utils/app_snackbar.dart';
+import 'package:app/providers/complaint_provider.dart';
 import 'package:app/widgets/app_appbar.dart';
 import 'package:app/widgets/app_buttons.dart';
 import 'package:app/widgets/app_textfields.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
@@ -16,19 +18,23 @@ import 'package:hugeicons/hugeicons.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:liquid_glass_plus/liquid_glass_plus.dart';
 
-class CreateComplaintScreen extends StatefulWidget {
+class CreateComplaintScreen extends ConsumerStatefulWidget {
   const CreateComplaintScreen({super.key});
 
   @override
-  State<CreateComplaintScreen> createState() => _CreateComplaintScreenState();
+  ConsumerState<CreateComplaintScreen> createState() =>
+      _CreateComplaintScreenState();
 }
 
-class _CreateComplaintScreenState extends State<CreateComplaintScreen> {
+class _CreateComplaintScreenState extends ConsumerState<CreateComplaintScreen> {
   final _location = LocationService();
   final _media = MediaService();
   final _formKey = GlobalKey<FormState>();
   final _titleController = TextEditingController();
   final _descriptionController = TextEditingController();
+  String _categoryError = "";
+  String _imagesError = "";
+  String _locationError = "";
 
   MapType _currentMapType = MapType.terrain;
   List<List<dynamic>> _currentMapIcon = HugeIcons.strokeRoundedMaping;
@@ -39,7 +45,7 @@ class _CreateComplaintScreenState extends State<CreateComplaintScreen> {
   String? _locationName;
   bool _isPublic = true;
   final List<XFile?> _images = [];
-  final bool _isLoading = false;
+  bool _isLoading = false;
 
   static const _categories = [
     {'label': 'Road', 'icon': HugeIcons.strokeRoundedRoad01},
@@ -341,8 +347,47 @@ class _CreateComplaintScreenState extends State<CreateComplaintScreen> {
     );
   }
 
-  void _submit() {
-    if (!_formKey.currentState!.validate()) return;
+  void _submit() async {
+    _formKey.currentState?.validate();
+    setState(() {
+      _categoryError = _selectedCategory == null ? "Catrgory is required" : "";
+      _imagesError = _images.isEmpty ? "Image is required" : "";
+      _locationError = _locationCoords == null ? "Location is required" : "";
+    });
+
+    try {
+      setState(() {
+        _isLoading = true;
+      });
+
+      await ref
+          .read(complaintNotifierProvider.notifier)
+          .createComplaint(
+            title: _titleController.text.trim(),
+            description: _descriptionController.text.trim(),
+            category: _selectedCategory!,
+            latitude: _locationCoords!.latitude,
+            longitude: _locationCoords!.longitude,
+            isPublic: _isPublic,
+            images: _images,
+          );
+
+      setState(() {
+        _titleController.text = "";
+        _descriptionController.text = "";
+        _selectedCategory = "";
+        _images.clear();
+        _locationCoords = null;
+        _isPublic = true;
+      });
+    } catch (e) {
+      if (!mounted) return;
+      AppSnackBar.error(context, e.toString());
+    } finally {
+      setState(() {
+        _isLoading = false;
+      });
+    }
   }
 
   @override
@@ -436,6 +481,19 @@ class _CreateComplaintScreenState extends State<CreateComplaintScreen> {
                       );
                     }).toList(),
                   ),
+                  if (_categoryError.isNotEmpty) ...{
+                    Padding(
+                      padding: const EdgeInsets.only(top: 6, left: 20),
+                      child: Text(
+                        _categoryError,
+                        style: GoogleFonts.inter(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w600,
+                          color: AppTheme.error,
+                        ),
+                      ),
+                    ),
+                  },
 
                   const SizedBox(height: 20),
 
@@ -462,6 +520,19 @@ class _CreateComplaintScreenState extends State<CreateComplaintScreen> {
                   // Attach Images
                   AppTextfields.label("Attach Images"),
                   attachImages(),
+                  if (_imagesError.isNotEmpty) ...{
+                    Padding(
+                      padding: const EdgeInsets.only(top: 6),
+                      child: Text(
+                        _imagesError,
+                        style: GoogleFonts.inter(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w600,
+                          color: AppTheme.error,
+                        ),
+                      ),
+                    ),
+                  },
                   const SizedBox(height: 20),
 
                   // Location
@@ -553,6 +624,19 @@ class _CreateComplaintScreenState extends State<CreateComplaintScreen> {
                             },
                           ),
                         ],
+                      ),
+                    ),
+                  },
+                  if (_locationError.isNotEmpty) ...{
+                    Padding(
+                      padding: const EdgeInsets.only(top: 6),
+                      child: Text(
+                        _locationError,
+                        style: GoogleFonts.inter(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w600,
+                          color: AppTheme.error,
+                        ),
                       ),
                     ),
                   },

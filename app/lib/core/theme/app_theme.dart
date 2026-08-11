@@ -73,16 +73,21 @@ class AppTheme {
         ),
         errorBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(radiusMd),
-          borderSide: const BorderSide(color: Color(0xFFEF4444)),
+          borderSide: const BorderSide(color: error),
         ),
         focusedErrorBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(radiusMd),
-          borderSide: const BorderSide(color: Color(0xFFEF4444), width: 1.5),
+          borderSide: const BorderSide(color: error, width: 1.5),
         ),
         hintStyle: GoogleFonts.poppins(
           color: textHint,
           fontSize: 14,
           fontWeight: FontWeight.w400,
+        ),
+        errorStyle: GoogleFonts.montserrat(
+          fontSize: 12,
+          fontWeight: FontWeight.w600,
+          color: AppTheme.error,
         ),
         prefixIconColor: textSecondary,
         suffixIconColor: textSecondary,

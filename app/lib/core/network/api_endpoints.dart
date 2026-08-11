@@ -14,4 +14,10 @@ class ApiEndpoints {
   static const String fetchProfile = '$apiVersion/user/';
   static const String updateFullname = '$apiVersion/user/fullname';
   static const String changePassword = '$apiVersion/user/password';
+
+  // Complaint endpoints (protected)
+  static const String createComplaint = '$apiVersion/complaint/';
+  static const String complaintDetail = '$apiVersion/complaint';
+  static const String getMyComplaints = '$apiVersion/complaint/me';
+  static const String getAllComplaints = '$apiVersion/complaint/all';
 }
