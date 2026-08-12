@@ -57,6 +57,7 @@ class AppButtons {
                   ],
                   Text(
                     text,
+                    overflow: TextOverflow.ellipsis,
                     style: GoogleFonts.montserrat(
                       fontSize: fontSize,
                       fontWeight: FontWeight.w600,
@@ -127,6 +128,7 @@ class AppButtons {
                   ],
                   Text(
                     text,
+                    overflow: TextOverflow.ellipsis,
                     style: GoogleFonts.montserrat(
                       fontSize: fontSize,
                       fontWeight: FontWeight.w600,
@@ -196,6 +198,7 @@ class AppButtons {
                   ],
                   Text(
                     text,
+                    overflow: TextOverflow.ellipsis,
                     style: GoogleFonts.montserrat(
                       fontSize: fontSize,
                       fontWeight: FontWeight.w600,
@@ -256,6 +259,7 @@ class AppButtons {
             else
               Text(
                 text,
+                overflow: TextOverflow.ellipsis,
                 style: GoogleFonts.montserrat(
                   fontSize: fontSize,
                   fontWeight: fontWeight,
@@ -324,6 +328,7 @@ class AppButtons {
                   ],
                   Text(
                     text,
+                    overflow: TextOverflow.ellipsis,
                     style: GoogleFonts.montserrat(
                       fontSize: fontSize,
                       fontWeight: FontWeight.w600,
@@ -411,6 +416,7 @@ class AppButtons {
             const SizedBox(width: 16),
             Text(
               text,
+              overflow: TextOverflow.ellipsis,
               style: GoogleFonts.montserrat(
                 fontSize: 18,
                 fontWeight: FontWeight.w600,
@@ -427,6 +433,7 @@ class AppButtons {
     required String label,
     required bool value,
     required ValueChanged<bool> onChanged,
+    bool readOnly = false,
     Color? activeColor,
     Color? labelColor,
     double? labelSize = 15,
@@ -446,7 +453,7 @@ class AppButtons {
         ),
         Switch(
           value: value,
-          onChanged: onChanged,
+          onChanged: readOnly ? null : onChanged,
           activeThumbColor: activeColor ?? AppTheme.primary,
           inactiveThumbColor: AppTheme.textSecondary,
         ),
