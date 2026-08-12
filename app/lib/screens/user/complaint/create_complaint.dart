@@ -176,6 +176,7 @@ class _CreateComplaintScreenState extends ConsumerState<CreateComplaintScreen> {
         );
       });
 
+      if (!mounted) return;
       Navigator.pop(context);
     }
 
@@ -605,23 +606,12 @@ class _CreateComplaintScreenState extends ConsumerState<CreateComplaintScreen> {
                       child: Row(
                         children: [
                           Expanded(
-                            child: GestureDetector(
-                              // TODO: remove this wrapper
-                              onTap: () {
-                                Clipboard.setData(
-                                  ClipboardData(
-                                    text:
-                                        "${_locationCoords!.latitude}, ${_locationCoords!.longitude}",
-                                  ),
-                                );
-                              },
-                              child: Text(
-                                _locationName.toString(),
-                                overflow: TextOverflow.ellipsis,
-                                style: GoogleFonts.montserrat(
-                                  fontSize: 16,
-                                  color: AppTheme.textPrimary,
-                                ),
+                            child: Text(
+                              _locationName.toString(),
+                              overflow: TextOverflow.ellipsis,
+                              style: GoogleFonts.montserrat(
+                                fontSize: 16,
+                                color: AppTheme.textPrimary,
                               ),
                             ),
                           ),
