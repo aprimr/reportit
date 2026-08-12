@@ -127,7 +127,7 @@ class _CreateComplaintScreenState extends ConsumerState<CreateComplaintScreen> {
     );
   }
 
-  void _showLocatioPickerMap() async {
+  void _showLocationPickerMap() async {
     LatLng? markedLocation;
     final currentCoords = await _location.getCurrentCoordinates();
     if (currentCoords == null) {
@@ -348,12 +348,18 @@ class _CreateComplaintScreenState extends ConsumerState<CreateComplaintScreen> {
   }
 
   void _submit() async {
-    _formKey.currentState?.validate();
     setState(() {
-      _categoryError = _selectedCategory == null ? "Catrgory is required" : "";
+      _categoryError = _selectedCategory == null ? "Category is required" : "";
       _imagesError = _images.isEmpty ? "Image is required" : "";
       _locationError = _locationCoords == null ? "Location is required" : "";
     });
+
+    if (!_formKey.currentState!.validate()) return;
+    if (_categoryError.isNotEmpty ||
+        _imagesError.isNotEmpty ||
+        _locationError.isNotEmpty) {
+      return;
+    }
 
     try {
       setState(() {
@@ -375,9 +381,10 @@ class _CreateComplaintScreenState extends ConsumerState<CreateComplaintScreen> {
       setState(() {
         _titleController.text = "";
         _descriptionController.text = "";
-        _selectedCategory = "";
+        _selectedCategory = null;
         _images.clear();
         _locationCoords = null;
+        _locationName = null;
         _isPublic = true;
       });
     } catch (e) {
@@ -412,6 +419,7 @@ class _CreateComplaintScreenState extends ConsumerState<CreateComplaintScreen> {
                     label: 'Title',
                     hint: 'Enter the complaint title',
                     maxChars: 60,
+                    readOnly: _isLoading,
                     validator: (v) {
                       if (v!.trim().isEmpty) return 'Please enter a title';
                       if (v.trim().length <= 15) {
@@ -434,7 +442,9 @@ class _CreateComplaintScreenState extends ConsumerState<CreateComplaintScreen> {
                       final isSelected = _selectedCategory == label;
 
                       return GestureDetector(
-                        onTap: () => setState(() => _selectedCategory = label),
+                        onTap: () => setState(
+                          () => _isLoading ? null : _selectedCategory = label,
+                        ),
                         child: AnimatedContainer(
                           duration: const Duration(milliseconds: 200),
                           curve: Curves.easeInOut,
@@ -481,7 +491,7 @@ class _CreateComplaintScreenState extends ConsumerState<CreateComplaintScreen> {
                       );
                     }).toList(),
                   ),
-                  if (_categoryError.isNotEmpty) ...{
+                  if (_categoryError.isNotEmpty)
                     Padding(
                       padding: const EdgeInsets.only(top: 6, left: 20),
                       child: Text(
@@ -493,7 +503,6 @@ class _CreateComplaintScreenState extends ConsumerState<CreateComplaintScreen> {
                         ),
                       ),
                     ),
-                  },
 
                   const SizedBox(height: 20),
 
@@ -504,6 +513,7 @@ class _CreateComplaintScreenState extends ConsumerState<CreateComplaintScreen> {
                     hint: 'Describe the issue in detail...',
                     maxLines: 8,
                     maxChars: 2500,
+                    readOnly: _isLoading,
                     validator: (v) {
                       if (v!.trim().isEmpty) {
                         return 'Please enter a description';
@@ -544,8 +554,8 @@ class _CreateComplaintScreenState extends ConsumerState<CreateComplaintScreen> {
                           flex: 5,
                           child: AppButtons.outlined(
                             text: "Pick on map",
-                            fontSize: 16,
-                            onPressed: _showLocatioPickerMap,
+                            fontSize: 13,
+                            onPressed: _showLocationPickerMap,
                           ),
                         ),
                         const SizedBox(width: 10),
@@ -553,7 +563,7 @@ class _CreateComplaintScreenState extends ConsumerState<CreateComplaintScreen> {
                           flex: 6,
                           child: AppButtons.primary(
                             text: "Use my location",
-                            fontSize: 16,
+                            fontSize: 14,
                             icon: HugeIcons.strokeRoundedGps01,
                             foregroundColor: AppTheme.primary,
                             backgroundColor: AppTheme.primary.withAlpha(30),
@@ -619,7 +629,7 @@ class _CreateComplaintScreenState extends ConsumerState<CreateComplaintScreen> {
                             icon: const Icon(Icons.close, size: 20),
                             onPressed: () {
                               setState(() {
-                                _locationCoords = null;
+                                _isLoading ? null : _locationCoords = null;
                               });
                             },
                           ),
@@ -647,6 +657,7 @@ class _CreateComplaintScreenState extends ConsumerState<CreateComplaintScreen> {
                   AppButtons.toggle(
                     value: _isPublic,
                     label: "Post to feed",
+                    readOnly: _isLoading,
 
                     onChanged: (newValue) {
                       setState(() {
@@ -659,7 +670,7 @@ class _CreateComplaintScreenState extends ConsumerState<CreateComplaintScreen> {
 
                   // Submit
                   _isLoading
-                      ? AppButtons.loading(text: 'Submitting...')
+                      ? AppButtons.loading(text: 'Creating. Please Wait...')
                       : AppButtons.primary(
                           onPressed: _submit,
                           text: 'Submit Complaint',
@@ -687,7 +698,7 @@ class _CreateComplaintScreenState extends ConsumerState<CreateComplaintScreen> {
             Row(
               children: [
                 InkWell(
-                  onTap: _showImagePicker,
+                  onTap: _isLoading ? null : _showImagePicker,
                   borderRadius: BorderRadius.circular(12),
                   child: Container(
                     width: 95,
@@ -745,14 +756,15 @@ class _CreateComplaintScreenState extends ConsumerState<CreateComplaintScreen> {
                         fit: BoxFit.cover,
                       ),
                     ),
-                    // Delete Button Overlay
+
+                    // Remove Image Button
                     Positioned(
                       top: 3,
                       right: 3,
                       child: InkWell(
                         onTap: () {
                           setState(() {
-                            _images.removeAt(index);
+                            _isLoading ? null : _images.removeAt(index);
                           });
                         },
                         child: Container(
@@ -765,6 +777,50 @@ class _CreateComplaintScreenState extends ConsumerState<CreateComplaintScreen> {
                             Icons.close,
                             size: 14,
                             color: Colors.white,
+                          ),
+                        ),
+                      ),
+                    ),
+
+                    // Image Size Overlay
+                    Positioned(
+                      bottom: 8,
+                      left: 0,
+                      right: 0,
+                      child: Container(
+                        height: 16,
+                        width: double.infinity,
+                        decoration: BoxDecoration(color: AppTheme.textPrimary),
+                        child: Center(
+                          child: FutureBuilder<int>(
+                            future: image.length(),
+                            builder: (context, snapshot) {
+                              if (snapshot.connectionState ==
+                                      ConnectionState.done &&
+                                  snapshot.hasData) {
+                                final kb = snapshot.data! / 1024;
+                                final sizeText = kb > 1024
+                                    ? '${(kb / 1024).toStringAsFixed(1)} MB'
+                                    : '${kb.toStringAsFixed(1)} KB';
+
+                                return Text(
+                                  sizeText,
+                                  style: GoogleFonts.montserrat(
+                                    fontSize: 10,
+                                    color: AppTheme.scaffoldBg,
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                );
+                              }
+                              return Text(
+                                'Calculating size...',
+                                style: GoogleFonts.montserrat(
+                                  fontSize: 10,
+                                  color: AppTheme.scaffoldBg,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              );
+                            },
                           ),
                         ),
                       ),
