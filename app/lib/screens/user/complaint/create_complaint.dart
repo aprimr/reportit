@@ -368,7 +368,7 @@ class _CreateComplaintScreenState extends ConsumerState<CreateComplaintScreen> {
       });
 
       await ref
-          .read(complaintNotifierProvider.notifier)
+          .read(complaintProvider.notifier)
           .createComplaint(
             title: _titleController.text.trim(),
             description: _descriptionController.text.trim(),
@@ -419,7 +419,7 @@ class _CreateComplaintScreenState extends ConsumerState<CreateComplaintScreen> {
                     controller: _titleController,
                     label: 'Title',
                     hint: 'Enter the complaint title',
-                    maxChars: 60,
+                    maxChars: 100,
                     readOnly: _isLoading,
                     validator: (v) {
                       if (v!.trim().isEmpty) return 'Please enter a title';
@@ -434,63 +434,68 @@ class _CreateComplaintScreenState extends ConsumerState<CreateComplaintScreen> {
 
                   // Category
                   AppTextfields.label("Category"),
-                  Wrap(
-                    spacing: 8,
-                    runSpacing: 8,
-                    children: _categories.map((cat) {
-                      final label = cat['label'] as String;
-                      final icon = cat['icon'] as List<List<dynamic>>;
-                      final isSelected = _selectedCategory == label;
+                  SingleChildScrollView(
+                    scrollDirection: Axis.horizontal,
+                    physics: BouncingScrollPhysics(),
+                    child: Row(
+                      children: _categories.map((category) {
+                        final label = category['label'] as String;
+                        final icon = category['icon'] as List<List<dynamic>>;
+                        final isSelected = _selectedCategory == label;
 
-                      return GestureDetector(
-                        onTap: () => setState(
-                          () => _isLoading ? null : _selectedCategory = label,
-                        ),
-                        child: AnimatedContainer(
-                          duration: const Duration(milliseconds: 200),
-                          curve: Curves.easeInOut,
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 14,
-                            vertical: 10,
+                        return GestureDetector(
+                          onTap: () => setState(
+                            () => _isLoading ? null : _selectedCategory = label,
                           ),
-                          decoration: BoxDecoration(
-                            color: isSelected ? AppTheme.primary : Colors.white,
-                            borderRadius: BorderRadius.circular(10),
-                            border: isSelected
-                                ? null
-                                : Border.all(
-                                    color: AppTheme.inputBorder,
-                                    width: 1,
-                                  ),
-                          ),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              HugeIcon(
-                                icon: icon,
-                                size: 18,
-                                color: isSelected
-                                    ? Colors.white
-                                    : AppTheme.textSecondary,
-                              ),
-                              const SizedBox(width: 8),
-                              Text(
-                                label,
-                                style: GoogleFonts.inter(
-                                  fontSize: 13,
-                                  fontWeight: isSelected
-                                      ? FontWeight.w600
-                                      : FontWeight.w400,
+                          child: AnimatedContainer(
+                            duration: const Duration(milliseconds: 200),
+                            curve: Curves.easeInOut,
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 12,
+                              vertical: 6,
+                            ),
+                            margin: EdgeInsets.only(right: 12),
+                            decoration: BoxDecoration(
+                              color: isSelected
+                                  ? AppTheme.primary
+                                  : Colors.white,
+                              borderRadius: BorderRadius.circular(10),
+                              border: isSelected
+                                  ? null
+                                  : Border.all(
+                                      color: AppTheme.inputBorder,
+                                      width: 1,
+                                    ),
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                HugeIcon(
+                                  icon: icon,
+                                  size: 16,
                                   color: isSelected
                                       ? Colors.white
                                       : AppTheme.textSecondary,
                                 ),
-                              ),
-                            ],
+                                const SizedBox(width: 8),
+                                Text(
+                                  label,
+                                  style: GoogleFonts.montserrat(
+                                    fontSize: 13,
+                                    fontWeight: isSelected
+                                        ? FontWeight.w600
+                                        : FontWeight.w400,
+                                    color: isSelected
+                                        ? Colors.white
+                                        : AppTheme.textSecondary,
+                                  ),
+                                ),
+                              ],
+                            ),
                           ),
-                        ),
-                      );
-                    }).toList(),
+                        );
+                      }).toList(),
+                    ),
                   ),
                   if (_categoryError.isNotEmpty)
                     Padding(
