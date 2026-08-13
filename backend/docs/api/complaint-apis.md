@@ -27,7 +27,7 @@
 
 #### Response Body
 
-```
+```json
 {
   "success": true,
   "message": "complaint create successful",
@@ -66,7 +66,7 @@
 
 #### Response Body
 
-```
+```json
 {
   "success": true,
   "message": "complaint delete successful"
@@ -85,7 +85,7 @@
 
 #### Response Body
 
-```
+```json
 {
   "success": true,
   "message": "complaint create successful",
@@ -132,7 +132,7 @@
 
 #### Response Body
 
-```
+```json
 {
   "success": true,
   "message": "complaints fetch successful",
@@ -188,7 +188,7 @@
 
 #### Response Body
 
-```
+```json
 {
   "success": true,
   "message": "complaints fetch successful",
@@ -209,7 +209,8 @@
         "latitude": 0.0,
         "is_public": true,
         "status": "open",
-        "admin_remarks": null,
+        "fullname":"user user",
+        "email":"user@example.com",
         "verified_at": null,
         "rejected_at": null,
         "resolved_at": null,
