@@ -5,9 +5,9 @@ class ComplaintHelper {
   static Color getStatusColor(String status) {
     switch (status.toLowerCase().trim()) {
       case 'open':
-        return AppTheme.secondary;
-      case 'verified':
         return AppTheme.warning;
+      case 'verified':
+        return AppTheme.secondary;
       case 'resolved':
         return AppTheme.success;
       case 'rejected':

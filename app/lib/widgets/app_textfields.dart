@@ -163,11 +163,9 @@ class AppTextfields {
       controller: controller,
       hint: hint,
       icon: icon ?? HugeIcons.strokeRoundedSearch01,
-      suffixIcon: const Icon(
-        Icons.clear,
-        size: 20,
-        color: AppTheme.textSecondary,
-      ),
+      suffixIcon: controller.text.isNotEmpty
+          ? Icon(Icons.clear, size: 20, color: AppTheme.textSecondary)
+          : null,
       onSuffixTap:
           onClear ??
           () {
