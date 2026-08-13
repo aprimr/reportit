@@ -1,6 +1,7 @@
 import 'package:app/core/routes/app_routes.dart';
 import 'package:app/core/theme/app_theme.dart';
 import 'package:app/providers/user_provider.dart';
+import 'package:app/providers/complaint_provider.dart';
 import 'package:app/screens/user/feed/feed_screen.dart';
 import 'package:app/screens/user/map/map_screen.dart';
 import 'package:app/screens/user/mycomplaints/my_complaints_screen.dart';
@@ -23,6 +24,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   final List<Widget> _screens = const [
     FeedScreen(),
     MyComplaintsScreen(),
+    SizedBox(),
     MapScreen(),
     ProfileScreen(),
   ];
@@ -30,6 +32,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   @override
   void initState() {
     super.initState();
+    // Fetch all complaints
+    Future.microtask(() {
+      ref.read(feedComplaintProvider.notifier).fetchAllComplaints();
+    });
+
     // Fetch user profile in background on homescreen initializes
     Future.microtask(() {
       ref.read(userProvider.notifier).fetchProfile();
@@ -76,98 +83,93 @@ class _ReportItNavBar extends StatelessWidget {
   final ValueChanged<int> onTabSelected;
   final VoidCallback onCreateTap;
 
-  static const List<List<List<dynamic>>> _icons = [
-    HugeIcons.strokeRoundedHome09,
-    HugeIcons.strokeRoundedReceiptText,
-    HugeIcons.strokeRoundedMapsLocation01,
-    HugeIcons.strokeRoundedUserCircle,
-  ];
-
   @override
   Widget build(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        color: AppTheme.appBarBg,
-        border: Border(
-          top: BorderSide(
-            color: AppTheme.textSecondary.withAlpha(30),
-            width: 0.8,
+    return BottomNavigationBar(
+      currentIndex: currentIndex,
+      onTap: (i) {
+        if (i == 2) {
+          onCreateTap();
+        } else {
+          final tab = i;
+          onTabSelected(tab);
+        }
+      },
+      type: BottomNavigationBarType.fixed,
+      backgroundColor: AppTheme.appBarBg,
+      selectedItemColor: AppTheme.primary,
+      unselectedItemColor: AppTheme.textPrimary,
+      elevation: 0,
+      selectedFontSize: 0,
+      unselectedFontSize: 0,
+
+      items: [
+        BottomNavigationBarItem(
+          icon: HugeIcon(
+            icon: HugeIcons.strokeRoundedHome09,
+            size: 22,
+            strokeWidth: 1.5,
           ),
-        ),
-      ),
-      child: SafeArea(
-        top: false,
-        child: SizedBox(
-          height: 56,
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: [
-              _NavIcon(
-                icon: _icons[0],
-                isActive: currentIndex == 0,
-                onTap: () => onTabSelected(0),
-              ),
-              _NavIcon(
-                icon: _icons[1],
-                isActive: currentIndex == 1,
-                onTap: () => onTabSelected(1),
-              ),
-              _NavIcon(
-                icon: HugeIcons.strokeRoundedAddSquare,
-                isActive: false,
-                isCenter: true,
-                onTap: onCreateTap,
-              ),
-              _NavIcon(
-                icon: _icons[2],
-                isActive: currentIndex == 2,
-                onTap: () => onTabSelected(2),
-              ),
-              _NavIcon(
-                icon: _icons[3],
-                isActive: currentIndex == 3,
-                onTap: () => onTabSelected(3),
-              ),
-            ],
+          activeIcon: HugeIcon(
+            icon: HugeIcons.strokeRoundedHome09,
+            size: 22,
+            strokeWidth: 1.6,
           ),
+          label: '',
         ),
-      ),
-    );
-  }
-}
 
-class _NavIcon extends StatelessWidget {
-  const _NavIcon({
-    required this.icon,
-    required this.isActive,
-    required this.onTap,
-    this.isCenter = false,
-  });
-
-  final List<List<dynamic>> icon;
-  final bool isActive;
-  final bool isCenter;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    final Color color = isActive ? AppTheme.primary : AppTheme.textPrimary;
-
-    return GestureDetector(
-      onTap: onTap,
-      behavior: HitTestBehavior.opaque,
-      child: SizedBox(
-        width: 56,
-        height: double.infinity,
-        child: Center(
-          child: HugeIcon(
-            icon: icon,
-            size: isCenter ? 28 : 24,
-            strokeWidth: isActive ? 1.6 : 1.4,
-            color: color,
+        BottomNavigationBarItem(
+          icon: HugeIcon(
+            icon: HugeIcons.strokeRoundedReceiptText,
+            size: 22,
+            strokeWidth: 1.5,
           ),
+          activeIcon: HugeIcon(
+            icon: HugeIcons.strokeRoundedReceiptText,
+            size: 22,
+            strokeWidth: 1.6,
+          ),
+          label: '',
         ),
-      ),
+
+        BottomNavigationBarItem(
+          icon: const HugeIcon(
+            icon: HugeIcons.strokeRoundedAddSquare,
+            size: 28,
+            strokeWidth: 1.6,
+            color: AppTheme.primary,
+          ),
+          label: '',
+        ),
+
+        BottomNavigationBarItem(
+          icon: HugeIcon(
+            icon: HugeIcons.strokeRoundedMapsLocation01,
+            size: 22,
+            strokeWidth: 1.5,
+          ),
+          activeIcon: HugeIcon(
+            icon: HugeIcons.strokeRoundedMapsLocation01,
+            size: 22,
+            strokeWidth: 1.6,
+          ),
+          label: '',
+        ),
+
+        BottomNavigationBarItem(
+          icon: HugeIcon(
+            icon: HugeIcons.strokeRoundedUserCircle,
+            size: 22,
+            strokeWidth: 1.5,
+          ),
+          activeIcon: HugeIcon(
+            icon: HugeIcons.strokeRoundedUserCircle,
+            size: 22,
+            strokeWidth: 1.6,
+          ),
+          label: '',
+        ),
+      ],
     );
   }
 }
