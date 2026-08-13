@@ -15,7 +15,7 @@ type ComplaintRepository interface {
 	FetchById(ctx context.Context, id string) (*Complaint, error)
 	Delete(ctx context.Context, id string) error
 	FetchUserComplaints(ctx context.Context, params ComplaintFetchParams) ([]Complaint, error)
-	FetchAllComplaints(ctx context.Context, params ComplaintFetchParams) ([]Complaint, error)
+	FetchAllComplaints(ctx context.Context, params ComplaintFetchParams) ([]FeedComplaint, error)
 }
 
 type complaintRepository struct {
@@ -196,9 +196,9 @@ func (cr *complaintRepository) FetchUserComplaints(ctx context.Context, params C
 }
 
 // Fetches all complaints
-func (cr *complaintRepository) FetchAllComplaints(ctx context.Context, params ComplaintFetchParams) ([]Complaint, error) {
+func (cr *complaintRepository) FetchAllComplaints(ctx context.Context, params ComplaintFetchParams) ([]FeedComplaint, error) {
 	// Base query with a dummy condition so we can safely chain AND clauses
-	query := `SELECT id, uid, title, description, category, image_urls, longitude, latitude, is_public, status, admin_remarks, verified_at, rejected_at, resolved_at, created_at FROM complaints WHERE 1=1`
+	query := `SELECT c.id, c.uid, c.title, c.description, c.category, c.image_urls, c.longitude, c.latitude, c.is_public, c.status, u.fullname, u.email , c.verified_at, c.rejected_at, c.resolved_at, c.created_at FROM complaints c INNER JOIN users u ON c.uid = u.uid WHERE 1=1`
 
 	args := []any{}
 	argIdx := 1
@@ -255,9 +255,9 @@ func (cr *complaintRepository) FetchAllComplaints(ctx context.Context, params Co
 	defer rows.Close()
 
 	// Scan rows
-	var complaints []Complaint
+	var complaints []FeedComplaint
 	for rows.Next() {
-		var complaint Complaint
+		var complaint FeedComplaint
 		err := rows.Scan(
 			&complaint.Id,
 			&complaint.Uid,
@@ -269,7 +269,8 @@ func (cr *complaintRepository) FetchAllComplaints(ctx context.Context, params Co
 			&complaint.Latitude,
 			&complaint.IsPublic,
 			&complaint.Status,
-			&complaint.AdminRemarks,
+			&complaint.Fullname,
+			&complaint.Email,
 			&complaint.VerifiedAt,
 			&complaint.RejectedAt,
 			&complaint.ResolvedAt,

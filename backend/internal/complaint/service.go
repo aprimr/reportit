@@ -12,7 +12,7 @@ type ComplaintService interface {
 	DeleteComplaint(ctx context.Context, id string) error
 	GetComplaint(ctx context.Context, id string) (*Complaint, error)
 	GetMyComplaints(ctx context.Context, params ComplaintFetchParams) ([]Complaint, error)
-	GetAllComplaints(ctx context.Context, params ComplaintFetchParams) ([]Complaint, error)
+	GetAllComplaints(ctx context.Context, params ComplaintFetchParams) ([]FeedComplaint, error)
 }
 
 type complaintService struct {
@@ -88,7 +88,7 @@ func (cs *complaintService) GetMyComplaints(ctx context.Context, params Complain
 	return complaint, nil
 }
 
-func (cs *complaintService) GetAllComplaints(ctx context.Context, params ComplaintFetchParams) ([]Complaint, error) {
+func (cs *complaintService) GetAllComplaints(ctx context.Context, params ComplaintFetchParams) ([]FeedComplaint, error) {
 	// Call repository
 	complaint, err := cs.complaintRepo.FetchAllComplaints(ctx, params)
 	if err != nil {

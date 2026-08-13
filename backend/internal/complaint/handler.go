@@ -274,7 +274,7 @@ func (ch *complaintHandler) GetAllComplaints(w http.ResponseWriter, r *http.Requ
 	}
 
 	if complaints == nil {
-		complaints = []Complaint{}
+		complaints = []FeedComplaint{}
 	}
 
 	utils.WriteJSON(w, http.StatusOK, complaints, "complaints fetch successful")
