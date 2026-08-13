@@ -97,7 +97,7 @@ class ComplaintService {
     }
   }
 
-  Future<ComplaintListResponse> getAllComplaints({
+  Future<FeedComplaintListResponse> getAllComplaints({
     String? search,
     String? status,
     String? sort,
@@ -114,7 +114,7 @@ class ComplaintService {
         ApiEndpoints.getAllComplaints,
         queryParameters: queryParameters.isNotEmpty ? queryParameters : null,
       );
-      return ComplaintListResponse.fromJson(response.data);
+      return FeedComplaintListResponse.fromJson(response.data);
     } on DioException catch (e) {
       throw e.error is ApiError
           ? e.error as ApiError
