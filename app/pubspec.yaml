@@ -53,6 +53,7 @@ dependencies:
   flutter_image_compress: ^2.5.1
   path_provider: ^2.1.6
   path: ^1.9.1
+  lottie: ^3.5.1
 
 dev_dependencies:
   flutter_test:
@@ -82,6 +83,7 @@ flutter:
     - assets/images/
     - assets/icon/
     - assets/videos/
+    - assets/animations/
     - assets/map_style.json
 
   # An image asset can refer to one or more resolution-specific "variants", see

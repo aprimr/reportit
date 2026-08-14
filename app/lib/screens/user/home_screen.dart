@@ -32,15 +32,19 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   @override
   void initState() {
     super.initState();
-    // Fetch all complaints
-    Future.microtask(() {
-      ref.read(feedComplaintProvider.notifier).fetchAllComplaints();
-    });
+    try {
+      // Fetch all complaints
+      Future.microtask(() {
+        ref.read(feedComplaintProvider.notifier).fetchAllComplaints();
+      });
+    } catch (_) {}
 
-    // Fetch user profile in background on homescreen initializes
-    Future.microtask(() {
-      ref.read(userProvider.notifier).fetchProfile();
-    });
+    try {
+      // Fetch user profile in background on homescreen initializes
+      Future.microtask(() {
+        ref.read(userProvider.notifier).fetchProfile();
+      });
+    } catch (_) {}
   }
 
   @override
