@@ -77,6 +77,7 @@ class ComplaintService {
     String? status,
     String? sort,
     int? limit,
+    String? cursor,
   }) async {
     try {
       final queryParameters = <String, dynamic>{};
@@ -84,6 +85,7 @@ class ComplaintService {
       if (status != null) queryParameters['status'] = status;
       if (sort != null) queryParameters['sort'] = sort;
       if (limit != null) queryParameters['limit'] = limit;
+      if (cursor != null) queryParameters['cursor'] = cursor;
 
       final response = await _client.get(
         ApiEndpoints.getMyComplaints,
@@ -102,6 +104,7 @@ class ComplaintService {
     String? status,
     String? sort,
     int? limit,
+    String? cursor,
   }) async {
     try {
       final queryParameters = <String, dynamic>{};
@@ -109,6 +112,7 @@ class ComplaintService {
       if (status != null) queryParameters['status'] = status;
       if (sort != null) queryParameters['sort'] = sort;
       if (limit != null) queryParameters['limit'] = limit;
+      if (cursor != null) queryParameters['cursor'] = cursor;
 
       final response = await _client.get(
         ApiEndpoints.getAllComplaints,

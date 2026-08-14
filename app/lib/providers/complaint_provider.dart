@@ -16,7 +16,7 @@ final feedComplaintProvider =
     StateNotifierProvider<FeedComplaintNotifier, List<FeedComplaintModel>>((
       ref,
     ) {
-      return FeedComplaintNotifier(ref.watch(complaintServiceProvider));
+      return FeedComplaintNotifier(ref.watch(complaintServiceProvider), ref);
     });
 
 class ComplaintNotifier extends StateNotifier<List<ComplaintModel>> {
@@ -90,10 +90,18 @@ class ComplaintNotifier extends StateNotifier<List<ComplaintModel>> {
 }
 
 // Feed complaint provider
+final isFetchingMoreProvider = StateProvider<bool>((ref) => false);
+
 class FeedComplaintNotifier extends StateNotifier<List<FeedComplaintModel>> {
   final ComplaintService _complaintService;
+  final Ref _ref;
 
-  FeedComplaintNotifier(this._complaintService) : super([]);
+  FeedComplaintNotifier(this._complaintService, this._ref) : super([]);
+
+  String? _nextCursor;
+  bool _hasMore = true;
+
+  bool get hasMore => _hasMore;
 
   Future<void> fetchAllComplaints({
     String? search,
@@ -101,6 +109,10 @@ class FeedComplaintNotifier extends StateNotifier<List<FeedComplaintModel>> {
     String? sort,
     int? limit,
   }) async {
+    // reset states
+    _nextCursor = null;
+    _hasMore = true;
+
     try {
       final response = await _complaintService.getAllComplaints(
         search: search,
@@ -109,8 +121,50 @@ class FeedComplaintNotifier extends StateNotifier<List<FeedComplaintModel>> {
         limit: limit,
       );
       state = response.data;
+
+      if (response.data.isNotEmpty) {
+        _nextCursor = response.data.last.createdAt;
+      }
+
+      if (response.data.length < (limit ?? 10)) {
+        _hasMore = false;
+      }
     } catch (e) {
       rethrow;
+    }
+  }
+
+  Future<void> fetchMoreFeedComplaints({
+    String? search,
+    String? status,
+    String? sort,
+    int? limit,
+  }) async {
+    if (!_hasMore || _ref.read(isFetchingMoreProvider)) return;
+    _ref.read(isFetchingMoreProvider.notifier).state = true;
+
+    try {
+      final response = await _complaintService.getAllComplaints(
+        search: search,
+        status: status,
+        sort: sort,
+        limit: limit,
+        cursor: _nextCursor,
+      );
+
+      final newItems = response.data;
+      if (newItems.isNotEmpty) {
+        state = [...state, ...newItems];
+        _nextCursor = newItems.last.createdAt;
+      }
+
+      if (newItems.length < (limit ?? 10)) {
+        _hasMore = false;
+      }
+    } catch (e) {
+      rethrow;
+    } finally {
+      _ref.read(isFetchingMoreProvider.notifier).state = false;
     }
   }
 
