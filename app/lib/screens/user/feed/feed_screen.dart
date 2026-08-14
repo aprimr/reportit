@@ -3,7 +3,6 @@ import 'package:app/helpers/complaint_helper.dart';
 import 'package:app/helpers/time_helper.dart';
 import 'package:app/providers/complaint_provider.dart';
 import 'package:app/screens/skeleton/user/home_skeleton.dart';
-import 'package:app/widgets/app_textfields.dart';
 import 'package:app/widgets/vote_buttons.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -23,6 +22,13 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
 
   String? selectedStatus;
   String? selectedSort;
+
+  final complaintStatus = [
+    {'label': 'All', 'value': null},
+    {'label': 'Open', 'value': 'open'},
+    {'label': 'Verified', 'value': 'verified'},
+    {'label': 'Resolved', 'value': 'resolved'},
+  ];
 
   @override
   void initState() {
@@ -64,11 +70,11 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
         );
   }
 
-  void onSearchChanged(String query) {
+  void _fetchComplaints() {
     ref
         .read(feedComplaintProvider.notifier)
         .fetchAllComplaints(
-          search: query.isEmpty ? null : query,
+          search: searchController.text.isEmpty ? null : searchController.text,
           status: selectedStatus,
           sort: selectedSort,
         );
@@ -78,6 +84,18 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
     setState(() {
       selectedStatus = newStatus;
     });
+    _fetchComplaints();
+  }
+
+  void onSearchChanged(String query) {
+    _fetchComplaints();
+  }
+
+  void onSortSelected(String sortStr) {
+    setState(() {
+      selectedSort = sortStr;
+    });
+    _fetchComplaints();
   }
 
   @override
@@ -86,9 +104,9 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
 
     return Scaffold(
       backgroundColor: AppTheme.scaffoldBg,
-      body: SafeArea(
-        child: RefreshIndicator(
-          onRefresh: pullTorefresh,
+      body: RefreshIndicator(
+        onRefresh: pullTorefresh,
+        child: SafeArea(
           child: CustomScrollView(
             controller: scrollController,
             slivers: [
@@ -96,54 +114,289 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
               SliverAppBar(
                 elevation: 0,
                 floating: true,
+                snap: true,
+                pinned: false,
                 backgroundColor: AppTheme.appBarBg,
-                scrolledUnderElevation: 0,
+                scrolledUnderElevation: 1,
                 title: Row(
                   children: [
                     Image.asset("assets/images/logo.png", height: 28),
                     SizedBox(width: 4),
                     Text(
-                      'ReportIt',
+                      'Complaint Feed',
                       style: GoogleFonts.quicksand(
                         fontSize: 22,
-                        fontWeight: FontWeight.w800,
+                        fontWeight: FontWeight.w600,
                         color: AppTheme.textPrimary,
                       ),
                     ),
                   ],
                 ),
-                actions: [
-                  Padding(
-                    padding: EdgeInsetsGeometry.only(
-                      right: 20,
-                      top: 6,
-                      bottom: 6,
-                    ),
-                    child: Padding(
-                      padding: const EdgeInsets.only(right: 4),
-                      child: HugeIcon(
-                        size: 24,
-                        strokeWidth: 1.8,
-                        icon: HugeIcons.strokeRoundedSearch01,
-                      ),
-                    ),
-                  ),
-                ],
                 bottom: PreferredSize(
-                  preferredSize: Size.fromHeight(60),
-                  child: Padding(
-                    padding: const EdgeInsets.fromLTRB(16, 6, 16, 6),
-                    child: AppTextfields.search(
-                      controller: searchController,
-                      hint: "Search title or description",
-                    ),
+                  preferredSize: Size.fromHeight(98),
+                  child: Column(
+                    children: [
+                      // Search Bar
+                      Padding(
+                        padding: const EdgeInsets.fromLTRB(16, 6, 16, 2),
+                        child: Container(
+                          constraints: BoxConstraints(maxHeight: 40),
+                          decoration: BoxDecoration(
+                            color: AppTheme.inputFill,
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(color: AppTheme.inputBorder),
+                          ),
+                          child: TextField(
+                            onChanged: onSearchChanged,
+                            controller: searchController,
+                            style: GoogleFonts.poppins(
+                              fontSize: 13,
+                              color: Colors.black87,
+                            ),
+                            decoration: InputDecoration(
+                              hintText: "Search by title or description",
+                              hintStyle: GoogleFonts.poppins(
+                                fontSize: 13,
+                                color: AppTheme.textHint,
+                              ),
+                              prefixIcon: Padding(
+                                padding: const EdgeInsets.only(
+                                  left: 12,
+                                  right: 8,
+                                ),
+                                child: SizedBox(
+                                  height: 18,
+                                  width: 18,
+
+                                  child: HugeIcon(
+                                    icon: HugeIcons.strokeRoundedSearch01,
+                                    strokeWidth: 1.8,
+                                    color: AppTheme.textSecondary,
+                                  ),
+                                ),
+                              ),
+                              suffixIcon: searchController.text.isNotEmpty
+                                  ? IconButton(
+                                      icon: const Icon(Icons.clear, size: 18),
+                                      color: Colors.grey.shade600,
+                                      onPressed: () {
+                                        searchController.clear();
+                                        _fetchComplaints();
+                                      },
+                                    )
+                                  : null,
+                              border: InputBorder.none,
+                              contentPadding: const EdgeInsets.fromLTRB(
+                                16,
+                                6,
+                                16,
+                                6,
+                              ),
+                              prefixIconConstraints: BoxConstraints(
+                                maxHeight: 40,
+                                maxWidth: 40,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+
+                      // Satus chips
+                      Row(
+                        children: [
+                          // Status
+                          Expanded(
+                            flex: 5,
+                            child: Padding(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 16,
+                                vertical: 2,
+                              ),
+                              child: SingleChildScrollView(
+                                scrollDirection: Axis.horizontal,
+                                child: Row(
+                                  children: complaintStatus.map((s) {
+                                    final isSelected =
+                                        selectedStatus == s['value'];
+
+                                    return Padding(
+                                      padding: EdgeInsets.only(right: 8),
+                                      child: ChoiceChip(
+                                        label: Text(s['label'] as String),
+                                        selectedColor: AppTheme.primary,
+                                        backgroundColor: AppTheme.scaffoldBg,
+                                        shape: StadiumBorder(),
+                                        padding: const EdgeInsets.symmetric(
+                                          horizontal: 8,
+                                          vertical: 0,
+                                        ),
+                                        labelStyle: GoogleFonts.montserrat(
+                                          fontSize: 12,
+                                          color: isSelected
+                                              ? AppTheme.scaffoldBg
+                                              : AppTheme.textSecondary,
+                                          fontWeight: isSelected
+                                              ? FontWeight.w600
+                                              : FontWeight.w500,
+                                        ),
+                                        showCheckmark: false,
+                                        selected: isSelected,
+                                        onSelected: (value) {
+                                          if (value) {
+                                            onStatusFilterSelected(s['value']);
+                                          }
+                                        },
+                                      ),
+                                    );
+                                  }).toList(),
+                                ),
+                              ),
+                            ),
+                          ),
+
+                          // Sort
+                          Expanded(
+                            flex: 2,
+                            child: Padding(
+                              padding: const EdgeInsets.only(right: 16),
+                              child: PopupMenuButton<String>(
+                                onSelected: (value) {
+                                  onSortSelected(value);
+                                },
+                                offset: const Offset(0, 45),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(14),
+                                ),
+                                elevation: 1,
+                                color: AppTheme.scaffoldBg,
+                                itemBuilder: (context) => [
+                                  PopupMenuItem<String>(
+                                    value: 'latest',
+                                    child: Row(
+                                      children: [
+                                        HugeIcon(
+                                          icon:
+                                              HugeIcons.strokeRoundedSorting19,
+                                          size: 18,
+                                          color: AppTheme.primary,
+                                        ),
+                                        const SizedBox(width: 10),
+                                        Text(
+                                          'Latest',
+                                          style: GoogleFonts.montserrat(
+                                            fontSize: 13,
+                                            fontWeight: FontWeight.w500,
+                                            color: AppTheme.textSecondary,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                  PopupMenuItem<String>(
+                                    value: 'oldest',
+                                    child: Row(
+                                      children: [
+                                        HugeIcon(
+                                          icon:
+                                              HugeIcons.strokeRoundedSorting91,
+                                          size: 18,
+                                          color: AppTheme.primary,
+                                        ),
+                                        const SizedBox(width: 10),
+                                        Text(
+                                          'Oldest',
+                                          style: GoogleFonts.montserrat(
+                                            fontSize: 13,
+                                            fontWeight: FontWeight.w500,
+                                            color: AppTheme.textSecondary,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ],
+                                child: Container(
+                                  height: 38,
+                                  decoration: BoxDecoration(
+                                    color: AppTheme.scaffoldBg,
+                                    borderRadius: BorderRadius.circular(14),
+                                    border: Border.all(
+                                      width: 2,
+                                      color: AppTheme.inputBorder,
+                                    ),
+                                  ),
+                                  child: Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      HugeIcon(
+                                        icon: HugeIcons
+                                            .strokeRoundedFilterVertical,
+                                        size: 16,
+                                        strokeWidth: 1.6,
+                                        color: AppTheme.textSecondary,
+                                      ),
+                                      const SizedBox(width: 4),
+                                      Text(
+                                        selectedSort == 'oldest'
+                                            ? 'Oldest'
+                                            : 'Latest',
+                                        style: GoogleFonts.montserrat(
+                                          fontSize: 12,
+                                          fontWeight: FontWeight.w500,
+                                          color: AppTheme.textSecondary,
+                                        ),
+                                      ),
+                                      const SizedBox(width: 2),
+                                      Icon(
+                                        Icons.keyboard_arrow_down_rounded,
+                                        size: 20,
+                                        color: AppTheme.textSecondary,
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+
+                      Divider(
+                        height: 3.5,
+                        color: AppTheme.inputBorder.withAlpha(240),
+                      ),
+                    ],
                   ),
                 ),
               ),
 
               // Body
               complaints.isEmpty
-                  ? SliverToBoxAdapter(child: HomeSkeletonScreen())
+                  ? SliverToBoxAdapter(
+                      child: searchController.text.isNotEmpty
+                          ? Padding(
+                              padding: const EdgeInsets.symmetric(
+                                vertical: 60,
+                                horizontal: 16,
+                              ),
+                              child: Center(
+                                child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Text(
+                                      "No complaints found",
+                                      style: GoogleFonts.montserrat(
+                                        fontSize: 18,
+                                        fontWeight: FontWeight.w500,
+                                        color: AppTheme.textPrimary,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            )
+                          : HomeSkeletonScreen(),
+                    )
                   : SliverList(
                       delegate: SliverChildBuilderDelegate(
                         (context, index) {
@@ -185,9 +438,11 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
                             ),
                             decoration: BoxDecoration(
                               color: AppTheme.cardBg,
-                              border: Border.all(
-                                width: 1.8,
-                                color: AppTheme.inputBorder.withAlpha(200),
+                              border: Border(
+                                bottom: BorderSide(
+                                  width: 4,
+                                  color: AppTheme.inputBorder.withAlpha(200),
+                                ),
                               ),
                             ),
                             child: Column(
@@ -219,32 +474,6 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
                                         ),
                                       ),
                                     ),
-
-                                    // Status
-                                    Container(
-                                      padding: const EdgeInsets.symmetric(
-                                        horizontal: 8,
-                                        vertical: 3,
-                                      ),
-                                      decoration: BoxDecoration(
-                                        color: ComplaintHelper.getStatusBgColor(
-                                          complaint.status,
-                                        ),
-                                        borderRadius: BorderRadius.circular(6),
-                                      ),
-                                      child: Text(
-                                        ComplaintHelper.formatStatus(
-                                          complaint.status,
-                                        ),
-                                        style: GoogleFonts.montserrat(
-                                          fontSize: 11,
-                                          fontWeight: FontWeight.w600,
-                                          color: ComplaintHelper.getStatusColor(
-                                            complaint.status,
-                                          ),
-                                        ),
-                                      ),
-                                    ),
                                   ],
                                 ),
                                 const SizedBox(height: 10),
@@ -273,35 +502,75 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
                                 ),
                                 const SizedBox(height: 10),
 
-                                // User
+                                // User and Status Row
                                 Row(
-                                  crossAxisAlignment: CrossAxisAlignment.center,
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
                                   children: [
-                                    Container(
-                                      width: 14,
-                                      height: 14,
-                                      decoration: const BoxDecoration(
-                                        shape: BoxShape.circle,
-                                        gradient: LinearGradient(
-                                          colors: [
-                                            AppTheme.primary,
-                                            AppTheme.secondary,
-                                            AppTheme.success,
-                                            AppTheme.warning,
-                                            AppTheme.error,
-                                          ],
-                                          begin: Alignment.topLeft,
-                                          end: Alignment.bottomRight,
-                                        ),
+                                    // User
+                                    Expanded(
+                                      child: Row(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.center,
+                                        children: [
+                                          Container(
+                                            width: 14,
+                                            height: 14,
+                                            decoration: const BoxDecoration(
+                                              shape: BoxShape.circle,
+                                              gradient: LinearGradient(
+                                                colors: [
+                                                  AppTheme.primary,
+                                                  AppTheme.secondary,
+                                                  AppTheme.success,
+                                                  AppTheme.warning,
+                                                  AppTheme.error,
+                                                ],
+                                                begin: Alignment.topLeft,
+                                                end: Alignment.bottomRight,
+                                              ),
+                                            ),
+                                          ),
+                                          const SizedBox(width: 6),
+                                          Flexible(
+                                            child: Text(
+                                              complaint.fullname,
+                                              overflow: TextOverflow.ellipsis,
+                                              style: GoogleFonts.montserrat(
+                                                fontSize: 12,
+                                                fontWeight: FontWeight.w600,
+                                                color: AppTheme.textSecondary,
+                                              ),
+                                            ),
+                                          ),
+                                        ],
                                       ),
                                     ),
-                                    const SizedBox(width: 6),
-                                    Text(
-                                      complaint.fullname,
-                                      style: GoogleFonts.montserrat(
-                                        fontSize: 12,
-                                        fontWeight: FontWeight.w600,
-                                        color: AppTheme.textSecondary,
+
+                                    // Status
+                                    Container(
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 8,
+                                        vertical: 3,
+                                      ),
+                                      margin: EdgeInsets.only(left: 16),
+                                      decoration: BoxDecoration(
+                                        color: ComplaintHelper.getStatusBgColor(
+                                          complaint.status,
+                                        ),
+                                        borderRadius: BorderRadius.circular(6),
+                                      ),
+                                      child: Text(
+                                        ComplaintHelper.formatStatus(
+                                          complaint.status,
+                                        ),
+                                        style: GoogleFonts.montserrat(
+                                          fontSize: 11,
+                                          fontWeight: FontWeight.w600,
+                                          color: ComplaintHelper.getStatusColor(
+                                            complaint.status,
+                                          ),
+                                        ),
                                       ),
                                     ),
                                   ],
@@ -334,7 +603,7 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
                                           onTap: () {},
                                           isActive: false,
                                         ),
-                                        SizedBox(width: 10),
+                                        SizedBox(width: 16),
 
                                         // Downvote
                                         VoteButton(

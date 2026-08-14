@@ -20,7 +20,7 @@ class UserNotifier extends StateNotifier<UserProfileData?> {
     try {
       final response = await _userService.fetchProfile();
       state = response.data;
-    } catch (e) {
+    } catch (_) {
       rethrow;
     }
   }

@@ -26,16 +26,19 @@ class VoteButton extends StatelessWidget {
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 200),
         curve: Curves.easeInOut,
-        padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
+        padding: const EdgeInsets.symmetric(vertical: 2, horizontal: 6),
         decoration: BoxDecoration(
-          color: isActive ? color.withAlpha(30) : Colors.transparent,
+          color: isActive ? color.withAlpha(40) : Colors.transparent,
           borderRadius: BorderRadius.circular(20),
+          border: isActive
+              ? Border.all(color: color.withAlpha(80), width: 1.6)
+              : Border.all(color: Colors.transparent, width: 1.6),
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            HugeIcon(size: 18, strokeWidth: 2, icon: icon, color: color),
-            const SizedBox(width: 4),
+            HugeIcon(size: 20, strokeWidth: 2.2, icon: icon, color: color),
+            const SizedBox(width: 3),
             Text(
               _formatCount(count),
               style: GoogleFonts.montserrat(
@@ -51,8 +54,8 @@ class VoteButton extends StatelessWidget {
   }
 
   String _formatCount(int n) {
-    if (n >= 1000000) return '${(n / 1000000).toStringAsFixed(1)}M';
-    if (n >= 1000) return '${(n / 1000).toStringAsFixed(1)}K';
+    if (n >= 1000000) return '${(n / 1000000).toStringAsFixed(1)}m';
+    if (n >= 1000) return '${(n / 1000).toStringAsFixed(1)}k';
     return n.toString();
   }
 }
