@@ -125,6 +125,8 @@
 * `status`
 * `sort`
 * `limit`
+* `cursor`
+
 
 #### Request Body
 
@@ -145,7 +147,7 @@
         "uid": "b1d6a311-92cc-48c6-923a-f...",
         "title": "Large Pothole on...",
         "description": "There is a massive pothole in the middle of the...",
-        "category": "road",
+        "category": "road", 
         "image_urls": [
           "https://res.cloudinary.com/dpzi1uyn6/image/upload/v178..."
         ],
@@ -181,6 +183,7 @@
 * `status`
 * `sort`
 * `limit`
+* `cursor`
 
 #### Request Body
 

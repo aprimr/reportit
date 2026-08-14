@@ -205,19 +205,19 @@ func (cr *complaintRepository) FetchAllComplaints(ctx context.Context, params Co
 
 	// If not an admin, restrict to public complaints only
 	if !params.IsAdmin {
-		query += ` AND is_public = true`
+		query += ` AND c.is_public = true`
 	}
 
 	// Append search to the query
 	if params.Search != "" {
-		query += fmt.Sprintf(` AND (title ILIKE $%d OR description ILIKE $%d)`, argIdx, argIdx)
+		query += fmt.Sprintf(` AND (c.title ILIKE $%d OR c.description ILIKE $%d)`, argIdx, argIdx)
 		args = append(args, "%"+params.Search+"%")
 		argIdx++
 	}
 
 	// Append status to query
 	if params.Status != "" {
-		query += fmt.Sprintf(` AND status = $%d`, argIdx)
+		query += fmt.Sprintf(` AND c.status = $%d`, argIdx)
 		args = append(args, params.Status)
 		argIdx++
 	}
@@ -230,7 +230,7 @@ func (cr *complaintRepository) FetchAllComplaints(ctx context.Context, params Co
 
 	// Append cursor index to query
 	if params.Cursor != "" {
-		query += fmt.Sprintf(" AND created_at %s $%d", cursorOp, argIdx)
+		query += fmt.Sprintf(" AND c.created_at %s $%d", cursorOp, argIdx)
 		args = append(args, params.Cursor)
 		argIdx++
 	}
@@ -238,9 +238,9 @@ func (cr *complaintRepository) FetchAllComplaints(ctx context.Context, params Co
 	// Append sort to query
 	switch params.Sort {
 	case "oldest":
-		query += " ORDER BY created_at ASC"
+		query += " ORDER BY c.created_at ASC"
 	default:
-		query += " ORDER BY created_at DESC"
+		query += " ORDER BY c.created_at DESC"
 	}
 
 	query += fmt.Sprintf(" LIMIT $%d", argIdx)

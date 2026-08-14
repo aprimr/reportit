@@ -63,8 +63,8 @@ func (ch *complaintHandler) CreateComplaint(w http.ResponseWriter, r *http.Reque
 	}
 
 	// Validate data
-	if len(title) < 15 || len(title) > 60 {
-		utils.WriteError(w, http.StatusBadRequest, "title must be between 15 and 60 characters")
+	if len(title) < 15 || len(title) > 100 {
+		utils.WriteError(w, http.StatusBadRequest, "title must be between 15 and 100 characters")
 		return
 	}
 
@@ -147,6 +147,13 @@ func (ch *complaintHandler) CreateComplaint(w http.ResponseWriter, r *http.Reque
 
 // Delete a complaint
 func (ch *complaintHandler) DeleteComplaint(w http.ResponseWriter, r *http.Request) {
+	// Get uid from request header
+	uid := middlewares.GetUidFromContext(r.Context())
+	if uid == "" {
+		utils.WriteError(w, http.StatusUnauthorized, ErrUnauthorized.Error())
+		return
+	}
+
 	// Get id from url params
 	id := chi.URLParam(r, "id")
 	if strings.TrimSpace(id) == "" {
@@ -170,6 +177,13 @@ func (ch *complaintHandler) DeleteComplaint(w http.ResponseWriter, r *http.Reque
 
 // Get a complaint by its id
 func (ch *complaintHandler) GetComplaint(w http.ResponseWriter, r *http.Request) {
+	// Get uid from request header
+	uid := middlewares.GetUidFromContext(r.Context())
+	if uid == "" {
+		utils.WriteError(w, http.StatusUnauthorized, ErrUnauthorized.Error())
+		return
+	}
+
 	// Get id from url params
 	id := chi.URLParam(r, "id")
 	if strings.TrimSpace(id) == "" {
@@ -213,12 +227,13 @@ func (ch *complaintHandler) GetMyComplaints(w http.ResponseWriter, r *http.Reque
 	}
 
 	params := ComplaintFetchParams{
-		Uid:    uid,
-		Search: queryVals.Get("search"),
-		Status: queryVals.Get("status"),
-		Sort:   queryVals.Get("sort"),
-		Limit:  limit,
-		Cursor: queryVals.Get("cursor"),
+		Uid:     uid,
+		Search:  queryVals.Get("search"),
+		Status:  queryVals.Get("status"),
+		Sort:    queryVals.Get("sort"),
+		Limit:   limit,
+		Cursor:  queryVals.Get("cursor"),
+		IsAdmin: false,
 	}
 
 	// Call service layer
@@ -259,6 +274,7 @@ func (ch *complaintHandler) GetAllComplaints(w http.ResponseWriter, r *http.Requ
 	}
 
 	params := ComplaintFetchParams{
+		Uid:     uid,
 		Search:  queryVals.Get("search"),
 		Status:  queryVals.Get("status"),
 		Sort:    queryVals.Get("sort"),
