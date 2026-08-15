@@ -103,16 +103,16 @@ class ComplaintTracking extends StatelessWidget {
     return Row(
       children: [
         Container(
-          width: 34,
-          height: 34,
+          width: 24,
+          height: 24,
           decoration: BoxDecoration(
             shape: BoxShape.circle,
-            border: Border.all(color: nodeColor, width: 2.5),
+            border: Border.all(color: AppTheme.scaffoldBg, width: 0),
           ),
           child: Center(
             child: Container(
-              width: 18,
-              height: 18,
+              width: 14,
+              height: 14,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
                 color: nodeColor,
@@ -167,7 +167,7 @@ class ComplaintTracking extends StatelessWidget {
     }
 
     return Container(
-      margin: const EdgeInsets.only(left: 15),
+      margin: const EdgeInsets.only(left: 11),
       width: 3,
       height: 50,
       decoration: BoxDecoration(

@@ -125,9 +125,9 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
                     SizedBox(width: 4),
                     Text(
                       'ReportIt',
-                      style: GoogleFonts.oleoScript(
-                        fontSize: 22,
-                        fontWeight: FontWeight.w500,
+                      style: GoogleFonts.merriweather(
+                        fontSize: 24,
+                        fontWeight: FontWeight.w600,
                         color: AppTheme.textPrimary,
                       ),
                     ),

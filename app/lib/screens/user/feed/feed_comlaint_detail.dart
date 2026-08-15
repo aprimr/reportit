@@ -8,6 +8,7 @@ import 'package:app/widgets/vote_buttons.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:hugeicons/hugeicons.dart';
@@ -23,8 +24,22 @@ class FeedComplaintDetail extends StatefulWidget {
 }
 
 class _ComplaintDetailState extends State<FeedComplaintDetail> {
-  Future<void> pullToRefresh() async {
-    return;
+  String? _mapStyle;
+
+  @override
+  void initState() {
+    super.initState();
+
+    _loadMapStyle();
+  }
+
+  Future<void> _loadMapStyle() async {
+    try {
+      final style = await rootBundle.loadString('assets/map_style.json');
+      if (mounted) setState(() => _mapStyle = style);
+    } catch (e) {
+      debugPrint('Failed to load map style: $e');
+    }
   }
 
   @override
@@ -50,6 +65,7 @@ class _ComplaintDetailState extends State<FeedComplaintDetail> {
                         target: LatLng(complaint.latitude, complaint.longitude),
                         zoom: 15,
                       ),
+                      style: _mapStyle,
                       zoomControlsEnabled: false,
                       compassEnabled: false,
                       cameraTargetBounds: CameraTargetBounds(

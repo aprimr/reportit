@@ -35,6 +35,7 @@ class _CreateComplaintScreenState extends ConsumerState<CreateComplaintScreen> {
   String _categoryError = "";
   String _imagesError = "";
   String _locationError = "";
+  String? _mapStyle;
 
   MapType _currentMapType = MapType.terrain;
   List<List<dynamic>> _currentMapIcon = HugeIcons.strokeRoundedMaping;
@@ -66,6 +67,8 @@ class _CreateComplaintScreenState extends ConsumerState<CreateComplaintScreen> {
       overlays: SystemUiOverlay.values,
     );
 
+    _loadMapStyle();
+
     super.initState();
   }
 
@@ -74,6 +77,15 @@ class _CreateComplaintScreenState extends ConsumerState<CreateComplaintScreen> {
     _titleController.dispose();
     _descriptionController.dispose();
     super.dispose();
+  }
+
+  Future<void> _loadMapStyle() async {
+    try {
+      final style = await rootBundle.loadString('assets/map_style.json');
+      if (mounted) setState(() => _mapStyle = style);
+    } catch (e) {
+      debugPrint('Failed to load map style: $e');
+    }
   }
 
   void _showImagePicker() {
@@ -201,6 +213,7 @@ class _CreateComplaintScreenState extends ConsumerState<CreateComplaintScreen> {
                     target: mapPos,
                     zoom: 15,
                   ),
+                  style: _mapStyle,
                   myLocationEnabled: true,
                   myLocationButtonEnabled: false,
                   zoomControlsEnabled: false,

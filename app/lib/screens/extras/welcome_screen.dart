@@ -114,9 +114,9 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                     children: [
                       Text(
                         'ReportIt',
-                        style: GoogleFonts.oleoScript(
+                        style: GoogleFonts.merriweather(
                           fontSize: 22,
-                          fontWeight: FontWeight.w400,
+                          fontWeight: FontWeight.w600,
                           color: AppTheme.appBarBg,
                         ),
                       ),
@@ -128,7 +128,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                   LiquidGlassLayer(
                     settings: const LiquidGlassSettings(
                       thickness: 80,
-                      frostIntensity: 3,
+                      frostIntensity: 4,
                       lightAngle: 0.7,
                     ),
                     child: LiquidGlass(
