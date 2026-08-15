@@ -24,6 +24,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
 
   Future<void> _checkAuthAndNavigate() async {
     WidgetsBinding.instance.addPostFrameCallback((_) async {
+      await Future.delayed(const Duration(seconds: 10));
       if (!mounted) return;
       final box = Hive.box('appBox');
       final bool isWelcomed = box.get('isWelcomed', defaultValue: false);
@@ -93,17 +94,17 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
                 children: [
                   TextSpan(
                     text: 'Report',
-                    style: GoogleFonts.quicksand(
+                    style: GoogleFonts.oleoScript(
                       fontSize: 34,
-                      fontWeight: FontWeight.w700,
+                      fontWeight: FontWeight.w500,
                       color: AppTheme.textPrimary,
                     ),
                   ),
                   TextSpan(
                     text: 'It',
-                    style: GoogleFonts.quicksand(
+                    style: GoogleFonts.oleoScript(
                       fontSize: 34,
-                      fontWeight: FontWeight.w700,
+                      fontWeight: FontWeight.w500,
                       color: AppTheme.primary,
                     ),
                   ),

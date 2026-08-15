@@ -114,9 +114,9 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                     children: [
                       Text(
                         'ReportIt',
-                        style: GoogleFonts.quicksand(
-                          fontSize: 20,
-                          fontWeight: FontWeight.w700,
+                        style: GoogleFonts.oleoScript(
+                          fontSize: 22,
+                          fontWeight: FontWeight.w400,
                           color: AppTheme.appBarBg,
                         ),
                       ),
