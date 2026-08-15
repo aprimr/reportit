@@ -51,7 +51,10 @@ class _CreateComplaintScreenState extends ConsumerState<CreateComplaintScreen> {
     {'label': 'Road', 'icon': HugeIcons.strokeRoundedRoad01},
     {'label': 'Waste', 'icon': HugeIcons.strokeRoundedGarbageTruck},
     {'label': 'Electricity', 'icon': HugeIcons.strokeRoundedBulbCharging},
+    {'label': 'Infrastructure', 'icon': HugeIcons.strokeRoundedCity01},
+    {'label': 'Electricity', 'icon': HugeIcons.strokeRoundedBulbCharging},
     {'label': 'Drainage', 'icon': HugeIcons.strokeRoundedDroplet},
+    {'label': 'Pollution', 'icon': HugeIcons.strokeRoundedFactory01},
     {'label': 'Water', 'icon': HugeIcons.strokeRoundedWaterPump},
     {'label': 'Other', 'icon': HugeIcons.strokeRoundedMoreHorizontal},
   ];
@@ -217,8 +220,8 @@ class _CreateComplaintScreenState extends ConsumerState<CreateComplaintScreen> {
                     padding: EdgeInsets.only(bottom: 30),
                     child: Image.asset(
                       "assets/icon/splash_ic.png",
-                      height: 45,
-                      width: 55,
+                      height: 40,
+                      width: 40,
                     ),
                   ),
                 ),

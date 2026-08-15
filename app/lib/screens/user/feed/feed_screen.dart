@@ -1,3 +1,4 @@
+import 'package:app/core/routes/app_routes.dart';
 import 'package:app/core/theme/app_theme.dart';
 import 'package:app/helpers/complaint_helper.dart';
 import 'package:app/helpers/time_helper.dart';
@@ -123,10 +124,10 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
                     Image.asset("assets/images/logo.png", height: 28),
                     SizedBox(width: 4),
                     Text(
-                      'Complaint Feed',
-                      style: GoogleFonts.quicksand(
+                      'ReportIt',
+                      style: GoogleFonts.oleoScript(
                         fontSize: 22,
-                        fontWeight: FontWeight.w600,
+                        fontWeight: FontWeight.w500,
                         color: AppTheme.textPrimary,
                       ),
                     ),
@@ -331,7 +332,7 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
                                       HugeIcon(
                                         icon: HugeIcons
                                             .strokeRoundedFilterVertical,
-                                        size: 16,
+                                        size: 14,
                                         strokeWidth: 1.6,
                                         color: AppTheme.textSecondary,
                                       ),
@@ -341,8 +342,8 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
                                             ? 'Oldest'
                                             : 'Latest',
                                         style: GoogleFonts.montserrat(
-                                          fontSize: 12,
-                                          fontWeight: FontWeight.w500,
+                                          fontSize: 10,
+                                          fontWeight: FontWeight.w600,
                                           color: AppTheme.textSecondary,
                                         ),
                                       ),
@@ -431,204 +432,219 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
                           }
 
                           final complaint = complaints[index];
-                          return Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 26,
-                              vertical: 15,
-                            ),
-                            decoration: BoxDecoration(
-                              color: AppTheme.cardBg,
-                              border: Border(
-                                bottom: BorderSide(
-                                  width: 4,
-                                  color: AppTheme.inputBorder.withAlpha(200),
+                          return GestureDetector(
+                            onTap: () {
+                              Navigator.pushNamed(
+                                context,
+                                AppRoutes.feedComplaintDetail,
+                                arguments: complaint,
+                              );
+                            },
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 26,
+                                vertical: 15,
+                              ),
+                              decoration: BoxDecoration(
+                                color: AppTheme.cardBg,
+                                border: Border(
+                                  bottom: BorderSide(
+                                    width: 4,
+                                    color: AppTheme.inputBorder.withAlpha(200),
+                                  ),
                                 ),
                               ),
-                            ),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                // Top Row
-                                Row(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceBetween,
-                                  children: [
-                                    // Category
-                                    Container(
-                                      padding: const EdgeInsets.symmetric(
-                                        horizontal: 10,
-                                        vertical: 4,
-                                      ),
-                                      decoration: BoxDecoration(
-                                        color: AppTheme.primary.withValues(
-                                          alpha: 0.08,
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  // Top Row
+                                  Row(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      // Category
+                                      Container(
+                                        padding: const EdgeInsets.symmetric(
+                                          horizontal: 10,
+                                          vertical: 4,
                                         ),
-                                        borderRadius: BorderRadius.circular(6),
-                                      ),
-                                      child: Text(
-                                        complaint.category,
-                                        style: GoogleFonts.montserrat(
-                                          fontSize: 11,
-                                          fontWeight: FontWeight.w600,
-                                          color: AppTheme.primary,
-                                        ),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                                const SizedBox(height: 10),
-
-                                // Title
-                                Text(
-                                  complaint.title,
-                                  style: GoogleFonts.montserrat(
-                                    fontSize: 14,
-                                    fontWeight: FontWeight.w600,
-                                    color: AppTheme.textPrimary,
-                                  ),
-                                ),
-                                const SizedBox(height: 4),
-
-                                // Description
-                                Text(
-                                  complaint.description,
-                                  maxLines: 2,
-                                  overflow: TextOverflow.ellipsis,
-                                  style: GoogleFonts.inter(
-                                    fontSize: 12,
-                                    fontWeight: FontWeight.w400,
-                                    color: AppTheme.textSecondary,
-                                  ),
-                                ),
-                                const SizedBox(height: 10),
-
-                                // User and Status Row
-                                Row(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceBetween,
-                                  children: [
-                                    // User
-                                    Expanded(
-                                      child: Row(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.center,
-                                        children: [
-                                          Container(
-                                            width: 14,
-                                            height: 14,
-                                            decoration: const BoxDecoration(
-                                              shape: BoxShape.circle,
-                                              gradient: LinearGradient(
-                                                colors: [
-                                                  AppTheme.primary,
-                                                  AppTheme.secondary,
-                                                  AppTheme.success,
-                                                  AppTheme.warning,
-                                                  AppTheme.error,
-                                                ],
-                                                begin: Alignment.topLeft,
-                                                end: Alignment.bottomRight,
-                                              ),
-                                            ),
+                                        decoration: BoxDecoration(
+                                          color: AppTheme.primary.withValues(
+                                            alpha: 0.08,
                                           ),
-                                          const SizedBox(width: 6),
-                                          Flexible(
-                                            child: Text(
-                                              complaint.fullname,
-                                              overflow: TextOverflow.ellipsis,
-                                              style: GoogleFonts.montserrat(
-                                                fontSize: 12,
-                                                fontWeight: FontWeight.w600,
-                                                color: AppTheme.textSecondary,
+                                          borderRadius: BorderRadius.circular(
+                                            6,
+                                          ),
+                                        ),
+                                        child: Text(
+                                          complaint.category,
+                                          style: GoogleFonts.montserrat(
+                                            fontSize: 11,
+                                            fontWeight: FontWeight.w600,
+                                            color: AppTheme.primary,
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  const SizedBox(height: 10),
+
+                                  // Title
+                                  Text(
+                                    complaint.title,
+                                    style: GoogleFonts.montserrat(
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.w600,
+                                      color: AppTheme.textPrimary,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 4),
+
+                                  // Description
+                                  Text(
+                                    complaint.description,
+                                    maxLines: 2,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: GoogleFonts.inter(
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.w400,
+                                      color: AppTheme.textSecondary,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 10),
+
+                                  // User and Status Row
+                                  Row(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      // User
+                                      Expanded(
+                                        child: Row(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.center,
+                                          children: [
+                                            Container(
+                                              width: 14,
+                                              height: 14,
+                                              decoration: const BoxDecoration(
+                                                shape: BoxShape.circle,
+                                                gradient: LinearGradient(
+                                                  colors: [
+                                                    AppTheme.primary,
+                                                    AppTheme.secondary,
+                                                    AppTheme.success,
+                                                    AppTheme.warning,
+                                                    AppTheme.error,
+                                                  ],
+                                                  begin: Alignment.topLeft,
+                                                  end: Alignment.bottomRight,
+                                                ),
                                               ),
                                             ),
+                                            const SizedBox(width: 6),
+                                            Flexible(
+                                              child: Text(
+                                                complaint.fullname,
+                                                overflow: TextOverflow.ellipsis,
+                                                style: GoogleFonts.montserrat(
+                                                  fontSize: 12,
+                                                  fontWeight: FontWeight.w600,
+                                                  color: AppTheme.textSecondary,
+                                                ),
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+
+                                      // Status
+                                      Container(
+                                        padding: const EdgeInsets.symmetric(
+                                          horizontal: 8,
+                                          vertical: 3,
+                                        ),
+                                        margin: EdgeInsets.only(left: 16),
+                                        decoration: BoxDecoration(
+                                          color:
+                                              ComplaintHelper.getStatusBgColor(
+                                                complaint.status,
+                                              ),
+                                          borderRadius: BorderRadius.circular(
+                                            6,
+                                          ),
+                                        ),
+                                        child: Text(
+                                          ComplaintHelper.formatStatus(
+                                            complaint.status,
+                                          ),
+                                          style: GoogleFonts.montserrat(
+                                            fontSize: 11,
+                                            fontWeight: FontWeight.w600,
+                                            color:
+                                                ComplaintHelper.getStatusColor(
+                                                  complaint.status,
+                                                ),
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+
+                                  // Divider
+                                  const Padding(
+                                    padding: EdgeInsets.symmetric(vertical: 10),
+                                    child: Divider(
+                                      height: 1,
+                                      thickness: 1,
+                                      color: AppTheme.divider,
+                                    ),
+                                  ),
+
+                                  // Bottom row
+                                  Row(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      // UpVote or Downvote row
+                                      Row(
+                                        children: [
+                                          // Upvote
+                                          VoteButton(
+                                            count: 2656,
+                                            icon: HugeIcons
+                                                .strokeRoundedArrowUpBig,
+                                            color: AppTheme.primary,
+                                            onTap: () {},
+                                            isActive: false,
+                                          ),
+                                          SizedBox(width: 16),
+
+                                          // Downvote
+                                          VoteButton(
+                                            count: 196,
+                                            icon: HugeIcons
+                                                .strokeRoundedArrowDownBig,
+                                            color: AppTheme.error,
+                                            onTap: () {},
+                                            isActive: false,
                                           ),
                                         ],
                                       ),
-                                    ),
 
-                                    // Status
-                                    Container(
-                                      padding: const EdgeInsets.symmetric(
-                                        horizontal: 8,
-                                        vertical: 3,
-                                      ),
-                                      margin: EdgeInsets.only(left: 16),
-                                      decoration: BoxDecoration(
-                                        color: ComplaintHelper.getStatusBgColor(
-                                          complaint.status,
-                                        ),
-                                        borderRadius: BorderRadius.circular(6),
-                                      ),
-                                      child: Text(
-                                        ComplaintHelper.formatStatus(
-                                          complaint.status,
-                                        ),
-                                        style: GoogleFonts.montserrat(
+                                      // Reported at
+                                      Text(
+                                        TimeHelper.timeAgo(complaint.createdAt),
+                                        style: GoogleFonts.poppins(
                                           fontSize: 11,
-                                          fontWeight: FontWeight.w600,
-                                          color: ComplaintHelper.getStatusColor(
-                                            complaint.status,
-                                          ),
+                                          color: AppTheme.textSecondary,
+                                          fontWeight: FontWeight.w500,
                                         ),
                                       ),
-                                    ),
-                                  ],
-                                ),
-
-                                // Divider
-                                const Padding(
-                                  padding: EdgeInsets.symmetric(vertical: 10),
-                                  child: Divider(
-                                    height: 1,
-                                    thickness: 1,
-                                    color: AppTheme.divider,
+                                    ],
                                   ),
-                                ),
-
-                                // Bottom row
-                                Row(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceBetween,
-                                  children: [
-                                    // UpVote or Downvote row
-                                    Row(
-                                      children: [
-                                        // Upvote
-                                        VoteButton(
-                                          count: 2656,
-                                          icon:
-                                              HugeIcons.strokeRoundedArrowUpBig,
-                                          color: AppTheme.primary,
-                                          onTap: () {},
-                                          isActive: false,
-                                        ),
-                                        SizedBox(width: 16),
-
-                                        // Downvote
-                                        VoteButton(
-                                          count: 196,
-                                          icon: HugeIcons
-                                              .strokeRoundedArrowDownBig,
-                                          color: AppTheme.error,
-                                          onTap: () {},
-                                          isActive: false,
-                                        ),
-                                      ],
-                                    ),
-
-                                    // Reported date
-                                    Text(
-                                      TimeHelper.timeAgo(complaint.createdAt),
-                                      style: GoogleFonts.poppins(
-                                        fontSize: 11,
-                                        color: AppTheme.textSecondary,
-                                        fontWeight: FontWeight.w500,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ],
+                                ],
+                              ),
                             ),
                           );
                         },
