@@ -32,14 +32,33 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   @override
   void initState() {
     super.initState();
-    Future.microtask(() async {
-      // Fetch user profile in background on homescreen initializes
-      await ref.read(userProvider.notifier).fetchProfile();
+    Future.microtask(_initializeApp);
+  }
 
-      // Fetch all complaints
-      await Future.delayed(const Duration(milliseconds: 100));
-      ref.read(feedComplaintProvider.notifier).fetchAllComplaints();
-    });
+  Future<void> _initializeApp() async {
+    // Fetch all complaints
+    try {
+      await ref.read(feedComplaintProvider.notifier).fetchAllComplaints();
+    } catch (e, stackTrace) {
+      debugPrint('App content initialization failed: $e');
+      debugPrintStack(stackTrace: stackTrace);
+    }
+
+    // Fetch user profile
+    try {
+      await ref.read(userProvider.notifier).fetchProfile();
+    } catch (e, stackTrace) {
+      debugPrint('App content initialization failed: $e');
+      debugPrintStack(stackTrace: stackTrace);
+    }
+
+    // Fetch my complaints only
+    try {
+      await ref.read(complaintProvider.notifier).fetchMyComplaints();
+    } catch (e, stackTrace) {
+      debugPrint('App content initialization failed: $e');
+      debugPrintStack(stackTrace: stackTrace);
+    }
   }
 
   @override

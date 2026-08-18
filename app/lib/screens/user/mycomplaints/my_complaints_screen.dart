@@ -36,7 +36,6 @@ class _MyComplaintsScreenState extends ConsumerState<MyComplaintsScreen> {
   void initState() {
     super.initState();
 
-    _fetchMyComplaints();
     scrollController.addListener(_onScroll);
   }
 
