@@ -2,6 +2,7 @@ import 'package:app/core/model/complaint_model.dart';
 import 'package:app/screens/user/complaint/create_complaint.dart';
 import 'package:app/screens/user/feed/feed_comlaint_detail.dart';
 import 'package:app/screens/user/home_screen.dart';
+import 'package:app/screens/user/mycomplaints/my_complaint_detail_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:app/screens/extras/splash_screen.dart';
 import 'package:app/screens/extras/welcome_screen.dart';
@@ -39,6 +40,12 @@ class AppRoutes {
           ModalRoute.of(context)!.settings.arguments as FeedComplaintModel;
 
       return FeedComplaintDetail(complaint: complaint);
+    },
+    myComplaintDetail: (context) {
+      final complaint =
+          ModalRoute.of(context)!.settings.arguments as ComplaintModel;
+
+      return MyComplaintDetailScreen(complaint: complaint);
     },
 
     // admin

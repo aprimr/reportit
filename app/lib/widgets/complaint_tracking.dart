@@ -128,7 +128,7 @@ class ComplaintTracking extends StatelessWidget {
           children: [
             Text(
               title,
-              style: GoogleFonts.poppins(
+              style: GoogleFonts.montserrat(
                 fontSize: 16,
                 fontWeight: FontWeight.w600,
                 color: nodeColor,

@@ -2,6 +2,7 @@ import 'package:app/core/model/complaint_model.dart';
 import 'package:app/core/theme/app_theme.dart';
 import 'package:app/helpers/complaint_helper.dart';
 import 'package:app/helpers/time_helper.dart';
+import 'package:app/widgets/authority_response_card.dart';
 import 'package:app/widgets/complaint_tracking.dart';
 import 'package:app/widgets/map_marker.dart';
 import 'package:app/widgets/vote_buttons.dart';
@@ -14,16 +15,16 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:hugeicons/hugeicons.dart';
 import 'package:liquid_glass_plus/liquid_glass_plus.dart';
 
-class FeedComplaintDetail extends StatefulWidget {
-  const FeedComplaintDetail({super.key, required this.complaint});
+class MyComplaintDetailScreen extends StatefulWidget {
+  const MyComplaintDetailScreen({super.key, required this.complaint});
 
-  final FeedComplaintModel complaint;
+  final ComplaintModel complaint;
 
   @override
-  State<FeedComplaintDetail> createState() => _ComplaintDetailState();
+  State<MyComplaintDetailScreen> createState() => _ComplaintDetailState();
 }
 
-class _ComplaintDetailState extends State<FeedComplaintDetail> {
+class _ComplaintDetailState extends State<MyComplaintDetailScreen> {
   String? _mapStyle;
 
   @override
@@ -153,93 +154,6 @@ class _ComplaintDetailState extends State<FeedComplaintDetail> {
                         ),
                         SizedBox(height: 12),
 
-                        // User and Vote Row
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            // User and reported at
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  // User
-                                  Row(
-                                    children: [
-                                      Container(
-                                        width: 14,
-                                        height: 14,
-                                        decoration: const BoxDecoration(
-                                          shape: BoxShape.circle,
-                                          gradient: LinearGradient(
-                                            colors: [
-                                              AppTheme.primary,
-                                              AppTheme.secondary,
-                                              AppTheme.success,
-                                              AppTheme.warning,
-                                              AppTheme.error,
-                                            ],
-                                            begin: Alignment.topLeft,
-                                            end: Alignment.bottomRight,
-                                          ),
-                                        ),
-                                      ),
-                                      const SizedBox(width: 6),
-                                      Expanded(
-                                        child: Text(
-                                          complaint.fullname,
-                                          overflow: TextOverflow.ellipsis,
-                                          style: GoogleFonts.montserrat(
-                                            fontSize: 14,
-                                            fontWeight: FontWeight.w600,
-                                            color: AppTheme.textPrimary,
-                                          ),
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                  SizedBox(height: 3),
-
-                                  // Reported At
-                                  Text(
-                                    TimeHelper.timeAgo(complaint.createdAt),
-                                    style: GoogleFonts.poppins(
-                                      fontSize: 11,
-                                      color: AppTheme.textSecondary,
-                                      fontWeight: FontWeight.w500,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                            SizedBox(width: 10),
-
-                            // UpVote or Downvote
-                            Row(
-                              children: [
-                                // Upvote
-                                VoteButton(
-                                  count: 2656,
-                                  icon: HugeIcons.strokeRoundedArrowUpBig,
-                                  color: AppTheme.primary,
-                                  onTap: () {},
-                                  isActive: false,
-                                ),
-                                SizedBox(width: 16),
-
-                                // Downvote
-                                VoteButton(
-                                  count: 0,
-                                  icon: HugeIcons.strokeRoundedArrowDownBig,
-                                  color: AppTheme.error,
-                                  onTap: () {},
-                                  isActive: false,
-                                ),
-                              ],
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 14),
-
                         // Title
                         Text(
                           complaint.title,
@@ -283,7 +197,49 @@ class _ComplaintDetailState extends State<FeedComplaintDetail> {
                             }).toList(),
                           ),
                         ),
-                        SizedBox(height: 22),
+                        SizedBox(height: 18),
+
+                        // Reported At and Vote Row
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            // Reported at
+                            Text(
+                              "On ${TimeHelper.formatDateTime(complaint.createdAt)}",
+                              style: GoogleFonts.poppins(
+                                fontSize: 13,
+                                color: AppTheme.textSecondary,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                            SizedBox(width: 10),
+
+                            // UpVote or Downvote
+                            Row(
+                              children: [
+                                // Upvote
+                                VoteButton(
+                                  count: 2656,
+                                  icon: HugeIcons.strokeRoundedArrowUpBig,
+                                  color: AppTheme.primary,
+                                  onTap: () {},
+                                  isActive: false,
+                                ),
+                                SizedBox(width: 16),
+
+                                // Downvote
+                                VoteButton(
+                                  count: 0,
+                                  icon: HugeIcons.strokeRoundedArrowDownBig,
+                                  color: AppTheme.error,
+                                  onTap: () {},
+                                  isActive: false,
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 14),
 
                         // Tracking
                         ComplaintTracking(
@@ -293,6 +249,16 @@ class _ComplaintDetailState extends State<FeedComplaintDetail> {
                           resolvedAt: complaint.resolvedAt,
                           rejectedAt: complaint.rejectedAt,
                         ),
+                        SizedBox(height: 18),
+
+                        // Authority Response
+                        AuthorityResponseCard(
+                          status: complaint.status,
+                          adminRemarks: complaint.adminRemarks,
+                          rejectedAt: complaint.rejectedAt,
+                          resolvedAt: complaint.resolvedAt,
+                        ),
+                        SizedBox(height: 8),
                       ],
                     ),
                   ),

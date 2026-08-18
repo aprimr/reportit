@@ -65,8 +65,8 @@ class _MyComplaintsScreenState extends ConsumerState<MyComplaintsScreen> {
 
   Future<void> pullTorefresh() async {
     await ref
-        .read(feedComplaintProvider.notifier)
-        .fetchAllComplaints(
+        .read(complaintProvider.notifier)
+        .fetchMyComplaints(
           search: searchController.text.isEmpty ? null : searchController.text,
           status: selectedStatus,
           sort: selectedSort,
@@ -439,7 +439,7 @@ class _MyComplaintsScreenState extends ConsumerState<MyComplaintsScreen> {
                             onTap: () {
                               Navigator.pushNamed(
                                 context,
-                                AppRoutes.feedComplaintDetail,
+                                AppRoutes.myComplaintDetail,
                                 arguments: complaint,
                               );
                             },
