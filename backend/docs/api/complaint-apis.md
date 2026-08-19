@@ -75,7 +75,27 @@
 
 ---
 
-### 3. Get Complaint by ID
+### 3. Toggle Complaint Visibility
+> Header: `Authorization: Bearer <access_token>`
+>
+> `PATCH /api/v1/complaint/{id}`
+
+#### Request Body
+
+`null`
+
+#### Response Body
+
+```json
+{
+"success": true,
+"message": "complaint visibility toggled"
+}
+```
+
+---
+
+### 4. Get Complaint by ID
 
 `GET /api/v1/complaint/{id}`
 
@@ -113,7 +133,7 @@
 
 ---
 
-### 4. Get My Complaints
+### 5. Get My Complaints
 
 > Header: `Authorization: Bearer <access_token>`
 >
@@ -171,7 +191,7 @@
 
 ---
 
-### 5. Get All Complaints
+### 6. Get All Complaints
 
 > Header: `Authorization: Bearer <access_token>`
 >
