@@ -37,7 +37,7 @@ class MapMarker {
       position: LatLng(latitude, longitude),
       icon: customIcon,
       infoWindow: showInfoWindow
-          ? InfoWindow(title: title, snippet: 'Status: ${status.toUpperCase()}')
+          ? InfoWindow(title: title, snippet: status.toUpperCase())
           : InfoWindow.noText,
     );
   }

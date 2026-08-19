@@ -1,22 +1,26 @@
+import 'package:app/core/model/complaint_model.dart';
 import 'package:app/core/services/location_service.dart';
 import 'package:app/core/theme/app_theme.dart';
 import 'package:app/core/utils/app_snackbar.dart';
+import 'package:app/providers/complaint_provider.dart';
 import 'package:app/widgets/app_buttons.dart';
+import 'package:app/widgets/map_marker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:hugeicons/hugeicons.dart';
 
-class MapScreen extends StatefulWidget {
+class MapScreen extends ConsumerStatefulWidget {
   const MapScreen({super.key});
 
   @override
-  State<MapScreen> createState() => _MapScreenState();
+  ConsumerState<MapScreen> createState() => _MapScreenState();
 }
 
-class _MapScreenState extends State<MapScreen> {
+class _MapScreenState extends ConsumerState<MapScreen> {
   GoogleMapController? _mapController;
   String? _mapStyle;
   bool _mapReady = false;
@@ -25,6 +29,7 @@ class _MapScreenState extends State<MapScreen> {
   List<List<dynamic>> _currentMapIcon = HugeIcons.strokeRoundedMaping;
   LatLng _currentCoords = const LatLng(28.0508594, 82.4062224);
 
+  List<FeedComplaintModel> complaints = [];
   final Set<Marker> _markers = {};
   final LocationService _locationService = LocationService();
 
@@ -38,6 +43,9 @@ class _MapScreenState extends State<MapScreen> {
     );
     _loadMapStyle();
     _fetchLocation();
+
+    // Fetch complaints
+    fetchComplaints();
   }
 
   @override
@@ -47,6 +55,7 @@ class _MapScreenState extends State<MapScreen> {
       SystemUiMode.manual,
       overlays: SystemUiOverlay.values,
     );
+
     super.dispose();
   }
 
@@ -83,6 +92,34 @@ class _MapScreenState extends State<MapScreen> {
     }
   }
 
+  void _updateMarkers(List<FeedComplaintModel> complaints) {
+    final Set<Marker> markers = {};
+
+    for (final c in complaints) {
+      final latitude = c.latitude;
+      final longitude = c.longitude;
+
+      markers.add(
+        MapMarker.newMarker(
+          id: c.id,
+          latitude: latitude,
+          longitude: longitude,
+          status: c.status,
+          title: c.title,
+          showInfoWindow: true,
+        ),
+      );
+    }
+
+    if (!mounted) return;
+
+    setState(() {
+      _markers
+        ..clear()
+        ..addAll(markers);
+    });
+  }
+
   Future<void> _recenter() async {
     await _mapController?.animateCamera(
       CameraUpdate.newCameraPosition(
@@ -104,6 +141,29 @@ class _MapScreenState extends State<MapScreen> {
         _currentMapIcon = HugeIcons.strokeRoundedMaping;
       }
     });
+  }
+
+  Future<void> fetchComplaints() async {
+    try {
+      final feedComplaintsRef = ref.read(feedComplaintProvider.notifier);
+      await feedComplaintsRef.fetchAllComplaints(limit: 5);
+
+      if (!mounted) return;
+      var allComplaints = ref.read(feedComplaintProvider);
+      _updateMarkers(allComplaints);
+
+      // Keep fetching  rest complaints
+      while (feedComplaintsRef.hasMore) {
+        await feedComplaintsRef.fetchMoreFeedComplaints(limit: 1);
+
+        if (!mounted) return;
+        allComplaints = ref.read(feedComplaintProvider);
+
+        // Update map markers
+        _updateMarkers(allComplaints);
+        await Future.delayed(const Duration(milliseconds: 100));
+      }
+    } catch (_) {}
   }
 
   @override
