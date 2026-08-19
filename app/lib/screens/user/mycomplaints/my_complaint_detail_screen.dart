@@ -33,6 +33,7 @@ class MyComplaintDetailScreen extends ConsumerStatefulWidget {
 class _ComplaintDetailState extends ConsumerState<MyComplaintDetailScreen> {
   String? _mapStyle;
   bool isDeleting = false;
+  bool isUpdating = false;
 
   @override
   void initState() {
@@ -56,6 +57,25 @@ class _ComplaintDetailState extends ConsumerState<MyComplaintDetailScreen> {
     final screenHeight = MediaQuery.of(context).size.height;
     final screenWidth = MediaQuery.of(context).size.width;
     final complaints = ref.read(complaintProvider.notifier);
+
+    void toggleVisibility(String id) async {
+      try {
+        setState(() {
+          isUpdating = true;
+        });
+
+        await complaints.toggleComplaintVisibility(complaint.id);
+        if (!context.mounted) return;
+        Navigator.pop(context);
+      } catch (e) {
+        if (!context.mounted) return;
+        AppSnackBar.error(context, e.toString());
+      } finally {
+        setState(() {
+          isUpdating = false;
+        });
+      }
+    }
 
     void delete() async {
       AppConfirmDialog.show(
@@ -301,13 +321,22 @@ class _ComplaintDetailState extends ConsumerState<MyComplaintDetailScreen> {
                           resolvedAt: complaint.resolvedAt,
                         ),
 
-                        // Toggle public visibility
-                        AppButtons.toggle(
-                          label: "Show in feed",
-                          value: true,
-                          onChanged: (val) {},
+                        // Show Make public or private Button
+                        Column(
+                          children: [
+                            AppButtons.secondary(
+                              onPressed: () {
+                                toggleVisibility(complaint.id);
+                              },
+                              fontSize: 14,
+                              isLoading: isUpdating,
+                              text: complaint.isPublic
+                                  ? "Remove from feed"
+                                  : "Make visible in feed",
+                            ),
+                            SizedBox(height: 12),
+                          ],
                         ),
-                        SizedBox(height: 12),
 
                         // Show Delete Button if status is open
                         if (complaint.status == "open") ...[
@@ -317,6 +346,8 @@ class _ComplaintDetailState extends ConsumerState<MyComplaintDetailScreen> {
                                 onPressed: delete,
                                 isLoading: isDeleting,
                                 text: "Delete Complaint",
+                                fontSize: 16,
+                                icon: HugeIcons.strokeRoundedDelete01,
                                 backgroundColor: AppTheme.error,
                               ),
                               SizedBox(height: 8),

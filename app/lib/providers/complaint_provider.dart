@@ -84,6 +84,42 @@ class ComplaintNotifier extends StateNotifier<List<ComplaintModel>> {
     }
   }
 
+  Future<void> toggleComplaintVisibility(String id) async {
+    try {
+      await _complaintService.toggleComplaintVisibility(id: id);
+
+      // Update the isPublic state of the complaint
+      state = state.map((c) {
+        if (c.id == id) {
+          return ComplaintModel(
+            id: c.id,
+            uid: c.uid,
+            title: c.title,
+            description: c.description,
+            category: c.category,
+            imageUrls: c.imageUrls,
+            latitude: c.latitude,
+            longitude: c.longitude,
+            isPublic: !c.isPublic, // Update state
+            status: c.status,
+            adminRemarks: c.adminRemarks,
+            verifiedAt: c.verifiedAt,
+            rejectedAt: c.rejectedAt,
+            resolvedAt: c.resolvedAt,
+            createdAt: c.createdAt,
+          );
+        }
+        return c;
+      }).toList();
+
+      // Remove complaint from feed complaints state
+      final feedNotifier = _ref.read(feedComplaintProvider.notifier);
+      feedNotifier.removeComplaint(id);
+    } catch (e) {
+      rethrow;
+    }
+  }
+
   void clearComplaints() {
     state = [];
   }

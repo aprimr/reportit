@@ -50,9 +50,7 @@ class ComplaintService {
 
   Future<BaseResponse> deleteComplaint({required String id}) async {
     try {
-      final response = await _client.delete(
-        '${ApiEndpoints.complaintDetail}/$id',
-      );
+      final response = await _client.delete('${ApiEndpoints.complaint}/$id');
       return BaseResponse.fromJson(response.data);
     } on DioException catch (e) {
       throw e.error is ApiError
@@ -61,9 +59,22 @@ class ComplaintService {
     }
   }
 
+  Future<BaseResponse> toggleComplaintVisibility({required String id}) async {
+    try {
+      final response = await _client.patch('${ApiEndpoints.complaint}/$id');
+      return BaseResponse.fromJson(response.data);
+    } on DioException catch (e) {
+      throw e.error is ApiError
+          ? e.error as ApiError
+          : ApiError(
+              message: e.message ?? 'Failed to toggle complaint visibility',
+            );
+    }
+  }
+
   Future<ComplaintResponse> getComplaintById({required String id}) async {
     try {
-      final response = await _client.get('${ApiEndpoints.complaintDetail}/$id');
+      final response = await _client.get('${ApiEndpoints.complaint}/$id');
       return ComplaintResponse.fromJson(response.data);
     } on DioException catch (e) {
       throw e.error is ApiError
