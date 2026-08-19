@@ -14,6 +14,7 @@ type ComplaintRepository interface {
 	Create(ctx context.Context, uid string, complaintReq CreateComplaintRequest) (*Complaint, error)
 	FetchById(ctx context.Context, id string) (*Complaint, error)
 	Delete(ctx context.Context, id string) error
+	ToggleVisibility(ctx context.Context, id string) error
 	FetchUserComplaints(ctx context.Context, params ComplaintFetchParams) ([]Complaint, error)
 	FetchAllComplaints(ctx context.Context, params ComplaintFetchParams) ([]FeedComplaint, error)
 }
@@ -101,6 +102,22 @@ func (cr *complaintRepository) Delete(ctx context.Context, id string) error {
 	if err != nil {
 		cr.logger.Error("failed to delete complaint from database", "error", err)
 		return ErrComplaintDeleteFailed
+	}
+	if cmdTag.RowsAffected() == 0 {
+		return ErrComplaintNotFound
+	}
+
+	return nil
+}
+
+// Toggles the flag for complaints visibinity (isPublic)
+func (cr *complaintRepository) ToggleVisibility(ctx context.Context, id string) error {
+	query := `UPDATE complaints SET is_public = NOT is_public WHERE id=$1`
+
+	cmdTag, err := cr.db.Exec(ctx, query, id)
+	if err != nil {
+		cr.logger.Error("failed to toggle complaint visibility in the database", "error", err, "complaint_id", id)
+		return ErrComplaintVisibilityToggleFailed
 	}
 	if cmdTag.RowsAffected() == 0 {
 		return ErrComplaintNotFound

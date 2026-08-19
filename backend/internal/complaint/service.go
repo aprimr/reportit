@@ -10,6 +10,7 @@ import (
 type ComplaintService interface {
 	CreateComplaint(ctx context.Context, uid string, complaintReq CreateComplaintRequest) (*Complaint, error)
 	DeleteComplaint(ctx context.Context, id string) error
+	UpdateComplaintVisibility(ctx context.Context, id string) error
 	GetComplaint(ctx context.Context, id string) (*Complaint, error)
 	GetMyComplaints(ctx context.Context, params ComplaintFetchParams) ([]Complaint, error)
 	GetAllComplaints(ctx context.Context, params ComplaintFetchParams) ([]FeedComplaint, error)
@@ -62,6 +63,17 @@ func (cs *complaintService) DeleteComplaint(ctx context.Context, id string) erro
 			}
 		}
 	}()
+
+	return nil
+}
+
+func (cs *complaintService) UpdateComplaintVisibility(ctx context.Context, id string) error {
+	// Call repository to update complaint
+	err := cs.complaintRepo.ToggleVisibility(ctx, id)
+	if err != nil {
+		cs.logger.Error("failed to update complaint", "error", err, "complaint_id", id)
+		return err
+	}
 
 	return nil
 }

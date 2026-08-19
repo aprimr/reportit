@@ -96,6 +96,7 @@ func main() {
 
 				r.Post("/", complaintHandler.CreateComplaint)
 				r.Delete("/{id}", complaintHandler.DeleteComplaint)
+				r.Patch("/{id}", complaintHandler.ToggleComplaintVisibility)
 			})
 		})
 	})

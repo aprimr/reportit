@@ -14,6 +14,7 @@ import (
 type ComplaintHandler interface {
 	CreateComplaint(w http.ResponseWriter, r *http.Request)
 	DeleteComplaint(w http.ResponseWriter, r *http.Request)
+	ToggleComplaintVisibility(w http.ResponseWriter, r *http.Request)
 	GetComplaint(w http.ResponseWriter, r *http.Request)
 	GetMyComplaints(w http.ResponseWriter, r *http.Request)
 	GetAllComplaints(w http.ResponseWriter, r *http.Request)
@@ -29,6 +30,7 @@ func NewComplaintHandler(complaintService ComplaintService) ComplaintHandler {
 	}
 }
 
+// For Users
 // Create Complaint handler
 func (ch *complaintHandler) CreateComplaint(w http.ResponseWriter, r *http.Request) {
 	// Get uid from request header
@@ -164,7 +166,7 @@ func (ch *complaintHandler) DeleteComplaint(w http.ResponseWriter, r *http.Reque
 	// Call service layer
 	err := ch.complaintService.DeleteComplaint(r.Context(), id)
 	if err != nil {
-		if errors.Is(err, ErrComplaintDeleteFailed) {
+		if errors.Is(err, ErrComplaintNotFound) {
 			utils.WriteError(w, http.StatusNotFound, ErrComplaintNotFound.Error())
 			return
 		}
@@ -173,6 +175,29 @@ func (ch *complaintHandler) DeleteComplaint(w http.ResponseWriter, r *http.Reque
 	}
 
 	utils.WriteJSON(w, http.StatusOK, nil, "complaint delete successful")
+}
+
+// Toggle a complaint's visibility (isPublic)
+func (ch *complaintHandler) ToggleComplaintVisibility(w http.ResponseWriter, r *http.Request) {
+	// Get complaint id from url params
+	id := chi.URLParam(r, "id")
+	if strings.TrimSpace(id) == "" {
+		utils.WriteError(w, http.StatusBadRequest, "missing complaint id")
+		return
+	}
+
+	// Call service layer
+	err := ch.complaintService.UpdateComplaintVisibility(r.Context(), id)
+	if err != nil {
+		if errors.Is(err, ErrComplaintNotFound) {
+			utils.WriteError(w, http.StatusNotFound, ErrComplaintNotFound.Error())
+			return
+		}
+		utils.WriteError(w, http.StatusInternalServerError, ErrComplaintVisibilityToggleFailed.Error())
+		return
+	}
+
+	utils.WriteJSON(w, http.StatusOK, nil, "complaint visibility toggled")
 }
 
 // Get a complaint by its id
