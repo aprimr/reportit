@@ -1,31 +1,38 @@
 import 'package:app/core/model/complaint_model.dart';
 import 'package:app/core/theme/app_theme.dart';
+import 'package:app/core/utils/app_snackbar.dart';
 import 'package:app/helpers/complaint_helper.dart';
 import 'package:app/helpers/time_helper.dart';
+import 'package:app/providers/complaint_provider.dart';
+import 'package:app/widgets/app_buttons.dart';
 import 'package:app/widgets/authority_response_card.dart';
 import 'package:app/widgets/complaint_tracking.dart';
+import 'package:app/widgets/confirm_modal.dart';
 import 'package:app/widgets/map_marker.dart';
 import 'package:app/widgets/vote_buttons.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:hugeicons/hugeicons.dart';
 import 'package:liquid_glass_plus/liquid_glass_plus.dart';
 
-class MyComplaintDetailScreen extends StatefulWidget {
+class MyComplaintDetailScreen extends ConsumerStatefulWidget {
   const MyComplaintDetailScreen({super.key, required this.complaint});
 
   final ComplaintModel complaint;
 
   @override
-  State<MyComplaintDetailScreen> createState() => _ComplaintDetailState();
+  ConsumerState<MyComplaintDetailScreen> createState() =>
+      _ComplaintDetailState();
 }
 
-class _ComplaintDetailState extends State<MyComplaintDetailScreen> {
+class _ComplaintDetailState extends ConsumerState<MyComplaintDetailScreen> {
   String? _mapStyle;
+  bool isDeleting = false;
 
   @override
   void initState() {
@@ -48,6 +55,39 @@ class _ComplaintDetailState extends State<MyComplaintDetailScreen> {
     final complaint = widget.complaint;
     final screenHeight = MediaQuery.of(context).size.height;
     final screenWidth = MediaQuery.of(context).size.width;
+    final complaints = ref.read(complaintProvider.notifier);
+
+    void delete() async {
+      AppConfirmDialog.show(
+        context: context,
+        title: "Delete Complaint?",
+        message:
+            "This will permanently delete the complaint. This action cannot be undone.",
+        confirmText: 'Yes, Delete',
+        cancelText: 'Cancel',
+        confirmBackgroundColor: AppTheme.error,
+        onConfirm: () async {
+          try {
+            setState(() {
+              isDeleting = true;
+            });
+
+            // Call delete
+            await complaints.deleteComplaint(complaint.id);
+
+            if (!context.mounted) return;
+            Navigator.pop(context);
+          } catch (e) {
+            if (!context.mounted) return;
+            AppSnackBar.error(context, e.toString());
+          } finally {
+            setState(() {
+              isDeleting = false;
+            });
+          }
+        },
+      );
+    }
 
     return Scaffold(
       backgroundColor: AppTheme.scaffoldBg,
@@ -92,6 +132,7 @@ class _ComplaintDetailState extends State<MyComplaintDetailScreen> {
                           latitude: complaint.latitude,
                           title: complaint.title,
                           status: complaint.status,
+                          // showInfoWindow: true,
                         ),
                       },
                     ),
@@ -244,6 +285,7 @@ class _ComplaintDetailState extends State<MyComplaintDetailScreen> {
                         // Tracking
                         ComplaintTracking(
                           key: widget.key,
+                          id: complaint.id,
                           createdAt: complaint.createdAt,
                           verifiedAt: complaint.verifiedAt,
                           resolvedAt: complaint.resolvedAt,
@@ -258,7 +300,29 @@ class _ComplaintDetailState extends State<MyComplaintDetailScreen> {
                           rejectedAt: complaint.rejectedAt,
                           resolvedAt: complaint.resolvedAt,
                         ),
-                        SizedBox(height: 8),
+
+                        // Toggle public visibility
+                        AppButtons.toggle(
+                          label: "Show in feed",
+                          value: true,
+                          onChanged: (val) {},
+                        ),
+                        SizedBox(height: 12),
+
+                        // Show Delete Button if status is open
+                        if (complaint.status == "open") ...[
+                          Column(
+                            children: [
+                              AppButtons.primary(
+                                onPressed: delete,
+                                isLoading: isDeleting,
+                                text: "Delete Complaint",
+                                backgroundColor: AppTheme.error,
+                              ),
+                              SizedBox(height: 8),
+                            ],
+                          ),
+                        ],
                       ],
                     ),
                   ),

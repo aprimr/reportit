@@ -127,7 +127,7 @@ class _MyComplaintsScreenState extends ConsumerState<MyComplaintsScreen> {
                     Text(
                       'My Complaints',
                       style: GoogleFonts.merriweather(
-                        fontSize: 24,
+                        fontSize: 20,
                         fontWeight: FontWeight.w600,
                         color: AppTheme.textPrimary,
                       ),
@@ -496,13 +496,12 @@ class _MyComplaintsScreenState extends ConsumerState<MyComplaintsScreen> {
                                     mainAxisAlignment:
                                         MainAxisAlignment.spaceBetween,
                                     children: [
-                                      // User
+                                      // Category And Public
                                       Expanded(
                                         child: Row(
                                           crossAxisAlignment:
                                               CrossAxisAlignment.center,
                                           children: [
-                                            // Category
                                             Container(
                                               padding:
                                                   const EdgeInsets.symmetric(
@@ -524,6 +523,18 @@ class _MyComplaintsScreenState extends ConsumerState<MyComplaintsScreen> {
                                                 ),
                                               ),
                                             ),
+                                            SizedBox(width: 10),
+
+                                            // Private Indicator
+                                            if (!complaint.isPublic) ...[
+                                              HugeIcon(
+                                                icon: HugeIcons
+                                                    .strokeRoundedAnonymous,
+                                                size: 16,
+                                                strokeWidth: 1.5,
+                                                color: AppTheme.warning,
+                                              ),
+                                            ],
                                           ],
                                         ),
                                       ),

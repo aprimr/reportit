@@ -8,6 +8,7 @@ import 'package:app/providers/user_provider.dart';
 import 'package:app/screens/skeleton/user/profile_skeleton.dart';
 import 'package:app/widgets/app_buttons.dart';
 import 'package:app/widgets/app_textfields.dart';
+import 'package:app/widgets/confirm_modal.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -355,92 +356,37 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     AuthService auth, {
     required bool allDevices,
   }) {
-    showDialog(
+    AppConfirmDialog.show(
       context: context,
-      barrierDismissible: false,
-      builder: (ctx) {
-        bool isLoading = false;
-        return StatefulBuilder(
-          builder: (dialogContext, setDialogState) {
-            return AlertDialog(
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(16),
-              ),
-              title: Text(
-                allDevices ? 'Log out of all devices?' : 'Log out?',
-                style: GoogleFonts.montserrat(
-                  fontSize: 20,
-                  fontWeight: FontWeight.w600,
-                  color: AppTheme.textPrimary,
-                ),
-              ),
-              content: Text(
-                allDevices
-                    ? 'This will end every active session on all devices. You\'ll need to sign in again everywhere.'
-                    : 'You\'ll need to sign in again to access your account on this device.',
-                style: GoogleFonts.inter(
-                  fontSize: 14,
-                  color: AppTheme.textSecondary,
-                ),
-              ),
-              actionsPadding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-              actions: [
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    AppButtons.secondary(
-                      text: allDevices
-                          ? 'Yes, Log out everywhere'
-                          : 'Yes, Logout',
-                      fontSize: 14,
-                      foregroundColor: AppTheme.onPrimary,
-                      backgroundColor: AppTheme.error,
-                      isLoading: isLoading,
-                      onPressed: () async {
-                        setDialogState(() => isLoading = true);
+      title: allDevices ? 'Log out of all devices?' : 'Log out?',
+      message: allDevices
+          ? 'This will end every active session on all devices. '
+                'You\'ll need to sign in again everywhere.'
+          : 'You\'ll need to sign in again to access your account on this device.',
+      confirmText: allDevices ? 'Yes, Log out everywhere' : 'Yes, Logout',
+      cancelText: 'No, Keep me logged in',
+      confirmBackgroundColor: AppTheme.error,
+      confirmForegroundColor: AppTheme.onPrimary,
+      onConfirm: () async {
+        final refreshToken = await TokenStorage.getRefreshToken();
 
-                        var refreshToken = await TokenStorage.getRefreshToken();
-                        try {
-                          if (allDevices) {
-                            await auth.logoutFromAllDevices();
-                          }
-                          if (refreshToken != null && refreshToken.isNotEmpty) {
-                            await auth.logout(refreshToken: refreshToken);
-                          }
-                        } catch (e) {
-                          // Handle error if needed
-                        } finally {
-                          await TokenStorage.clearTokens();
+        if (allDevices) {
+          await auth.logoutFromAllDevices();
+        }
 
-                          if (context.mounted) {
-                            Navigator.pushNamedAndRemoveUntil(
-                              context,
-                              AppRoutes.login,
-                              (route) => false,
-                            );
-                          }
-                        }
-                      },
-                    ),
+        if (refreshToken != null && refreshToken.isNotEmpty) {
+          await auth.logout(refreshToken: refreshToken);
+        }
 
-                    const SizedBox(height: 20),
-                    Center(
-                      child: AppButtons.text(
-                        onPressed: !isLoading
-                            ? () => Navigator.pop(ctx)
-                            : () => {},
-                        text: "No, Keep me logged in",
-                        fontSize: 14,
-                        textColor: AppTheme.textSecondary,
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                  ],
-                ),
-              ],
-            );
-          },
-        );
+        await TokenStorage.clearTokens();
+
+        if (context.mounted) {
+          Navigator.pushNamedAndRemoveUntil(
+            context,
+            AppRoutes.login,
+            (route) => false,
+          );
+        }
       },
     );
   }

@@ -288,6 +288,8 @@ class _ComplaintDetailState extends State<FeedComplaintDetail> {
                         // Tracking
                         ComplaintTracking(
                           key: widget.key,
+                          id: complaint.id,
+                          showTrackingId: false,
                           createdAt: complaint.createdAt,
                           verifiedAt: complaint.verifiedAt,
                           resolvedAt: complaint.resolvedAt,

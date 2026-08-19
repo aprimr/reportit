@@ -126,7 +126,7 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
                     Text(
                       'ReportIt',
                       style: GoogleFonts.merriweather(
-                        fontSize: 24,
+                        fontSize: 22,
                         fontWeight: FontWeight.w600,
                         color: AppTheme.textPrimary,
                       ),
