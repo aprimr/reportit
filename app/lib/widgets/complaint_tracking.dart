@@ -1,9 +1,14 @@
 import 'package:app/core/theme/app_theme.dart';
+import 'package:app/helpers/complaint_helper.dart';
 import 'package:app/helpers/time_helper.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:hugeicons/hugeicons.dart';
 
 class ComplaintTracking extends StatelessWidget {
+  final String id;
+  final bool showTrackingId;
   final String? createdAt;
   final String? verifiedAt;
   final String? resolvedAt;
@@ -11,6 +16,8 @@ class ComplaintTracking extends StatelessWidget {
 
   const ComplaintTracking({
     super.key,
+    required this.id,
+    this.showTrackingId = true,
     required this.createdAt,
     required this.verifiedAt,
     required this.resolvedAt,
@@ -22,6 +29,7 @@ class ComplaintTracking extends StatelessWidget {
     bool isVerified = verifiedAt != null;
     bool isResolved = resolvedAt != null;
     bool isRejected = rejectedAt != null;
+    final String trackingId = ComplaintHelper.extractTrackingId(id, createdAt!);
 
     // Colors
     const Color grayColor = AppTheme.textHint;
@@ -43,7 +51,39 @@ class ComplaintTracking extends StatelessWidget {
               fontWeight: FontWeight.w600,
             ),
           ),
-          SizedBox(height: 8),
+          SizedBox(height: 6),
+
+          // Tracking ID
+          if (showTrackingId) ...[
+            Column(
+              children: [
+                GestureDetector(
+                  onTap: () {
+                    Clipboard.setData(ClipboardData(text: trackingId));
+                  },
+                  child: Row(
+                    children: [
+                      Text(
+                        trackingId,
+                        style: GoogleFonts.montserrat(
+                          fontSize: 14,
+                          color: AppTheme.textSecondary,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                      SizedBox(width: 8),
+                      HugeIcon(
+                        size: 14,
+                        color: AppTheme.textSecondary,
+                        icon: HugeIcons.strokeRoundedCopy01,
+                      ),
+                    ],
+                  ),
+                ),
+                SizedBox(height: 13),
+              ],
+            ),
+          ],
 
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,

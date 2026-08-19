@@ -42,6 +42,7 @@ class AuthorityResponseCard extends StatelessWidget {
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.fromLTRB(16, 14, 16, 14),
+      margin: const EdgeInsets.fromLTRB(0, 0, 0, 16),
       decoration: BoxDecoration(
         color: ComplaintHelper.getStatusBgColor(status),
         borderRadius: BorderRadius.circular(12),
