@@ -4,7 +4,6 @@ import 'package:app/helpers/complaint_helper.dart';
 import 'package:app/helpers/time_helper.dart';
 import 'package:app/providers/complaint_provider.dart';
 import 'package:app/widgets/app_buttons.dart';
-import 'package:app/widgets/vote_buttons.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -508,83 +507,32 @@ class _MyComplaintsScreenState extends ConsumerState<MyComplaintsScreen> {
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  // Top Row
-                                  Row(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceBetween,
-                                    children: [],
-                                  ),
-                                  const SizedBox(height: 10),
-
-                                  // Title
-                                  Text(
-                                    complaint.title,
-                                    style: GoogleFonts.montserrat(
-                                      fontSize: 14,
-                                      fontWeight: FontWeight.w600,
-                                      color: AppTheme.textPrimary,
-                                    ),
-                                  ),
-                                  const SizedBox(height: 4),
-
-                                  // Description
-                                  Text(
-                                    complaint.description,
-                                    maxLines: 2,
-                                    overflow: TextOverflow.ellipsis,
-                                    style: GoogleFonts.inter(
-                                      fontSize: 12,
-                                      fontWeight: FontWeight.w400,
-                                      color: AppTheme.textSecondary,
-                                    ),
-                                  ),
-                                  const SizedBox(height: 10),
-
                                   // Category and Status Row
                                   Row(
                                     mainAxisAlignment:
                                         MainAxisAlignment.spaceBetween,
                                     children: [
-                                      // Category And Public
-                                      Expanded(
-                                        child: Row(
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.center,
-                                          children: [
-                                            Container(
-                                              padding:
-                                                  const EdgeInsets.symmetric(
-                                                    horizontal: 10,
-                                                    vertical: 4,
-                                                  ),
-                                              decoration: BoxDecoration(
-                                                color: AppTheme.primary
-                                                    .withValues(alpha: 0.08),
-                                                borderRadius:
-                                                    BorderRadius.circular(6),
-                                              ),
-                                              child: Text(
-                                                complaint.category,
-                                                style: GoogleFonts.montserrat(
-                                                  fontSize: 11,
-                                                  fontWeight: FontWeight.w600,
-                                                  color: AppTheme.primary,
-                                                ),
-                                              ),
-                                            ),
-                                            SizedBox(width: 10),
-
-                                            // Private Indicator
-                                            if (!complaint.isPublic) ...[
-                                              HugeIcon(
-                                                icon: HugeIcons
-                                                    .strokeRoundedAnonymous,
-                                                size: 16,
-                                                strokeWidth: 1.5,
-                                                color: AppTheme.warning,
-                                              ),
-                                            ],
-                                          ],
+                                      // Category
+                                      Container(
+                                        padding: const EdgeInsets.symmetric(
+                                          horizontal: 10,
+                                          vertical: 4,
+                                        ),
+                                        decoration: BoxDecoration(
+                                          color: AppTheme.primary.withValues(
+                                            alpha: 0.08,
+                                          ),
+                                          borderRadius: BorderRadius.circular(
+                                            6,
+                                          ),
+                                        ),
+                                        child: Text(
+                                          complaint.category,
+                                          style: GoogleFonts.montserrat(
+                                            fontSize: 11,
+                                            fontWeight: FontWeight.w600,
+                                            color: AppTheme.primary,
+                                          ),
                                         ),
                                       ),
 
@@ -620,6 +568,31 @@ class _MyComplaintsScreenState extends ConsumerState<MyComplaintsScreen> {
                                       ),
                                     ],
                                   ),
+                                  const SizedBox(height: 10),
+
+                                  // Title
+                                  Text(
+                                    complaint.title,
+                                    style: GoogleFonts.montserrat(
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.w600,
+                                      color: AppTheme.textPrimary,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 4),
+
+                                  // Description
+                                  Text(
+                                    complaint.description,
+                                    maxLines: 2,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: GoogleFonts.inter(
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.w400,
+                                      color: AppTheme.textSecondary,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 4),
 
                                   // Divider
                                   const Padding(
@@ -636,31 +609,55 @@ class _MyComplaintsScreenState extends ConsumerState<MyComplaintsScreen> {
                                     mainAxisAlignment:
                                         MainAxisAlignment.spaceBetween,
                                     children: [
-                                      // UpVote or Downvote row
-                                      Row(
-                                        children: [
-                                          // Upvote
-                                          VoteButton(
-                                            count: 2656,
-                                            icon: HugeIcons
-                                                .strokeRoundedArrowUpBig,
-                                            color: AppTheme.primary,
-                                            onTap: () {},
-                                            isActive: false,
-                                          ),
-                                          SizedBox(width: 16),
-
-                                          // Downvote
-                                          VoteButton(
-                                            count: 196,
-                                            icon: HugeIcons
-                                                .strokeRoundedArrowDownBig,
-                                            color: AppTheme.error,
-                                            onTap: () {},
-                                            isActive: false,
-                                          ),
-                                        ],
-                                      ),
+                                      // Public/Private indicator
+                                      if (!complaint.isPublic) ...[
+                                        Row(
+                                          children: [
+                                            Container(
+                                              height: 7,
+                                              width: 7,
+                                              decoration: BoxDecoration(
+                                                color: AppTheme.warning,
+                                                borderRadius:
+                                                    BorderRadius.circular(100),
+                                              ),
+                                            ),
+                                            SizedBox(width: 6),
+                                            Text(
+                                              "Private",
+                                              style: GoogleFonts.montserrat(
+                                                fontSize: 12,
+                                                color: AppTheme.warning,
+                                                fontWeight: FontWeight.w600,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ],
+                                      if (complaint.isPublic) ...[
+                                        Row(
+                                          children: [
+                                            Container(
+                                              height: 7,
+                                              width: 7,
+                                              decoration: BoxDecoration(
+                                                color: AppTheme.success,
+                                                borderRadius:
+                                                    BorderRadius.circular(100),
+                                              ),
+                                            ),
+                                            SizedBox(width: 6),
+                                            Text(
+                                              "Public",
+                                              style: GoogleFonts.montserrat(
+                                                fontSize: 12,
+                                                color: AppTheme.success,
+                                                fontWeight: FontWeight.w600,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ],
 
                                       // Reported at
                                       Text(

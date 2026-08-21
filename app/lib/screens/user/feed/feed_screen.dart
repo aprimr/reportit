@@ -4,7 +4,6 @@ import 'package:app/helpers/complaint_helper.dart';
 import 'package:app/helpers/time_helper.dart';
 import 'package:app/providers/complaint_provider.dart';
 import 'package:app/screens/skeleton/user/home_skeleton.dart';
-import 'package:app/widgets/vote_buttons.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -485,6 +484,37 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
                                           ),
                                         ),
                                       ),
+
+                                      // Status
+                                      Container(
+                                        padding: const EdgeInsets.symmetric(
+                                          horizontal: 8,
+                                          vertical: 3,
+                                        ),
+                                        margin: EdgeInsets.only(left: 16),
+                                        decoration: BoxDecoration(
+                                          color:
+                                              ComplaintHelper.getStatusBgColor(
+                                                complaint.status,
+                                              ),
+                                          borderRadius: BorderRadius.circular(
+                                            6,
+                                          ),
+                                        ),
+                                        child: Text(
+                                          ComplaintHelper.formatStatus(
+                                            complaint.status,
+                                          ),
+                                          style: GoogleFonts.montserrat(
+                                            fontSize: 11,
+                                            fontWeight: FontWeight.w600,
+                                            color:
+                                                ComplaintHelper.getStatusColor(
+                                                  complaint.status,
+                                                ),
+                                          ),
+                                        ),
+                                      ),
                                     ],
                                   ),
                                   const SizedBox(height: 10),
@@ -511,9 +541,19 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
                                       color: AppTheme.textSecondary,
                                     ),
                                   ),
-                                  const SizedBox(height: 10),
+                                  const SizedBox(height: 4),
 
-                                  // User and Status Row
+                                  // Divider
+                                  const Padding(
+                                    padding: EdgeInsets.symmetric(vertical: 10),
+                                    child: Divider(
+                                      height: 1,
+                                      thickness: 1,
+                                      color: AppTheme.divider,
+                                    ),
+                                  ),
+
+                                  // User and reported at Row
                                   Row(
                                     mainAxisAlignment:
                                         MainAxisAlignment.spaceBetween,
@@ -556,80 +596,6 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
                                             ),
                                           ],
                                         ),
-                                      ),
-
-                                      // Status
-                                      Container(
-                                        padding: const EdgeInsets.symmetric(
-                                          horizontal: 8,
-                                          vertical: 3,
-                                        ),
-                                        margin: EdgeInsets.only(left: 16),
-                                        decoration: BoxDecoration(
-                                          color:
-                                              ComplaintHelper.getStatusBgColor(
-                                                complaint.status,
-                                              ),
-                                          borderRadius: BorderRadius.circular(
-                                            6,
-                                          ),
-                                        ),
-                                        child: Text(
-                                          ComplaintHelper.formatStatus(
-                                            complaint.status,
-                                          ),
-                                          style: GoogleFonts.montserrat(
-                                            fontSize: 11,
-                                            fontWeight: FontWeight.w600,
-                                            color:
-                                                ComplaintHelper.getStatusColor(
-                                                  complaint.status,
-                                                ),
-                                          ),
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-
-                                  // Divider
-                                  const Padding(
-                                    padding: EdgeInsets.symmetric(vertical: 10),
-                                    child: Divider(
-                                      height: 1,
-                                      thickness: 1,
-                                      color: AppTheme.divider,
-                                    ),
-                                  ),
-
-                                  // Bottom row
-                                  Row(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceBetween,
-                                    children: [
-                                      // UpVote or Downvote row
-                                      Row(
-                                        children: [
-                                          // Upvote
-                                          VoteButton(
-                                            count: 2656,
-                                            icon: HugeIcons
-                                                .strokeRoundedArrowUpBig,
-                                            color: AppTheme.primary,
-                                            onTap: () {},
-                                            isActive: false,
-                                          ),
-                                          SizedBox(width: 16),
-
-                                          // Downvote
-                                          VoteButton(
-                                            count: 196,
-                                            icon: HugeIcons
-                                                .strokeRoundedArrowDownBig,
-                                            color: AppTheme.error,
-                                            onTap: () {},
-                                            isActive: false,
-                                          ),
-                                        ],
                                       ),
 
                                       // Reported at

@@ -9,7 +9,6 @@ import 'package:app/widgets/authority_response_card.dart';
 import 'package:app/widgets/complaint_tracking.dart';
 import 'package:app/widgets/confirm_modal.dart';
 import 'package:app/widgets/map_marker.dart';
-import 'package:app/widgets/vote_buttons.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
@@ -213,7 +212,18 @@ class _ComplaintDetailState extends ConsumerState<MyComplaintDetailScreen> {
                             ),
                           ],
                         ),
-                        SizedBox(height: 12),
+                        SizedBox(height: 10),
+
+                        // Reported At
+                        Text(
+                          "At ${TimeHelper.formatDateTime(complaint.createdAt)}",
+                          style: GoogleFonts.poppins(
+                            fontSize: 12,
+                            color: AppTheme.textSecondary,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                        const SizedBox(height: 4),
 
                         // Title
                         Text(
@@ -259,48 +269,6 @@ class _ComplaintDetailState extends ConsumerState<MyComplaintDetailScreen> {
                           ),
                         ),
                         SizedBox(height: 18),
-
-                        // Reported At and Vote Row
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            // Reported at
-                            Text(
-                              "On ${TimeHelper.formatDateTime(complaint.createdAt)}",
-                              style: GoogleFonts.poppins(
-                                fontSize: 13,
-                                color: AppTheme.textSecondary,
-                                fontWeight: FontWeight.w500,
-                              ),
-                            ),
-                            SizedBox(width: 10),
-
-                            // UpVote or Downvote
-                            Row(
-                              children: [
-                                // Upvote
-                                VoteButton(
-                                  count: 2656,
-                                  icon: HugeIcons.strokeRoundedArrowUpBig,
-                                  color: AppTheme.primary,
-                                  onTap: () {},
-                                  isActive: false,
-                                ),
-                                SizedBox(width: 16),
-
-                                // Downvote
-                                VoteButton(
-                                  count: 0,
-                                  icon: HugeIcons.strokeRoundedArrowDownBig,
-                                  color: AppTheme.error,
-                                  onTap: () {},
-                                  isActive: false,
-                                ),
-                              ],
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 14),
 
                         // Tracking
                         ComplaintTracking(

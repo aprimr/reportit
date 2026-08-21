@@ -4,14 +4,12 @@ import 'package:app/helpers/complaint_helper.dart';
 import 'package:app/helpers/time_helper.dart';
 import 'package:app/widgets/complaint_tracking.dart';
 import 'package:app/widgets/map_marker.dart';
-import 'package:app/widgets/vote_buttons.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:hugeicons/hugeicons.dart';
 import 'package:liquid_glass_plus/liquid_glass_plus.dart';
 
 class FeedComplaintDetail extends StatefulWidget {
@@ -153,92 +151,59 @@ class _ComplaintDetailState extends State<FeedComplaintDetail> {
                         ),
                         SizedBox(height: 12),
 
-                        // User and Vote Row
+                        // User and reported at
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
                             // User and reported at
                             Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
+                              child: Row(
                                 children: [
-                                  // User
-                                  Row(
-                                    children: [
-                                      Container(
-                                        width: 14,
-                                        height: 14,
-                                        decoration: const BoxDecoration(
-                                          shape: BoxShape.circle,
-                                          gradient: LinearGradient(
-                                            colors: [
-                                              AppTheme.primary,
-                                              AppTheme.secondary,
-                                              AppTheme.success,
-                                              AppTheme.warning,
-                                              AppTheme.error,
-                                            ],
-                                            begin: Alignment.topLeft,
-                                            end: Alignment.bottomRight,
-                                          ),
-                                        ),
+                                  Container(
+                                    width: 14,
+                                    height: 14,
+                                    decoration: const BoxDecoration(
+                                      shape: BoxShape.circle,
+                                      gradient: LinearGradient(
+                                        colors: [
+                                          AppTheme.primary,
+                                          AppTheme.secondary,
+                                          AppTheme.success,
+                                          AppTheme.warning,
+                                          AppTheme.error,
+                                        ],
+                                        begin: Alignment.topLeft,
+                                        end: Alignment.bottomRight,
                                       ),
-                                      const SizedBox(width: 6),
-                                      Expanded(
-                                        child: Text(
-                                          complaint.fullname,
-                                          overflow: TextOverflow.ellipsis,
-                                          style: GoogleFonts.montserrat(
-                                            fontSize: 14,
-                                            fontWeight: FontWeight.w600,
-                                            color: AppTheme.textPrimary,
-                                          ),
-                                        ),
-                                      ),
-                                    ],
+                                    ),
                                   ),
-                                  SizedBox(height: 3),
-
-                                  // Reported At
-                                  Text(
-                                    TimeHelper.timeAgo(complaint.createdAt),
-                                    style: GoogleFonts.poppins(
-                                      fontSize: 11,
-                                      color: AppTheme.textSecondary,
-                                      fontWeight: FontWeight.w500,
+                                  const SizedBox(width: 6),
+                                  Expanded(
+                                    child: Text(
+                                      complaint.fullname,
+                                      overflow: TextOverflow.ellipsis,
+                                      style: GoogleFonts.montserrat(
+                                        fontSize: 14,
+                                        fontWeight: FontWeight.w600,
+                                        color: AppTheme.textPrimary,
+                                      ),
                                     ),
                                   ),
                                 ],
                               ),
                             ),
-                            SizedBox(width: 10),
-
-                            // UpVote or Downvote
-                            Row(
-                              children: [
-                                // Upvote
-                                VoteButton(
-                                  count: 2656,
-                                  icon: HugeIcons.strokeRoundedArrowUpBig,
-                                  color: AppTheme.primary,
-                                  onTap: () {},
-                                  isActive: false,
-                                ),
-                                SizedBox(width: 16),
-
-                                // Downvote
-                                VoteButton(
-                                  count: 0,
-                                  icon: HugeIcons.strokeRoundedArrowDownBig,
-                                  color: AppTheme.error,
-                                  onTap: () {},
-                                  isActive: false,
-                                ),
-                              ],
+                            // Reported At
+                            Text(
+                              TimeHelper.timeAgo(complaint.createdAt),
+                              style: GoogleFonts.poppins(
+                                fontSize: 11,
+                                color: AppTheme.textSecondary,
+                                fontWeight: FontWeight.w500,
+                              ),
                             ),
                           ],
                         ),
-                        const SizedBox(height: 14),
+                        const SizedBox(height: 10),
 
                         // Title
                         Text(

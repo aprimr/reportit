@@ -12,7 +12,6 @@ import (
 	"github.com/aprimr/reportit/internal/middlewares"
 	"github.com/aprimr/reportit/internal/user"
 	"github.com/aprimr/reportit/internal/utils"
-	"github.com/aprimr/reportit/internal/vote"
 	"github.com/go-chi/chi/v5"
 	"github.com/joho/godotenv"
 )
@@ -57,11 +56,6 @@ func main() {
 	complaintService := complaint.NewComplaintService(logger, complaintRepo)
 	complaintHandler := complaint.NewComplaintHandler(complaintService)
 
-	// Complaint Dependencies
-	voteRepo := vote.NewVoteRepository(database.DB, logger)
-	voteService := vote.NewVoteService(voteRepo, logger)
-	voteHandler := vote.NewVoteHandler(voteService)
-
 	// Init chi router
 	r := chi.NewRouter()
 
@@ -103,17 +97,6 @@ func main() {
 				r.Post("/", complaintHandler.CreateComplaint)
 				r.Delete("/{id}", complaintHandler.DeleteComplaint)
 				r.Patch("/{id}", complaintHandler.ToggleComplaintVisibility)
-			})
-		})
-
-		// vote routes
-		r.Route("/vote", func(r chi.Router) {
-			// user vote routes
-			r.Group(func(r chi.Router) {
-				r.Use(middlewares.AuthMiddleware(true))
-
-				r.Get("/{id}", voteHandler.GetVotes)
-				r.Post("/", voteHandler.Vote)
 			})
 		})
 	})

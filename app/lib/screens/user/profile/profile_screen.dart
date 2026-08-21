@@ -367,28 +367,25 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
       cancelText: 'No, Keep me logged in',
       confirmBackgroundColor: AppTheme.error,
       confirmForegroundColor: AppTheme.onPrimary,
+
       onConfirm: () async {
         final refreshToken = await TokenStorage.getRefreshToken();
 
         if (allDevices) {
           await auth.logoutFromAllDevices();
-        }
-
-        if (refreshToken != null && refreshToken.isNotEmpty) {
+        } else if (refreshToken != null && refreshToken.isNotEmpty) {
           await auth.logout(refreshToken: refreshToken);
         }
 
         await TokenStorage.clearTokens();
-
-        if (context.mounted) {
-          Navigator.pushNamedAndRemoveUntil(
-            context,
-            AppRoutes.login,
-            (route) => false,
-          );
-        }
       },
-    );
+    ).then((success) {
+      if (success == true && context.mounted) {
+        Navigator.of(
+          context,
+        ).pushNamedAndRemoveUntil(AppRoutes.login, (route) => false);
+      }
+    });
   }
 
   void _openEditFullNameSheet(BuildContext context, String fullname) {
