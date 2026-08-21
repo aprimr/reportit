@@ -20,4 +20,7 @@ class ApiEndpoints {
   static const String createComplaint = '$apiVersion/complaint/';
   static const String getMyComplaints = '$apiVersion/complaint/me';
   static const String getAllComplaints = '$apiVersion/complaint/all';
+
+  // vote endpoints (protected)
+  static const String vote = '$apiVersion/vote';
 }

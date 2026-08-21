@@ -3,7 +3,7 @@ import 'package:app/core/theme/app_theme.dart';
 import 'package:app/helpers/complaint_helper.dart';
 import 'package:app/helpers/time_helper.dart';
 import 'package:app/providers/complaint_provider.dart';
-import 'package:app/screens/skeleton/user/home_skeleton.dart';
+import 'package:app/widgets/app_buttons.dart';
 import 'package:app/widgets/vote_buttons.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -398,7 +398,56 @@ class _MyComplaintsScreenState extends ConsumerState<MyComplaintsScreen> {
                                 ),
                               ),
                             )
-                          : HomeSkeletonScreen(),
+                          : Padding(
+                              padding: const EdgeInsets.symmetric(
+                                vertical: 120,
+                                horizontal: 16,
+                              ),
+                              child: Center(
+                                child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Text(
+                                      "No complaints yet",
+                                      style: GoogleFonts.montserrat(
+                                        fontSize: 20,
+                                        fontWeight: FontWeight.w500,
+                                        color: AppTheme.textPrimary,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 8),
+
+                                    Text(
+                                      "You haven't reported anything yet.",
+                                      style: GoogleFonts.poppins(
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.w400,
+                                        color: AppTheme.textSecondary,
+                                      ),
+                                    ),
+                                    Text(
+                                      "Start by reporting an issue in your community.",
+                                      style: GoogleFonts.poppins(
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.w400,
+                                        color: AppTheme.textSecondary,
+                                      ),
+                                    ),
+                                    SizedBox(height: 18),
+
+                                    AppButtons.primary(
+                                      onPressed: () {
+                                        Navigator.pushNamed(
+                                          context,
+                                          AppRoutes.create,
+                                        );
+                                      },
+                                      text: "Create a complaint",
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
                     )
                   : SliverList(
                       delegate: SliverChildBuilderDelegate(
