@@ -25,14 +25,23 @@ null
   "success": true,
   "message": "user fetched successfully",
   "data": {
-    "uid": "231ceaf6-6c46-4623-8...",
-    "fullname": "user user",
-    "email": "user@example.com",
-    "phone": "9847800000",
-    "role": "user",
-    "is_verified": true,
-    "created_at": "2026-08-02T12:00:04.330385Z",
-    "updated_at": "2026-08-02T12:00:04.330385Z"
+    "user":{
+      "uid": "231ceaf6-6c46-4623-8...",
+      "fullname": "user user",
+      "email": "user@example.com",
+      "phone": "9847800000",
+      "role": "user",
+      "is_verified": true,
+      "created_at": "2026-08-02T12:00:04.330385Z",
+      "updated_at": "2026-08-02T12:00:04.330385Z",
+    },
+    "complaint_stats": {
+      "open": 1,
+      "verified": 2,
+      "resolved": 2,
+      "rejected": 1,
+      "total": 6
+    }
   }
 }
 ```
