@@ -9,7 +9,7 @@ import (
 )
 
 type UserService interface {
-	FetchProfile(ctx context.Context, uid string) (*auth.User, error)
+	FetchProfile(ctx context.Context, uid string) (*auth.User, *UserComplaintStats, error)
 	UpdateFullname(ctx context.Context, uid, fullname string) error
 	ChangePassword(ctx context.Context, uid, currentPassword, newPassword string) error
 }
@@ -26,18 +26,25 @@ func NewUserService(userRepo UserRepository, logger *slog.Logger) UserService {
 	}
 }
 
-func (us *userService) FetchProfile(ctx context.Context, uid string) (*auth.User, error) {
+func (us *userService) FetchProfile(ctx context.Context, uid string) (*auth.User, *UserComplaintStats, error) {
 	// Call repository
 	user, err := us.userRepo.GetUserByUid(ctx, uid)
 	if err != nil {
 		us.logger.Error("failed to fetch user", "error", err, "uid", uid)
-		return nil, err
+		return nil, nil, err
 	}
 	if user == nil {
-		return nil, err
+		return nil, nil, err
 	}
 
-	return user, nil
+	// Fetch complaint stats
+	stats, err := us.userRepo.GetComplaintStats(ctx, uid)
+	if err != nil {
+		us.logger.Error("failed to fetch complaint stats", "error", err, "uid", uid)
+		return nil, nil, err
+	}
+
+	return user, stats, nil
 }
 
 func (us *userService) UpdateFullname(ctx context.Context, uid, fullname string) error {

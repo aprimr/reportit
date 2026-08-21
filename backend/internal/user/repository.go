@@ -15,6 +15,7 @@ type UserRepository interface {
 	GetPasswordHash(ctx context.Context, uid string) (string, error)
 	UpdatePassword(ctx context.Context, uid string, newPasswordHash string) error
 	GetUserByUid(ctx context.Context, uid string) (*auth.User, error)
+	GetComplaintStats(ctx context.Context, uid string) (*UserComplaintStats, error)
 }
 
 type userRepository struct {
@@ -55,6 +56,27 @@ func (ur *userRepository) GetUserByUid(ctx context.Context, uid string) (*auth.U
 	}
 
 	return &user, nil
+}
+
+// GetComplaintStatus returns the no of complaints for a status
+func (ur *userRepository) GetComplaintStats(ctx context.Context, uid string) (*UserComplaintStats, error) {
+	var stats UserComplaintStats
+
+	query := `SELECT COUNT(*) FILTER (WHERE status = 'open') AS open,
+        COUNT(*) FILTER (WHERE status = 'verified') AS verified,
+        COUNT(*) FILTER (WHERE status = 'resolved') AS resolved,
+        COUNT(*) FILTER (WHERE status = 'rejected') AS rejected,
+        COUNT(*) AS total FROM complaints WHERE uid=$1`
+
+	err := ur.db.QueryRow(ctx, query, uid).Scan(
+		&stats.Open,
+		&stats.Verified,
+		&stats.Resolved,
+		&stats.Rejected,
+		&stats.Total,
+	)
+
+	return &stats, err
 }
 
 // UpdateFullnameByUid updates the fullname for the user

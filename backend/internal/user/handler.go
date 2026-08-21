@@ -34,7 +34,7 @@ func (uh *userHandler) FetchProfile(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Call service
-	user, err := uh.userService.FetchProfile(r.Context(), uid)
+	user, stats, err := uh.userService.FetchProfile(r.Context(), uid)
 	if err != nil {
 		if errors.Is(err, ErrUserNotFound) {
 			utils.WriteError(w, http.StatusNotFound, ErrUserNotFound.Error())
@@ -45,7 +45,12 @@ func (uh *userHandler) FetchProfile(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	utils.WriteJSON(w, http.StatusOK, user, "user fetched successfully")
+	UserProfile := UserProfile{
+		User:           *user,
+		ComplaintStats: *stats,
+	}
+
+	utils.WriteJSON(w, http.StatusOK, UserProfile, "user fetched successfully")
 }
 
 func (uh *userHandler) UpdateFullname(w http.ResponseWriter, r *http.Request) {
