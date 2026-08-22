@@ -89,13 +89,13 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       if (!context.mounted) return;
       AppSnackBar.success(context, responseData['message']);
       if (role == 'admin') {
-        Navigator.pushReplacementNamed(context, AppRoutes.adminDash);
+        Navigator.pushReplacementNamed(context, AppRoutes.adminHome);
       } else {
         Navigator.pushReplacementNamed(context, AppRoutes.home);
       }
     } catch (e) {
       if (context.mounted) {
-        AppSnackBar.error(context, 'Failed to process login data.');
+        AppSnackBar.error(context, e.toString());
       }
     }
   }

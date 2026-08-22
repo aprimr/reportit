@@ -69,7 +69,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
 
         // Navigate based on role
         if (role == 'admin') {
-          Navigator.pushReplacementNamed(context, AppRoutes.adminDash);
+          Navigator.pushReplacementNamed(context, AppRoutes.adminHome);
         } else {
           Navigator.pushReplacementNamed(context, AppRoutes.home);
         }

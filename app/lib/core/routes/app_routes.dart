@@ -1,4 +1,5 @@
 import 'package:app/core/model/complaint_model.dart';
+import 'package:app/screens/admin/admin_home_screen.dart';
 import 'package:app/screens/user/complaint/create_complaint.dart';
 import 'package:app/screens/user/feed/feed_comlaint_detail.dart';
 import 'package:app/screens/user/home_screen.dart';
@@ -23,7 +24,7 @@ class AppRoutes {
   static const String myComplaintDetail = '/my-complaint-detail';
 
   // admin routes
-  static const String adminDash = '/dashboard';
+  static const String adminHome = '/admin/home';
 
   static Map<String, WidgetBuilder> routes = {
     splash: (context) => const SplashScreen(),
@@ -49,7 +50,6 @@ class AppRoutes {
     },
 
     // admin
-    adminDash: (context) =>
-        const Scaffold(body: Center(child: Text('Admin Dash'))),
+    adminHome: (context) => const AdminHomeScreen(),
   };
 }
