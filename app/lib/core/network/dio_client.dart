@@ -205,11 +205,23 @@ class ApiError {
       case DioExceptionType.connectionTimeout:
       case DioExceptionType.sendTimeout:
       case DioExceptionType.receiveTimeout:
-        return 'Connection timed out. Please try again.';
+        return 'Connection timed out. Please check your internet connection or try again later.';
+
       case DioExceptionType.connectionError:
-        return 'No internet connection. Please check your network.';
+        return 'Unable to connect. Please check your internet connection or try again later.';
+
       case DioExceptionType.badResponse:
-        return 'Something went wrong. Please try again.';
+        return 'The server encountered an error. Please try again later.';
+
+      case DioExceptionType.cancel:
+        return 'Request was cancelled.';
+
+      case DioExceptionType.badCertificate:
+        return 'Could not establish a secure connection. Please try again later.';
+
+      case DioExceptionType.unknown:
+        return 'Something went wrong. Please check your connection and try again.';
+
       default:
         return 'An unexpected error occurred.';
     }

@@ -1,5 +1,6 @@
 import 'package:app/core/routes/app_routes.dart';
 import 'package:app/core/theme/app_theme.dart';
+import 'package:app/core/utils/app_snackbar.dart';
 import 'package:app/helpers/complaint_helper.dart';
 import 'package:app/helpers/time_helper.dart';
 import 'package:app/providers/complaint_provider.dart';
@@ -62,23 +63,37 @@ class _MyComplaintsScreenState extends ConsumerState<MyComplaintsScreen> {
   }
 
   Future<void> pullTorefresh() async {
-    await ref
-        .read(complaintProvider.notifier)
-        .fetchMyComplaints(
-          search: searchController.text.isEmpty ? null : searchController.text,
-          status: selectedStatus,
-          sort: selectedSort,
-        );
+    try {
+      await ref
+          .read(complaintProvider.notifier)
+          .fetchMyComplaints(
+            search: searchController.text.isEmpty
+                ? null
+                : searchController.text,
+            status: selectedStatus,
+            sort: selectedSort,
+          );
+    } catch (e) {
+      if (!mounted) return;
+      AppSnackBar.error(context, e.toString());
+    }
   }
 
-  void _fetchMyComplaints() {
-    ref
-        .read(complaintProvider.notifier)
-        .fetchMyComplaints(
-          search: searchController.text.isEmpty ? null : searchController.text,
-          status: selectedStatus,
-          sort: selectedSort,
-        );
+  void _fetchMyComplaints() async {
+    try {
+      await ref
+          .read(complaintProvider.notifier)
+          .fetchMyComplaints(
+            search: searchController.text.isEmpty
+                ? null
+                : searchController.text,
+            status: selectedStatus,
+            sort: selectedSort,
+          );
+    } catch (e) {
+      if (!mounted) return;
+      AppSnackBar.error(context, e.toString());
+    }
   }
 
   void onStatusFilterSelected(String? newStatus) {

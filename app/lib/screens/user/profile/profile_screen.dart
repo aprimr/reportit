@@ -3,6 +3,7 @@ import 'package:app/core/routes/app_routes.dart';
 import 'package:app/core/services/auth_service.dart';
 import 'package:app/core/storage/token_storage.dart';
 import 'package:app/core/theme/app_theme.dart';
+import 'package:app/core/utils/app_snackbar.dart';
 import 'package:app/providers/auth_provider.dart';
 import 'package:app/providers/user_provider.dart';
 import 'package:app/screens/skeleton/user/profile_skeleton.dart';
@@ -37,7 +38,12 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
         color: AppTheme.primary,
         backgroundColor: Colors.white,
         onRefresh: () async {
-          await ref.read(userProvider.notifier).fetchProfile();
+          try {
+            await ref.read(userProvider.notifier).fetchProfile();
+          } catch (e) {
+            if (!context.mounted) return;
+            AppSnackBar.error(context, e.toString());
+          }
         },
         child: SafeArea(
           child: CustomScrollView(

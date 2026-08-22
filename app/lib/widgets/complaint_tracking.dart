@@ -117,7 +117,7 @@ class ComplaintTracking extends StatelessWidget {
 
           // Nodes for verified and Resolved
           if (!isRejected) ...[
-            _buildVerticalConnector(isActive: isRejected, status: "verified"),
+            _buildVerticalConnector(isActive: isVerified, status: "verified"),
             _buildNodeWithLabel(
               title: "Verified",
               date: verifiedAt,

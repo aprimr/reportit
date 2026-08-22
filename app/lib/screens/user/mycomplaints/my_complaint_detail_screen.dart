@@ -285,6 +285,7 @@ class _ComplaintDetailState extends ConsumerState<MyComplaintDetailScreen> {
                         AuthorityResponseCard(
                           status: complaint.status,
                           adminRemarks: complaint.adminRemarks,
+                          verifiedAt: complaint.verifiedAt,
                           rejectedAt: complaint.rejectedAt,
                           resolvedAt: complaint.resolvedAt,
                         ),

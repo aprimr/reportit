@@ -1,5 +1,6 @@
 import 'package:app/core/routes/app_routes.dart';
 import 'package:app/core/theme/app_theme.dart';
+import 'package:app/core/utils/app_snackbar.dart';
 import 'package:app/providers/user_provider.dart';
 import 'package:app/providers/complaint_provider.dart';
 import 'package:app/screens/user/feed/feed_screen.dart';
@@ -39,25 +40,25 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     // Fetch all complaints
     try {
       await ref.read(feedComplaintProvider.notifier).fetchAllComplaints();
-    } catch (e, stackTrace) {
-      debugPrint('App content initialization failed: $e');
-      debugPrintStack(stackTrace: stackTrace);
+    } catch (e) {
+      if (!mounted) return;
+      AppSnackBar.error(context, 'App content initialization failed');
     }
 
     // Fetch user profile
     try {
       await ref.read(userProvider.notifier).fetchProfile();
-    } catch (e, stackTrace) {
-      debugPrint('App content initialization failed: $e');
-      debugPrintStack(stackTrace: stackTrace);
+    } catch (e) {
+      if (!mounted) return;
+      AppSnackBar.error(context, 'App content initialization failed');
     }
 
     // Fetch my complaints only
     try {
       await ref.read(complaintProvider.notifier).fetchMyComplaints();
-    } catch (e, stackTrace) {
-      debugPrint('App content initialization failed: $e');
-      debugPrintStack(stackTrace: stackTrace);
+    } catch (e) {
+      if (!mounted) return;
+      AppSnackBar.error(context, 'App content initialization failed');
     }
   }
 
