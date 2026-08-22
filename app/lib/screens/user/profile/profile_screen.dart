@@ -24,10 +24,10 @@ class ProfileScreen extends ConsumerStatefulWidget {
 class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   @override
   Widget build(BuildContext context) {
-    final user = ref.watch(userProvider);
+    final profile = ref.watch(userProvider);
     final auth = ref.watch(authServiceProvider);
 
-    if (user == null) {
+    if (profile == null) {
       return const ProfileSkeletonScreen();
     }
 
@@ -48,30 +48,27 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                 sliver: SliverList(
                   delegate: SliverChildListDelegate([
                     const SizedBox(height: 16),
-                    _profileCard(context, user),
+                    _profileCard(context, profile),
+                    const SizedBox(height: 16),
+                    _complaintStats(stats: profile.complaintStats),
                     const SizedBox(height: 28),
                     _sectionLabel('Account'),
                     _card([
                       _menuTile(
                         icon: HugeIcons.strokeRoundedUserEdit01,
                         title: 'Edit full name',
-                        subtitle: user.fullname,
-                        onTap: () =>
-                            _openEditFullNameSheet(context, user.fullname),
+                        subtitle: profile.user.fullname,
+                        onTap: () => _openEditFullNameSheet(
+                          context,
+                          profile.user.fullname,
+                        ),
                       ),
                       _divider(),
                       _menuTile(
                         icon: HugeIcons.strokeRoundedSquareLock02,
                         title: 'Change password',
-                        subtitle: '',
+                        subtitle: 'Update your account password',
                         onTap: () => _openChangePasswordSheet(context),
-                      ),
-                      _divider(),
-                      _menuTile(
-                        icon: HugeIcons.strokeRoundedReceiptText,
-                        title: 'My complaints',
-                        subtitle: '20 complaints',
-                        isLast: true,
                       ),
                     ]),
                     const SizedBox(height: 30),
@@ -88,7 +85,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   }
 
   // Profile card
-  Widget _profileCard(BuildContext context, UserProfileData user) {
+  Widget _profileCard(BuildContext context, UserProfileData profile) {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
@@ -120,7 +117,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                       children: [
                         Flexible(
                           child: Text(
-                            user.fullname,
+                            profile.user.fullname,
                             overflow: TextOverflow.ellipsis,
                             style: GoogleFonts.montserrat(
                               fontSize: 20,
@@ -133,7 +130,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      user.email,
+                      profile.user.email,
                       style: GoogleFonts.inter(
                         fontSize: 12,
                         color: Colors.white.withValues(alpha: 0.85),
@@ -153,7 +150,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                 child: _heroStat(
                   icon: HugeIcons.strokeRoundedCall,
                   label: 'Phone',
-                  value: user.phone,
+                  value: profile.user.phone,
                 ),
               ),
               Container(
@@ -166,7 +163,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                 child: _heroStat(
                   icon: HugeIcons.strokeRoundedReceiptText,
                   label: 'Complaints',
-                  value: "23",
+                  value: profile.complaintStats.total.toString(),
                 ),
               ),
             ],
@@ -209,6 +206,94 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                     fontSize: 12.5,
                     fontWeight: FontWeight.w600,
                     color: Colors.white,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _complaintStats({required ComplaintStats stats}) {
+    return GridView.count(
+      crossAxisCount: 2,
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      mainAxisSpacing: 12,
+      crossAxisSpacing: 12,
+      childAspectRatio: 2.5,
+      children: [
+        _statCard(label: 'Open', count: stats.open, color: AppTheme.warning),
+        _statCard(
+          label: 'Verified',
+          count: stats.verified,
+          color: AppTheme.primary,
+        ),
+        _statCard(
+          label: 'Resolved',
+          count: stats.resolved,
+          color: AppTheme.success,
+        ),
+        _statCard(
+          label: 'Rejected',
+          count: stats.rejected,
+          color: AppTheme.error,
+        ),
+      ],
+    );
+  }
+
+  Widget _statCard({
+    required String label,
+    required int count,
+    required Color color,
+  }) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+      decoration: BoxDecoration(
+        color: color.withAlpha(10),
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: Colors.grey.withAlpha(10)),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withAlpha(12),
+            blurRadius: 10,
+            offset: const Offset(0, 6),
+          ),
+        ],
+      ),
+      child: Row(
+        children: [
+          Container(
+            width: 4,
+            height: 34,
+            decoration: BoxDecoration(
+              color: color,
+              borderRadius: BorderRadius.circular(4),
+            ),
+          ),
+          const SizedBox(width: 16),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(
+                  count.toString(),
+                  style: GoogleFonts.montserrat(
+                    fontSize: 22,
+                    fontWeight: FontWeight.w700,
+                    color: color,
+                  ),
+                ),
+                Text(
+                  label,
+                  style: GoogleFonts.montserrat(
+                    color: AppTheme.textPrimary,
+                    fontSize: 12,
+                    fontWeight: FontWeight.w500,
                   ),
                 ),
               ],

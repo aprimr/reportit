@@ -32,14 +32,23 @@ class UserNotifier extends StateNotifier<UserProfileData?> {
 
       if (state != null) {
         state = UserProfileData(
-          uid: state!.uid,
-          fullname: newFullname,
-          email: state!.email,
-          phone: state!.phone,
-          role: state!.role,
-          isVerified: state!.isVerified,
-          createdAt: state!.createdAt,
-          updatedAt: DateTime.now().toIso8601String(),
+          user: UserProfile(
+            uid: state!.user.uid,
+            fullname: newFullname,
+            email: state!.user.email,
+            phone: state!.user.phone,
+            role: state!.user.role,
+            isVerified: state!.user.isVerified,
+            createdAt: state!.user.createdAt,
+            updatedAt: state!.user.updatedAt,
+          ),
+          complaintStats: ComplaintStats(
+            open: state!.complaintStats.open,
+            verified: state!.complaintStats.verified,
+            resolved: state!.complaintStats.resolved,
+            rejected: state!.complaintStats.rejected,
+            total: state!.complaintStats.total,
+          ),
         );
       }
     } catch (e) {
