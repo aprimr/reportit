@@ -1,6 +1,6 @@
 class ApiEndpoints {
   static const String baseUrl = "http://192.168.100.30:8000";
-  static const String apiVersion = "/api/v1";
+  static const String apiVersion = "/v1";
 
   // Auth endpoints
   static const String login = '$apiVersion/auth/login';
@@ -27,4 +27,6 @@ class ApiEndpoints {
   static const String createComplaint = '$apiVersion/complaint/';
   static const String getMyComplaints = '$apiVersion/complaint/me';
   static const String getAllComplaints = '$apiVersion/complaint/all';
+
+  static const String getAdminAllComplaints = '$apiVersion/admin/complaints';
 }

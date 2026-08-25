@@ -12,11 +12,24 @@ final complaintProvider =
       return ComplaintNotifier(ref, ref.watch(complaintServiceProvider));
     });
 
+// Feed complaint provider
+final isFetchingMoreProvider = StateProvider<bool>((ref) => false);
+
 final feedComplaintProvider =
     StateNotifierProvider<FeedComplaintNotifier, List<FeedComplaintModel>>((
       ref,
     ) {
       return FeedComplaintNotifier(ref.watch(complaintServiceProvider), ref);
+    });
+
+// Admin complaint provider
+final isFetchingMoreAdminProvider = StateProvider<bool>((ref) => false);
+
+final adminComplaintProvider =
+    StateNotifierProvider<AdminComplaintNotifier, List<FeedComplaintModel>>((
+      ref,
+    ) {
+      return AdminComplaintNotifier(ref.watch(complaintServiceProvider), ref);
     });
 
 class ComplaintNotifier extends StateNotifier<List<ComplaintModel>> {
@@ -125,9 +138,6 @@ class ComplaintNotifier extends StateNotifier<List<ComplaintModel>> {
   }
 }
 
-// Feed complaint provider
-final isFetchingMoreProvider = StateProvider<bool>((ref) => false);
-
 class FeedComplaintNotifier extends StateNotifier<List<FeedComplaintModel>> {
   final ComplaintService _complaintService;
   final Ref _ref;
@@ -206,6 +216,86 @@ class FeedComplaintNotifier extends StateNotifier<List<FeedComplaintModel>> {
 
   void addComplaint(FeedComplaintModel complaint) {
     state = [complaint, ...state];
+  }
+
+  void removeComplaint(String id) {
+    state = state.where((c) => c.id != id).toList();
+  }
+}
+
+class AdminComplaintNotifier extends StateNotifier<List<FeedComplaintModel>> {
+  final ComplaintService _complaintService;
+  final Ref _ref;
+
+  AdminComplaintNotifier(this._complaintService, this._ref) : super([]);
+
+  String? _nextCursor;
+  bool _hasMore = true;
+
+  bool get hasMore => _hasMore;
+
+  Future<void> fetchAdminAllComplaints({
+    String? search,
+    String? status,
+    String? sort,
+    int? limit,
+  }) async {
+    _nextCursor = null;
+    _hasMore = true;
+
+    try {
+      final response = await _complaintService.getAdminAllComplaints(
+        search: search,
+        status: status,
+        sort: sort,
+        limit: limit,
+      );
+      state = response.data;
+
+      if (response.data.isNotEmpty) {
+        _nextCursor = response.data.last.createdAt;
+      }
+
+      if (response.data.length < (limit ?? 10)) {
+        _hasMore = false;
+      }
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  Future<void> fetchMoreAdminComplaints({
+    String? search,
+    String? status,
+    String? sort,
+    int? limit,
+  }) async {
+    if (!_hasMore || _ref.read(isFetchingMoreAdminProvider)) return;
+    _ref.read(isFetchingMoreAdminProvider.notifier).state = true;
+
+    try {
+      final response = await _complaintService.getAdminAllComplaints(
+        search: search,
+        status: status,
+        sort: sort,
+        limit: limit,
+        cursor: _nextCursor,
+      );
+
+      final newItems = response.data;
+      if (newItems.isNotEmpty) {
+        state = [...state, ...newItems];
+        _nextCursor = newItems.last.createdAt;
+      }
+
+      if (newItems.length < (limit ?? 10)) {
+        _hasMore = false;
+      }
+    } catch (e) {
+      rethrow;
+    } finally {
+      _ref.read(isFetchingMoreAdminProvider.notifier).state = false;
+    }
   }
 
   void removeComplaint(String id) {

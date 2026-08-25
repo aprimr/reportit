@@ -136,4 +136,32 @@ class ComplaintService {
           : ApiError(message: e.message ?? 'Failed to fetch all complaints');
     }
   }
+
+  // ADMIN ---
+  Future<FeedComplaintListResponse> getAdminAllComplaints({
+    String? search,
+    String? status,
+    String? sort,
+    int? limit,
+    String? cursor,
+  }) async {
+    try {
+      final queryParameters = <String, dynamic>{};
+      if (search != null) queryParameters['search'] = search;
+      if (status != null) queryParameters['status'] = status;
+      if (sort != null) queryParameters['sort'] = sort;
+      if (limit != null) queryParameters['limit'] = limit;
+      if (cursor != null) queryParameters['cursor'] = cursor;
+
+      final response = await _client.get(
+        ApiEndpoints.getAdminAllComplaints,
+        queryParameters: queryParameters.isNotEmpty ? queryParameters : null,
+      );
+      return FeedComplaintListResponse.fromJson(response.data);
+    } on DioException catch (e) {
+      throw e.error is ApiError
+          ? e.error as ApiError
+          : ApiError(message: e.message ?? 'Failed to fetch all complaints');
+    }
+  }
 }

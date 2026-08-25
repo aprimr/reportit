@@ -1,5 +1,6 @@
 import 'package:app/core/theme/app_theme.dart';
 import 'package:app/core/utils/app_snackbar.dart';
+import 'package:app/providers/complaint_provider.dart';
 import 'package:app/providers/user_provider.dart';
 import 'package:app/screens/admin/complaints/admin_complaints_screen.dart';
 import 'package:app/screens/admin/dashboard/admin_dashboard_screen.dart';
@@ -38,7 +39,15 @@ class _HomeScreenState extends ConsumerState<AdminHomeScreen> {
       await ref.read(userProvider.notifier).fetchAdminProfile();
     } catch (e) {
       if (!mounted) return;
-      AppSnackBar.error(context, e.toString());
+      AppSnackBar.error(context, 'App content initialization failed');
+    }
+
+    // Fetch all complaints
+    try {
+      await ref.read(adminComplaintProvider.notifier).fetchAdminAllComplaints();
+    } catch (e) {
+      if (!mounted) return;
+      AppSnackBar.error(context, 'App content initialization failed');
     }
   }
 

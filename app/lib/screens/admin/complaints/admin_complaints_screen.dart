@@ -1,15 +1,623 @@
+import 'package:app/core/theme/app_theme.dart';
+import 'package:app/core/utils/app_snackbar.dart';
+import 'package:app/helpers/complaint_helper.dart';
+import 'package:app/helpers/time_helper.dart';
+import 'package:app/providers/complaint_provider.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:hugeicons/hugeicons.dart';
 
-class AdminComplaintsScreen extends StatefulWidget {
+class AdminComplaintsScreen extends ConsumerStatefulWidget {
   const AdminComplaintsScreen({super.key});
 
   @override
-  State<AdminComplaintsScreen> createState() => _AdminComplaintsScreenState();
+  ConsumerState<AdminComplaintsScreen> createState() =>
+      _AdminComplaintsScreenState();
 }
 
-class _AdminComplaintsScreenState extends State<AdminComplaintsScreen> {
+class _AdminComplaintsScreenState extends ConsumerState<AdminComplaintsScreen> {
+  final TextEditingController searchController = TextEditingController();
+  final ScrollController scrollController = ScrollController();
+
+  String? selectedStatus;
+  String? selectedSort;
+
+  final complaintStatus = [
+    {'label': 'All', 'value': null},
+    {'label': 'Open', 'value': 'open'},
+    {'label': 'Verified', 'value': 'verified'},
+    {'label': 'Rejected', 'value': 'rejected'},
+    {'label': 'Resolved', 'value': 'resolved'},
+  ];
+
+  @override
+  void initState() {
+    super.initState();
+    scrollController.addListener(_onScroll);
+  }
+
+  @override
+  void dispose() {
+    searchController.dispose();
+    scrollController.dispose();
+    super.dispose();
+  }
+
+  void _onScroll() {
+    if (scrollController.position.pixels >=
+        scrollController.position.maxScrollExtent - 200) {
+      final notifier = ref.read(adminComplaintProvider.notifier);
+
+      if (notifier.hasMore) {
+        notifier.fetchAdminAllComplaints(
+          search: searchController.text.isEmpty ? null : searchController.text,
+          status: selectedStatus,
+          sort: selectedSort,
+        );
+      }
+    }
+  }
+
+  Future<void> pullToRefresh() async {
+    _fetchAdminComplaints();
+  }
+
+  void _fetchAdminComplaints() async {
+    try {
+      await ref
+          .watch(adminComplaintProvider.notifier)
+          .fetchAdminAllComplaints(
+            search: searchController.text.isEmpty
+                ? null
+                : searchController.text,
+            status: selectedStatus,
+            sort: selectedSort,
+          );
+    } catch (e) {
+      if (!mounted) return;
+      AppSnackBar.error(context, e.toString());
+    }
+  }
+
+  void onStatusFilterSelected(String? newStatus) {
+    setState(() {
+      selectedStatus = newStatus;
+    });
+    _fetchAdminComplaints();
+  }
+
+  void onSearchChanged(String query) {
+    _fetchAdminComplaints();
+  }
+
+  void onSortSelected(String sortStr) {
+    setState(() {
+      selectedSort = sortStr;
+    });
+    _fetchAdminComplaints();
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Scaffold(body: Center(child: Text("Complaint")));
+    final complaints = ref.watch(adminComplaintProvider);
+    final isFetchingMore = ref.watch(isFetchingMoreAdminProvider);
+
+    return Scaffold(
+      backgroundColor: AppTheme.scaffoldBg,
+      body: RefreshIndicator(
+        onRefresh: pullToRefresh,
+        child: SafeArea(
+          child: CustomScrollView(
+            controller: scrollController,
+            slivers: [
+              // App Bar
+              SliverAppBar(
+                elevation: 0,
+                floating: true,
+                snap: true,
+                pinned: false,
+                backgroundColor: AppTheme.appBarBg,
+                scrolledUnderElevation: 1,
+                title: Text(
+                  'All Complaints',
+                  style: GoogleFonts.merriweather(
+                    fontSize: 20,
+                    fontWeight: FontWeight.w600,
+                    color: AppTheme.textPrimary,
+                  ),
+                ),
+                bottom: PreferredSize(
+                  preferredSize: const Size.fromHeight(98),
+                  child: Column(
+                    children: [
+                      // Search Bar
+                      Padding(
+                        padding: const EdgeInsets.fromLTRB(16, 6, 16, 2),
+                        child: Container(
+                          constraints: const BoxConstraints(maxHeight: 40),
+                          decoration: BoxDecoration(
+                            color: AppTheme.inputFill,
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(color: AppTheme.inputBorder),
+                          ),
+                          child: TextField(
+                            onChanged: onSearchChanged,
+                            controller: searchController,
+                            style: GoogleFonts.poppins(
+                              fontSize: 13,
+                              color: Colors.black87,
+                            ),
+                            decoration: InputDecoration(
+                              hintText:
+                                  "Search complaints by title or description",
+                              hintStyle: GoogleFonts.poppins(
+                                fontSize: 13,
+                                color: AppTheme.textHint,
+                              ),
+                              prefixIcon: Padding(
+                                padding: const EdgeInsets.only(
+                                  left: 12,
+                                  right: 8,
+                                ),
+                                child: SizedBox(
+                                  height: 18,
+                                  width: 18,
+                                  child: HugeIcon(
+                                    icon: HugeIcons.strokeRoundedSearch01,
+                                    strokeWidth: 1.8,
+                                    color: AppTheme.textSecondary,
+                                  ),
+                                ),
+                              ),
+                              suffixIcon: searchController.text.isNotEmpty
+                                  ? IconButton(
+                                      icon: const Icon(Icons.clear, size: 18),
+                                      color: Colors.grey.shade600,
+                                      onPressed: () {
+                                        searchController.clear();
+                                        _fetchAdminComplaints();
+                                      },
+                                    )
+                                  : null,
+                              border: InputBorder.none,
+                              contentPadding: const EdgeInsets.fromLTRB(
+                                16,
+                                6,
+                                16,
+                                6,
+                              ),
+                              prefixIconConstraints: const BoxConstraints(
+                                maxHeight: 40,
+                                maxWidth: 40,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+
+                      // Status chips & Sort row
+                      Row(
+                        children: [
+                          // Status Filters
+                          Expanded(
+                            flex: 5,
+                            child: Padding(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 16,
+                                vertical: 2,
+                              ),
+                              child: SingleChildScrollView(
+                                scrollDirection: Axis.horizontal,
+                                child: Row(
+                                  children: complaintStatus.map((s) {
+                                    final isSelected =
+                                        selectedStatus == s['value'];
+
+                                    return Padding(
+                                      padding: const EdgeInsets.only(right: 8),
+                                      child: ChoiceChip(
+                                        label: Text(s['label'] as String),
+                                        selectedColor: AppTheme.primary,
+                                        backgroundColor: AppTheme.scaffoldBg,
+                                        shape: const StadiumBorder(),
+                                        padding: const EdgeInsets.symmetric(
+                                          horizontal: 8,
+                                          vertical: 0,
+                                        ),
+                                        labelStyle: GoogleFonts.montserrat(
+                                          fontSize: 12,
+                                          color: isSelected
+                                              ? AppTheme.scaffoldBg
+                                              : AppTheme.textSecondary,
+                                          fontWeight: isSelected
+                                              ? FontWeight.w600
+                                              : FontWeight.w500,
+                                        ),
+                                        showCheckmark: false,
+                                        selected: isSelected,
+                                        onSelected: (value) {
+                                          if (value) {
+                                            onStatusFilterSelected(s['value']);
+                                          }
+                                        },
+                                      ),
+                                    );
+                                  }).toList(),
+                                ),
+                              ),
+                            ),
+                          ),
+
+                          // Sort Dropdown
+                          Expanded(
+                            flex: 2,
+                            child: Padding(
+                              padding: const EdgeInsets.only(right: 16),
+                              child: PopupMenuButton<String>(
+                                onSelected: (value) {
+                                  onSortSelected(value);
+                                },
+                                offset: const Offset(0, 45),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(14),
+                                ),
+                                elevation: 1,
+                                color: AppTheme.scaffoldBg,
+                                itemBuilder: (context) => [
+                                  PopupMenuItem<String>(
+                                    value: 'latest',
+                                    child: Row(
+                                      children: [
+                                        HugeIcon(
+                                          icon:
+                                              HugeIcons.strokeRoundedSorting19,
+                                          size: 18,
+                                          color: AppTheme.primary,
+                                        ),
+                                        const SizedBox(width: 10),
+                                        Text(
+                                          'Latest',
+                                          style: GoogleFonts.montserrat(
+                                            fontSize: 13,
+                                            fontWeight: FontWeight.w500,
+                                            color: AppTheme.textSecondary,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                  PopupMenuItem<String>(
+                                    value: 'oldest',
+                                    child: Row(
+                                      children: [
+                                        HugeIcon(
+                                          icon:
+                                              HugeIcons.strokeRoundedSorting91,
+                                          size: 18,
+                                          color: AppTheme.primary,
+                                        ),
+                                        const SizedBox(width: 10),
+                                        Text(
+                                          'Oldest',
+                                          style: GoogleFonts.montserrat(
+                                            fontSize: 13,
+                                            fontWeight: FontWeight.w500,
+                                            color: AppTheme.textSecondary,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ],
+                                child: Container(
+                                  height: 38,
+                                  decoration: BoxDecoration(
+                                    color: AppTheme.scaffoldBg,
+                                    borderRadius: BorderRadius.circular(14),
+                                    border: Border.all(
+                                      width: 2,
+                                      color: AppTheme.inputBorder,
+                                    ),
+                                  ),
+                                  child: Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      HugeIcon(
+                                        icon: HugeIcons
+                                            .strokeRoundedFilterVertical,
+                                        size: 14,
+                                        strokeWidth: 1.6,
+                                        color: AppTheme.textSecondary,
+                                      ),
+                                      const SizedBox(width: 4),
+                                      Text(
+                                        selectedSort == 'oldest'
+                                            ? 'Oldest'
+                                            : 'Latest',
+                                        style: GoogleFonts.montserrat(
+                                          fontSize: 10,
+                                          fontWeight: FontWeight.w600,
+                                          color: AppTheme.textSecondary,
+                                        ),
+                                      ),
+                                      const SizedBox(width: 2),
+                                      Icon(
+                                        Icons.keyboard_arrow_down_rounded,
+                                        size: 20,
+                                        color: AppTheme.textSecondary,
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+
+                      Divider(
+                        height: 3.5,
+                        color: AppTheme.inputBorder.withAlpha(240),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+
+              // Body list or Empty state
+              complaints.isEmpty
+                  ? SliverToBoxAdapter(
+                      child: Padding(
+                        padding: EdgeInsets.symmetric(
+                          vertical: searchController.text.isNotEmpty ? 60 : 120,
+                          horizontal: 16,
+                        ),
+                        child: Center(
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Text(
+                                searchController.text.isNotEmpty
+                                    ? "No complaints found"
+                                    : "No complaints yet",
+                                style: GoogleFonts.montserrat(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.w500,
+                                  color: AppTheme.textPrimary,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    )
+                  : SliverList(
+                      delegate: SliverChildBuilderDelegate(
+                        (context, index) {
+                          // Loading more indicator
+                          if (index == complaints.length) {
+                            return Padding(
+                              padding: const EdgeInsets.symmetric(vertical: 18),
+                              child: Center(
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    const SizedBox(
+                                      height: 16,
+                                      width: 16,
+                                      child: CircularProgressIndicator(
+                                        strokeWidth: 1.8,
+                                        color: AppTheme.textSecondary,
+                                      ),
+                                    ),
+                                    const SizedBox(width: 12),
+                                    Text(
+                                      "Loading complaints...",
+                                      style: GoogleFonts.poppins(
+                                        fontWeight: FontWeight.w500,
+                                        color: AppTheme.textSecondary,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            );
+                          }
+
+                          final complaint = complaints[index];
+                          return GestureDetector(
+                            onTap: () {
+                              // Navigator.pushNamed(
+                              //   context,
+                              //   AppRoutes.myComplaintDetail,
+                              //   arguments: complaint,
+                              // );
+                            },
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 26,
+                                vertical: 15,
+                              ),
+                              decoration: BoxDecoration(
+                                color: AppTheme.cardBg,
+                                border: Border(
+                                  bottom: BorderSide(
+                                    width: 4,
+                                    color: AppTheme.inputBorder.withAlpha(200),
+                                  ),
+                                ),
+                              ),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  // Category and Status Row
+                                  Row(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      // Category
+                                      Container(
+                                        padding: const EdgeInsets.symmetric(
+                                          horizontal: 10,
+                                          vertical: 4,
+                                        ),
+                                        decoration: BoxDecoration(
+                                          color: AppTheme.primary.withValues(
+                                            alpha: 0.08,
+                                          ),
+                                          borderRadius: BorderRadius.circular(
+                                            6,
+                                          ),
+                                        ),
+                                        child: Text(
+                                          complaint.category,
+                                          style: GoogleFonts.montserrat(
+                                            fontSize: 11,
+                                            fontWeight: FontWeight.w600,
+                                            color: AppTheme.primary,
+                                          ),
+                                        ),
+                                      ),
+
+                                      // Status Badge
+                                      Container(
+                                        padding: const EdgeInsets.symmetric(
+                                          horizontal: 8,
+                                          vertical: 3,
+                                        ),
+                                        margin: const EdgeInsets.only(left: 16),
+                                        decoration: BoxDecoration(
+                                          color:
+                                              ComplaintHelper.getStatusBgColor(
+                                                complaint.status,
+                                              ),
+                                          borderRadius: BorderRadius.circular(
+                                            6,
+                                          ),
+                                        ),
+                                        child: Text(
+                                          ComplaintHelper.formatStatus(
+                                            complaint.status,
+                                          ),
+                                          style: GoogleFonts.montserrat(
+                                            fontSize: 11,
+                                            fontWeight: FontWeight.w600,
+                                            color:
+                                                ComplaintHelper.getStatusColor(
+                                                  complaint.status,
+                                                ),
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  const SizedBox(height: 10),
+
+                                  // Title
+                                  Text(
+                                    complaint.title,
+                                    style: GoogleFonts.montserrat(
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.w600,
+                                      color: AppTheme.textPrimary,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 4),
+
+                                  // Description
+                                  Text(
+                                    complaint.description,
+                                    maxLines: 5,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: GoogleFonts.inter(
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.w400,
+                                      color: AppTheme.textSecondary,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 4),
+
+                                  // Divider
+                                  const Padding(
+                                    padding: EdgeInsets.symmetric(vertical: 10),
+                                    child: Divider(
+                                      height: 1,
+                                      thickness: 1,
+                                      color: AppTheme.divider,
+                                    ),
+                                  ),
+
+                                  // Bottom row
+                                  Row(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      // User
+                                      Expanded(
+                                        child: Row(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.center,
+                                          children: [
+                                            Container(
+                                              width: 14,
+                                              height: 14,
+                                              decoration: const BoxDecoration(
+                                                shape: BoxShape.circle,
+                                                gradient: LinearGradient(
+                                                  colors: [
+                                                    AppTheme.primary,
+                                                    AppTheme.secondary,
+                                                    AppTheme.success,
+                                                    AppTheme.warning,
+                                                    AppTheme.error,
+                                                  ],
+                                                  begin: Alignment.topLeft,
+                                                  end: Alignment.bottomRight,
+                                                ),
+                                              ),
+                                            ),
+                                            const SizedBox(width: 6),
+                                            Flexible(
+                                              child: Text(
+                                                complaint.isPublic
+                                                    ? complaint.fullname
+                                                    : "Anonynomous User",
+                                                overflow: TextOverflow.ellipsis,
+                                                style: GoogleFonts.montserrat(
+                                                  fontSize: 12,
+                                                  fontWeight: FontWeight.w600,
+                                                  color: AppTheme.textSecondary,
+                                                ),
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+
+                                      Text(
+                                        TimeHelper.timeAgo(complaint.createdAt),
+                                        style: GoogleFonts.poppins(
+                                          fontSize: 11,
+                                          color: AppTheme.textSecondary,
+                                          fontWeight: FontWeight.w500,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ],
+                              ),
+                            ),
+                          );
+                        },
+                        childCount:
+                            complaints.length + (isFetchingMore ? 1 : 0),
+                      ),
+                    ),
+            ],
+          ),
+        ),
+      ),
+    );
   }
 }

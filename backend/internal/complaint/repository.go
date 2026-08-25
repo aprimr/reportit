@@ -214,7 +214,6 @@ func (cr *complaintRepository) FetchUserComplaints(ctx context.Context, params C
 
 // Fetches all complaints
 func (cr *complaintRepository) FetchAllComplaints(ctx context.Context, params ComplaintFetchParams) ([]FeedComplaint, error) {
-	// Base query with a dummy condition so we can safely chain AND clauses
 	query := `SELECT c.id, c.uid, c.title, c.description, c.category, c.image_urls, c.longitude, c.latitude, c.is_public, c.status, u.fullname, u.email , c.verified_at, c.rejected_at, c.resolved_at, c.created_at FROM complaints c INNER JOIN users u ON c.uid = u.uid WHERE 1=1`
 
 	args := []any{}

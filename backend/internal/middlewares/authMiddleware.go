@@ -2,7 +2,6 @@ package middlewares
 
 import (
 	"context"
-	"fmt"
 	"net/http"
 	"strings"
 
@@ -50,9 +49,6 @@ func AuthMiddleware(userAuthMiddleware bool) func(http.Handler) http.Handler {
 				utils.WriteError(w, http.StatusUnauthorized, "invalid role in access token")
 				return
 			}
-
-			fmt.Printf("Var ROLE is %v \n", role)
-			fmt.Printf("Var userAuth bool is %v \n", userAuthMiddleware)
 
 			if role == "user" {
 				if userAuthMiddleware != true {

@@ -59,7 +59,7 @@ func main() {
 	// Init chi router
 	r := chi.NewRouter()
 
-	r.Route("/api/v1", func(r chi.Router) {
+	r.Route("/v1", func(r chi.Router) {
 		// auth routes
 		r.Route("/auth", func(r chi.Router) {
 			r.Post("/login", authHandler.Login)
@@ -96,9 +96,14 @@ func main() {
 		r.Route("/admin", func(r chi.Router) {
 			r.Use(middlewares.AuthMiddleware(false)) // admin auth middleware
 
+			// admin profile routes
 			r.Get("/", userHandler.FetchProfile)
 			r.Patch("/fullname", userHandler.UpdateFullname)
 			r.Patch("/password", userHandler.ChangePassword)
+
+			// admin complaints route
+			r.Get("/complaints", complaintHandler.GetAllComplaints)
+
 		})
 
 		// complaint routes
