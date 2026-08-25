@@ -96,3 +96,98 @@ null
   "message": "password updated successfully"
 }
 ```
+
+
+## Admin Endpoints
+
+### 1. Fetch Admin Profile
+
+> Header: `Authorization` `bearer <access_token>`
+>
+> `GET` `/admin/` (Protected)
+
+#### Request Body
+
+```
+null
+```
+
+#### Response Body
+
+```json
+{
+  "success": true,
+  "message": "user fetched successfully",
+  "data": {
+    "user":{
+      "uid": "231ceaf6-6c46-82d5-8...",
+      "fullname": "Admin",
+      "email": "admin@example.com",
+      "phone": "9812345678",
+      "role": "admin",
+      "is_verified": true,
+      "created_at": "2026-08-12T12:00:04.330385Z",
+      "updated_at": "2026-08-12T12:00:04.330385Z",
+    },
+    "complaint_stats": {
+      "open": 0,
+      "verified": 0,
+      "resolved": 0,
+      "rejected": 0,
+      "total": 0
+    }
+  }
+}
+```
+
+---
+
+### 2. Update Admin Full Name
+
+> Header: `Authorization` `bearer <access_token>`
+>
+> `PATCH` `/admin/fullname` (Protected)
+
+#### Request Body
+
+```json
+{
+  "fullname": "New Admin"
+}
+```
+
+#### Response Body
+
+```json
+{
+  "success": true,
+  "message": "fullname updated successfully"
+}
+```
+
+---
+
+### 3. Change Admin Password
+
+> Header: `Authorization` `bearer <access_token>`
+>
+> `PATCH` `/auth/password` (Protected)
+
+#### Request Body
+
+```json
+{
+  "current_password": "Admin123!",
+  "new_password": "NewAdmin123@"
+}
+```
+
+#### Response Body
+
+```json
+{
+  "success": true,
+  "message": "password updated successfully"
+}
+```
+
