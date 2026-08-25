@@ -118,7 +118,9 @@ class _ProfileScreenState extends ConsumerState<AdminProfileScreen> {
                   children: [
                     Row(
                       crossAxisAlignment: CrossAxisAlignment.center,
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
+                        // Full Name
                         Flexible(
                           child: Text(
                             profile.user.fullname,
@@ -127,6 +129,26 @@ class _ProfileScreenState extends ConsumerState<AdminProfileScreen> {
                               fontSize: 20,
                               fontWeight: FontWeight.w600,
                               color: Colors.white,
+                            ),
+                          ),
+                        ),
+
+                        // Admin Badge
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 8,
+                            vertical: 1.5,
+                          ),
+                          decoration: BoxDecoration(
+                            color: AppTheme.success,
+                            borderRadius: BorderRadius.circular(6),
+                          ),
+                          child: Text(
+                            "Admin",
+                            style: GoogleFonts.montserrat(
+                              color: Colors.white,
+                              fontSize: 12,
+                              fontWeight: FontWeight.w600,
                             ),
                           ),
                         ),
