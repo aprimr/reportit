@@ -2,6 +2,7 @@ package middlewares
 
 import (
 	"context"
+	"fmt"
 	"net/http"
 	"strings"
 
@@ -44,13 +45,26 @@ func AuthMiddleware(userAuthMiddleware bool) func(http.Handler) http.Handler {
 			}
 
 			// verify user or admin role
-			role, _ := claims["role"].(string)
-			if userAuthMiddleware && role != "user" {
-				utils.WriteError(w, http.StatusForbidden, "access denied")
+			role, ok := claims["role"].(string)
+			if !ok || role == "" {
+				utils.WriteError(w, http.StatusUnauthorized, "invalid role in access token")
 				return
-			} else if !userAuthMiddleware && role != "admin" {
-				utils.WriteError(w, http.StatusForbidden, "access denied")
-				return
+			}
+
+			fmt.Printf("Var ROLE is %v \n", role)
+			fmt.Printf("Var userAuth bool is %v \n", userAuthMiddleware)
+
+			if role == "user" {
+				if userAuthMiddleware != true {
+					utils.WriteError(w, http.StatusForbidden, "access denied for user action")
+					return
+				}
+			}
+			if role == "admin" {
+				if userAuthMiddleware != false {
+					utils.WriteError(w, http.StatusForbidden, "access denied for admin action")
+					return
+				}
 			}
 
 			ctx := context.WithValue(r.Context(), UserUidKey, claims["uid"])

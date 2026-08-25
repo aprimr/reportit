@@ -66,12 +66,20 @@ func main() {
 			r.Post("/register", authHandler.Register)
 			r.Post("/refresh", authHandler.RefreshToken)
 
-			// protected auth routes
+			// protected user auth routes
 			r.Group(func(r chi.Router) {
 				r.Use(middlewares.AuthMiddleware(true))
 
 				r.Post("/logout", authHandler.Logout)
 				r.Post("/logout-all", authHandler.LogoutFromAllDevice)
+			})
+
+			// protected user auth routes
+			r.Group(func(r chi.Router) {
+				r.Use(middlewares.AuthMiddleware(false)) // Admin auth middleware
+
+				r.Post("/admin/logout", authHandler.Logout)
+				r.Post("/admin/logout-all", authHandler.LogoutFromAllDevice)
 			})
 		})
 
