@@ -125,3 +125,44 @@ null
   "message": "logged out from all devices"
 }
 ```
+
+
+### 6. Logout Admin
+> Header: `Authorization` `bearer <access_token>`
+>
+> `POST` `/auth/admin/logout` (Protected)
+
+#### Request Body
+```json
+{
+  "refresh_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+}
+```
+
+#### Response Body
+```json
+{
+  "success": true,
+  "message": "logout successful"
+}
+```
+
+---
+
+### 5. Logout Admin From All Devices
+> Header: `Authorization` `bearer <access_token>`
+>
+> `POST` `/auth/admin/logout-all` (Protected)
+
+#### Request Body
+```
+null
+```
+
+#### Response Body
+```json
+{
+  "success": true,
+  "message": "logged out from all devices"
+}
+```
