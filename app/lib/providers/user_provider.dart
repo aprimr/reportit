@@ -71,6 +71,63 @@ class UserNotifier extends StateNotifier<UserProfileData?> {
     }
   }
 
+  // ADMIN ---
+  //  Fetch and store admin profile
+  Future<void> fetchAdminProfile() async {
+    try {
+      final response = await _userService.fetchAdminProfile();
+      state = response.data;
+    } catch (_) {
+      rethrow;
+    }
+  }
+
+  //  Update admin Fullname
+  Future<void> updateAdminFullname(String newFullname) async {
+    try {
+      await _userService.updateAdminFullname(fullname: newFullname);
+
+      if (state != null) {
+        state = UserProfileData(
+          user: UserProfile(
+            uid: state!.user.uid,
+            fullname: newFullname,
+            email: state!.user.email,
+            phone: state!.user.phone,
+            role: state!.user.role,
+            isVerified: state!.user.isVerified,
+            createdAt: state!.user.createdAt,
+            updatedAt: state!.user.updatedAt,
+          ),
+          complaintStats: ComplaintStats(
+            open: state!.complaintStats.open,
+            verified: state!.complaintStats.verified,
+            resolved: state!.complaintStats.resolved,
+            rejected: state!.complaintStats.rejected,
+            total: state!.complaintStats.total,
+          ),
+        );
+      }
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  // Change admin password
+  Future<void> changeAdminPassword({
+    required String currentPassword,
+    required String newPassword,
+  }) async {
+    try {
+      await _userService.changeAdminPassword(
+        currentPassword: currentPassword,
+        newPassword: newPassword,
+      );
+    } catch (e) {
+      rethrow;
+    }
+  }
+
   // logout
   void clearUser() {
     state = null;

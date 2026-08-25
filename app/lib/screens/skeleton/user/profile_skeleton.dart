@@ -126,14 +126,21 @@ class ProfileSkeletonScreen extends StatelessWidget {
 
             const SizedBox(height: 28),
 
+            // stats
+            GridView.count(
+              crossAxisCount: 2,
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              mainAxisSpacing: 12,
+              crossAxisSpacing: 12,
+              childAspectRatio: 2.5,
+              children: [_card([]), _card([]), _card([]), _card([])],
+            ),
+
+            const SizedBox(height: 30),
+
             // Account card
-            _card([
-              _tile(subtitleWidth: 110),
-              _divider(),
-              _tile(),
-              _divider(),
-              _tile(subtitleWidth: 90),
-            ]),
+            _card([_tile(subtitleWidth: 110), _divider(), _tile()]),
 
             const SizedBox(height: 30),
 

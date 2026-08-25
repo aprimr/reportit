@@ -1,4 +1,5 @@
 import 'package:app/core/theme/app_theme.dart';
+import 'package:app/core/utils/app_snackbar.dart';
 import 'package:app/widgets/app_buttons.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -89,10 +90,8 @@ class _AppConfirmDialogState extends State<AppConfirmDialog> {
         _isLoading = false;
       });
 
-      // You can replace this with your global error handling.
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text(e.toString())));
+      Navigator.pop(context);
+      AppSnackBar.error(context, e.toString());
     }
   }
 

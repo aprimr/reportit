@@ -1,4 +1,6 @@
 import 'package:app/core/theme/app_theme.dart';
+import 'package:app/core/utils/app_snackbar.dart';
+import 'package:app/providers/user_provider.dart';
 import 'package:app/screens/admin/complaints/admin_complaints_screen.dart';
 import 'package:app/screens/admin/dashboard/admin_dashboard_screen.dart';
 import 'package:app/screens/admin/profile/admin_profile_screen.dart';
@@ -30,7 +32,15 @@ class _HomeScreenState extends ConsumerState<AdminHomeScreen> {
     Future.microtask(_initializeApp);
   }
 
-  Future<void> _initializeApp() async {}
+  Future<void> _initializeApp() async {
+    // Fetch user profile
+    try {
+      await ref.read(userProvider.notifier).fetchAdminProfile();
+    } catch (e) {
+      if (!mounted) return;
+      AppSnackBar.error(context, e.toString());
+    }
+  }
 
   @override
   Widget build(BuildContext context) {

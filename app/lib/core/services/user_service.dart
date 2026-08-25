@@ -50,4 +50,51 @@ class UserService {
           : ApiError(message: e.message ?? 'Failed to change password');
     }
   }
+
+  // ADMIN ---
+
+  Future<UserProfileResponse> fetchAdminProfile() async {
+    try {
+      final response = await _client.get(ApiEndpoints.fetchAdminProfile);
+      return UserProfileResponse.fromJson(response.data);
+    } on DioException catch (e) {
+      throw e.error is ApiError
+          ? e.error as ApiError
+          : ApiError(message: e.message ?? 'Failed to fetch profile');
+    }
+  }
+
+  Future<BaseResponse> updateAdminFullname({required String fullname}) async {
+    try {
+      final response = await _client.patch(
+        ApiEndpoints.updateAdminFullname,
+        data: {'fullname': fullname},
+      );
+      return BaseResponse.fromJson(response.data);
+    } on DioException catch (e) {
+      throw e.error is ApiError
+          ? e.error as ApiError
+          : ApiError(message: e.message ?? 'Failed to update full name');
+    }
+  }
+
+  Future<BaseResponse> changeAdminPassword({
+    required String currentPassword,
+    required String newPassword,
+  }) async {
+    try {
+      final response = await _client.patch(
+        ApiEndpoints.changeAdminPassword,
+        data: {
+          'current_password': currentPassword,
+          'new_password': newPassword,
+        },
+      );
+      return BaseResponse.fromJson(response.data);
+    } on DioException catch (e) {
+      throw e.error is ApiError
+          ? e.error as ApiError
+          : ApiError(message: e.message ?? 'Failed to change password');
+    }
+  }
 }

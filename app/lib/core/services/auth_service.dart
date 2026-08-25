@@ -85,4 +85,30 @@ class AuthService {
           : ApiError(message: e.message ?? 'Logout from all devices failed');
     }
   }
+
+  // ADMIN ---
+  Future<BaseResponse> logoutAdmin({required String refreshToken}) async {
+    try {
+      final response = await _client.post(
+        ApiEndpoints.logoutAdmin,
+        data: {'refresh_token': refreshToken},
+      );
+      return BaseResponse.fromJson(response.data);
+    } on DioException catch (e) {
+      throw e.error is ApiError
+          ? e.error as ApiError
+          : ApiError(message: e.message ?? 'Logout failed');
+    }
+  }
+
+  Future<BaseResponse> logoutAdminFromAllDevices() async {
+    try {
+      final response = await _client.post(ApiEndpoints.logoutAllAdmin);
+      return BaseResponse.fromJson(response.data);
+    } on DioException catch (e) {
+      throw e.error is ApiError
+          ? e.error as ApiError
+          : ApiError(message: e.message ?? 'Logout from all devices failed');
+    }
+  }
 }
