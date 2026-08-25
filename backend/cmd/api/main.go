@@ -84,6 +84,15 @@ func main() {
 			r.Patch("/password", userHandler.ChangePassword)
 		})
 
+		// protected admin routes
+		r.Route("/admin", func(r chi.Router) {
+			r.Use(middlewares.AuthMiddleware(false)) // admin auth middleware
+
+			r.Get("/", userHandler.FetchProfile)
+			r.Patch("/fullname", userHandler.UpdateFullname)
+			r.Patch("/password", userHandler.ChangePassword)
+		})
+
 		// complaint routes
 		r.Route("/complaint", func(r chi.Router) {
 			// user comlaint routes
