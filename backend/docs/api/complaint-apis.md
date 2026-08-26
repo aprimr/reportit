@@ -1,6 +1,6 @@
 # APIs
 
-**Base Route:** `/api/v1`
+**Base Route:** `/v1`
 
 ---
 
@@ -11,7 +11,7 @@
 
 > Header: `Authorization: Bearer <access_token>`
 >
-> `POST /api/v1/complaint/`
+> `POST /v1/complaint/`
 
 #### Request Body (Multipart Form-Data)
 
@@ -58,7 +58,7 @@
 ### 2. Delete Complaint
 > Header: `Authorization: Bearer <access_token>`
 >
-> `DELETE /api/v1/complaint/{id}`
+> `DELETE /v1/complaint/{id}`
 
 #### Request Body
 
@@ -78,7 +78,7 @@
 ### 3. Toggle Complaint Visibility
 > Header: `Authorization: Bearer <access_token>`
 >
-> `PATCH /api/v1/complaint/{id}`
+> `PATCH /v1/complaint/{id}`
 
 #### Request Body
 
@@ -97,7 +97,7 @@
 
 ### 4. Get Complaint by ID
 
-`GET /api/v1/complaint/{id}`
+`GET /v1/complaint/{id}`
 
 #### Request Body
 
@@ -137,7 +137,7 @@
 
 > Header: `Authorization: Bearer <access_token>`
 >
-> `GET /api/v1/complaint/me`
+> `GET /v1/complaint/me`
 
 #### Query Parameters
 
@@ -195,7 +195,7 @@
 
 > Header: `Authorization: Bearer <access_token>`
 >
-> `GET /api/v1/complaint/all`
+> `GET /v1/complaint/all`
 
 #### Query Parameters
 
@@ -246,3 +246,44 @@
   ]
 }
 ```
+
+### 7. Get Admin Dashboard Stats
+
+> Header: `Authorization: Bearer <access_token>`
+>
+> `GET /admin/dashboard`
+
+#### Query Parameters
+
+* `duration` (Optional) - Accepts: `today`, `yesterday`, `week`, `month`, `year`, `all`. Defaults to `today`.
+
+#### Request Body
+
+`null`
+
+#### Response Body
+
+```json
+{
+  "success": true,
+  "message": "dashboard stats fetch successful",
+  "data": {
+    "duration": "today",
+    "total": 142,
+    "status_counts": {
+      "open": 45,
+      "verified": 30,
+      "resolved": 55,
+      "rejected": 12
+    },
+    "category_counts": {
+      "Road": 40,
+      "Water": 25,
+      "Electricity": 30,
+      "Infrastructure": 15,
+      "Drainage": 20,
+      "Pollution": 7,
+      "Other": 5
+    }
+  }
+}

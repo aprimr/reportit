@@ -1,6 +1,6 @@
 # APIs
 
-Base Route: `/api/v1`
+Base Route: `/v1`
 
 ---
 
