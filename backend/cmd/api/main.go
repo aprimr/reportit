@@ -101,6 +101,9 @@ func main() {
 			r.Patch("/fullname", userHandler.UpdateFullname)
 			r.Patch("/password", userHandler.ChangePassword)
 
+			// dashboard
+			r.Get("/dashboard", complaintHandler.GetDashboardStats)
+
 			// admin complaints route
 			r.Get("/complaints", complaintHandler.GetAllComplaints)
 

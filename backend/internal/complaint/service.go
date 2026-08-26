@@ -14,6 +14,8 @@ type ComplaintService interface {
 	GetComplaint(ctx context.Context, id string) (*Complaint, error)
 	GetMyComplaints(ctx context.Context, params ComplaintFetchParams) ([]Complaint, error)
 	GetAllComplaints(ctx context.Context, params ComplaintFetchParams) ([]FeedComplaint, error)
+
+	GetDashboardStats(ctx context.Context, params DashboardStatsParams) (DashboardStatsResponse, error)
 }
 
 type complaintService struct {
@@ -109,4 +111,15 @@ func (cs *complaintService) GetAllComplaints(ctx context.Context, params Complai
 	}
 
 	return complaint, nil
+}
+
+// ADMIN ---
+func (cs *complaintService) GetDashboardStats(ctx context.Context, params DashboardStatsParams) (DashboardStatsResponse, error) {
+	stats, err := cs.complaintRepo.GetDashboardStats(ctx, params)
+	if err != nil {
+		cs.logger.Error("failed to get dashboard stats", "error", err)
+		return DashboardStatsResponse{}, err
+	}
+
+	return stats, nil
 }

@@ -75,3 +75,15 @@ type ComplaintFetchParams struct {
 	Cursor  string
 	IsAdmin bool
 }
+
+// ADMIN ---
+type DashboardStatsParams struct {
+	Duration string // "today", "yesterday", "week", "month", "year", "all"
+}
+
+type DashboardStatsResponse struct {
+	Duration       string         `json:"duration"`
+	Total          int            `json:"total"`
+	StatusCounts   map[string]int `json:"status_counts"`
+	CategoryCounts map[string]int `json:"category_counts"`
+}

@@ -17,6 +17,8 @@ type ComplaintRepository interface {
 	ToggleVisibility(ctx context.Context, id string) error
 	FetchUserComplaints(ctx context.Context, params ComplaintFetchParams) ([]Complaint, error)
 	FetchAllComplaints(ctx context.Context, params ComplaintFetchParams) ([]FeedComplaint, error)
+
+	GetDashboardStats(ctx context.Context, params DashboardStatsParams) (DashboardStatsResponse, error)
 }
 
 type complaintRepository struct {
@@ -301,4 +303,76 @@ func (cr *complaintRepository) FetchAllComplaints(ctx context.Context, params Co
 	}
 
 	return complaints, nil
+}
+
+// ADMIN ---
+func (cr *complaintRepository) GetDashboardStats(ctx context.Context, params DashboardStatsParams) (DashboardStatsResponse, error) {
+	// Create query based on duration
+	if params.Duration == "" {
+		params.Duration = "today"
+	}
+
+	var timeFilterSql string
+	switch params.Duration {
+	case "yesterday":
+		timeFilterSql = "created_at >= NOW() - INTERVAL '1 day'"
+	case "week":
+		timeFilterSql = "created_at >= NOW() - INTERVAL '7 days'"
+	case "month":
+		timeFilterSql = "created_at >= NOW() - INTERVAL '1 month'"
+	case "year":
+		timeFilterSql = "created_at >= NOW() - INTERVAL '1 year'"
+	case "all":
+		timeFilterSql = "1=1"
+	default:
+		params.Duration = "today"
+		timeFilterSql = "created_at >= CURRENT_DATE"
+	}
+
+	stats := DashboardStatsResponse{
+		Duration:       params.Duration,
+		StatusCounts:   make(map[string]int),
+		CategoryCounts: make(map[string]int),
+	}
+
+	// fetch no of status
+	statusQuery := fmt.Sprintf(`SELECT status, COUNT(*) FROM complaints WHERE %s GROUP BY status`, timeFilterSql)
+	statusRows, err := cr.db.Query(ctx, statusQuery)
+	if err != nil {
+		cr.logger.Error("failed to fetch status stats from database", "error", err)
+		return stats, ErrInternalError
+	}
+	defer statusRows.Close()
+
+	for statusRows.Next() {
+		var status string
+		var count int
+		if err := statusRows.Scan(&status, &count); err != nil {
+			cr.logger.Error("failed to scan status stat row", "error", err)
+			return stats, ErrInternalError
+		}
+		stats.StatusCounts[status] = count
+		stats.Total += count
+	}
+
+	// fetch category
+	catQuery := fmt.Sprintf(`SELECT category, COUNT(*) FROM complaints WHERE %s GROUP BY category`, timeFilterSql)
+	catRows, err := cr.db.Query(ctx, catQuery)
+	if err != nil {
+		cr.logger.Error("failed to fetch category stats from database", "error", err)
+		return stats, ErrInternalError
+	}
+	defer catRows.Close()
+
+	for catRows.Next() {
+		var category string
+		var count int
+		if err := catRows.Scan(&category, &count); err != nil {
+			cr.logger.Error("failed to scan category stat row", "error", err)
+			return stats, ErrInternalError
+		}
+		stats.CategoryCounts[category] = count
+	}
+
+	return stats, nil
 }

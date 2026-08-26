@@ -18,6 +18,8 @@ type ComplaintHandler interface {
 	GetComplaint(w http.ResponseWriter, r *http.Request)
 	GetMyComplaints(w http.ResponseWriter, r *http.Request)
 	GetAllComplaints(w http.ResponseWriter, r *http.Request)
+
+	GetDashboardStats(w http.ResponseWriter, r *http.Request)
 }
 
 type complaintHandler struct {
@@ -30,7 +32,7 @@ func NewComplaintHandler(complaintService ComplaintService) ComplaintHandler {
 	}
 }
 
-// For Users
+// USER ---
 // Create Complaint handler
 func (ch *complaintHandler) CreateComplaint(w http.ResponseWriter, r *http.Request) {
 	// Get uid from request header
@@ -319,4 +321,39 @@ func (ch *complaintHandler) GetAllComplaints(w http.ResponseWriter, r *http.Requ
 	}
 
 	utils.WriteJSON(w, http.StatusOK, complaints, "complaints fetch successful")
+}
+
+// ADMIN ---
+func (ch *complaintHandler) GetDashboardStats(w http.ResponseWriter, r *http.Request) {
+	// Get uid from request header
+	uid := middlewares.GetUidFromContext(r.Context())
+	if uid == "" {
+		utils.WriteError(w, http.StatusUnauthorized, ErrUnauthorized.Error())
+		return
+	}
+
+	// Verify admin role
+	role := middlewares.GetRoleFromContext(r.Context())
+	if role != "admin" {
+		utils.WriteError(w, http.StatusForbidden, ErrUnauthorized.Error())
+		return
+	}
+
+	queryVals := r.URL.Query()
+	duration := queryVals.Get("duration")
+	if duration == "" {
+		duration = "today"
+	}
+
+	params := DashboardStatsParams{
+		Duration: duration,
+	}
+
+	stats, err := ch.complaintService.GetDashboardStats(r.Context(), params)
+	if err != nil {
+		utils.WriteError(w, http.StatusInternalServerError, ErrInternalError.Error())
+		return
+	}
+
+	utils.WriteJSON(w, http.StatusOK, stats, "dashboard stats fetch successful")
 }
