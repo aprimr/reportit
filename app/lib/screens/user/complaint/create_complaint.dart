@@ -53,7 +53,6 @@ class _CreateComplaintScreenState extends ConsumerState<CreateComplaintScreen> {
     {'label': 'Waste', 'icon': HugeIcons.strokeRoundedGarbageTruck},
     {'label': 'Electricity', 'icon': HugeIcons.strokeRoundedBulbCharging},
     {'label': 'Infrastructure', 'icon': HugeIcons.strokeRoundedCity01},
-    {'label': 'Electricity', 'icon': HugeIcons.strokeRoundedBulbCharging},
     {'label': 'Drainage', 'icon': HugeIcons.strokeRoundedDroplet},
     {'label': 'Pollution', 'icon': HugeIcons.strokeRoundedFactory01},
     {'label': 'Water', 'icon': HugeIcons.strokeRoundedWaterPump},

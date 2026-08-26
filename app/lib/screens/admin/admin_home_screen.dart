@@ -42,6 +42,14 @@ class _HomeScreenState extends ConsumerState<AdminHomeScreen> {
       AppSnackBar.error(context, 'App content initialization failed');
     }
 
+    // Fetch dashboard data
+    try {
+      await ref.read(adminDashboardProvider.notifier).fetchDashboardStats();
+    } catch (e) {
+      if (!mounted) return;
+      AppSnackBar.error(context, 'App content initialization failed');
+    }
+
     // Fetch all complaints
     try {
       await ref.read(adminComplaintProvider.notifier).fetchAdminAllComplaints();

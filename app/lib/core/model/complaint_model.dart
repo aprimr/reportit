@@ -235,3 +235,28 @@ class FeedComplaintListResponse {
     );
   }
 }
+
+// ADMIN ---
+class DashboardStatsModel {
+  final String duration;
+  final int total;
+  final Map<String, int> statusCounts;
+  final Map<String, int> categoryCounts;
+
+  DashboardStatsModel({
+    required this.duration,
+    required this.total,
+    required this.statusCounts,
+    required this.categoryCounts,
+  });
+
+  factory DashboardStatsModel.fromJson(Map<String, dynamic> json) {
+    final data = json['data'];
+    return DashboardStatsModel(
+      duration: data['duration'] ?? 'today',
+      total: data['total'] ?? 0,
+      statusCounts: Map<String, int>.from(data['status_counts'] ?? {}),
+      categoryCounts: Map<String, int>.from(data['category_counts'] ?? {}),
+    );
+  }
+}

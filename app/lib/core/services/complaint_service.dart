@@ -164,4 +164,22 @@ class ComplaintService {
           : ApiError(message: e.message ?? 'Failed to fetch all complaints');
     }
   }
+
+  Future<DashboardStatsModel> getAdminDashboardStats({String? duration}) async {
+    try {
+      final queryParameters = <String, dynamic>{};
+      if (duration != null) queryParameters['duration'] = duration;
+
+      final response = await _client.get(
+        ApiEndpoints.adminDashboardStats,
+        queryParameters: queryParameters.isNotEmpty ? queryParameters : null,
+      );
+
+      return DashboardStatsModel.fromJson(response.data);
+    } on DioException catch (e) {
+      throw e.error is ApiError
+          ? e.error as ApiError
+          : ApiError(message: e.message ?? 'Failed to fetch dashboard stats');
+    }
+  }
 }

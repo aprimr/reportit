@@ -580,9 +580,7 @@ class _AdminComplaintsScreenState extends ConsumerState<AdminComplaintsScreen> {
                                             const SizedBox(width: 6),
                                             Flexible(
                                               child: Text(
-                                                complaint.isPublic
-                                                    ? complaint.fullname
-                                                    : "Anonynomous User",
+                                                complaint.fullname,
                                                 overflow: TextOverflow.ellipsis,
                                                 style: GoogleFonts.montserrat(
                                                   fontSize: 12,

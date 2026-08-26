@@ -22,7 +22,7 @@ final feedComplaintProvider =
       return FeedComplaintNotifier(ref.watch(complaintServiceProvider), ref);
     });
 
-// Admin complaint provider
+// Admin Complaint Provider
 final isFetchingMoreAdminProvider = StateProvider<bool>((ref) => false);
 
 final adminComplaintProvider =
@@ -30,6 +30,14 @@ final adminComplaintProvider =
       ref,
     ) {
       return AdminComplaintNotifier(ref.watch(complaintServiceProvider), ref);
+    });
+
+// Admin Dashboard Provider
+final isFetchingDashboardProvider = StateProvider<bool>((ref) => false);
+
+final adminDashboardProvider =
+    StateNotifierProvider<AdminDashboardNotifier, DashboardStatsModel?>((ref) {
+      return AdminDashboardNotifier(ref.watch(complaintServiceProvider), ref);
     });
 
 class ComplaintNotifier extends StateNotifier<List<ComplaintModel>> {
@@ -300,5 +308,28 @@ class AdminComplaintNotifier extends StateNotifier<List<FeedComplaintModel>> {
 
   void removeComplaint(String id) {
     state = state.where((c) => c.id != id).toList();
+  }
+}
+
+class AdminDashboardNotifier extends StateNotifier<DashboardStatsModel?> {
+  final ComplaintService _complaintService;
+  final Ref _ref;
+
+  AdminDashboardNotifier(this._complaintService, this._ref) : super(null);
+
+  Future<void> fetchDashboardStats({String? duration}) async {
+    _ref.read(isFetchingDashboardProvider.notifier).state = true;
+
+    try {
+      final stats = await _complaintService.getAdminDashboardStats(
+        duration: duration,
+      );
+
+      state = stats;
+    } catch (e) {
+      rethrow;
+    } finally {
+      _ref.read(isFetchingDashboardProvider.notifier).state = false;
+    }
   }
 }
