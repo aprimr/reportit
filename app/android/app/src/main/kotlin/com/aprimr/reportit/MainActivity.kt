@@ -1,4 +1,4 @@
-package com.example.app
+package com.aprimr.reportit
 
 import io.flutter.embedding.android.FlutterActivity
 

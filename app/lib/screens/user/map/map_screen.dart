@@ -2,6 +2,7 @@ import 'package:app/core/model/complaint_model.dart';
 import 'package:app/core/services/location_service.dart';
 import 'package:app/core/theme/app_theme.dart';
 import 'package:app/core/utils/app_snackbar.dart';
+import 'package:app/helpers/time_helper.dart';
 import 'package:app/providers/complaint_provider.dart';
 import 'package:app/widgets/app_buttons.dart';
 import 'package:app/widgets/map_marker.dart';
@@ -106,6 +107,7 @@ class _MapScreenState extends ConsumerState<MapScreen> {
           longitude: longitude,
           status: c.status,
           title: c.title,
+          desc: "Reported At: ${TimeHelper.formatDate(c.createdAt)}",
           showInfoWindow: true,
         ),
       );

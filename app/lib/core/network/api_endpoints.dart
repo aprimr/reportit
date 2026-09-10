@@ -1,5 +1,5 @@
 class ApiEndpoints {
-  static const String baseUrl = "http://192.168.100.30:8000";
+  static const String baseUrl = "http://192.168.18.10:8000";
   static const String apiVersion = "/v1";
 
   // Auth endpoints

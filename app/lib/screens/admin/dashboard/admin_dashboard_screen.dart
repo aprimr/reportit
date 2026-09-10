@@ -35,7 +35,7 @@ class _AdminDashboardScreenState extends ConsumerState<AdminDashboardScreen> {
     {'label': 'Drainage', 'icon': HugeIcons.strokeRoundedDroplet},
     {'label': 'Pollution', 'icon': HugeIcons.strokeRoundedFactory01},
     {'label': 'Water', 'icon': HugeIcons.strokeRoundedWaterPump},
-    {'label': 'Other', 'icon': HugeIcons.strokeRoundedMoreHorizontal},
+    {'label': 'Other', 'icon': HugeIcons.strokeRoundedMegaphone01},
   ];
 
   Future<void> _fetchDashboardData() async {
@@ -201,7 +201,7 @@ class _AdminDashboardScreenState extends ConsumerState<AdminDashboardScreen> {
                                 mainAxisSpacing: 12,
                                 mainAxisExtent: 105,
                               ),
-                          itemCount: 7,
+                          itemCount: 8,
                           itemBuilder: (context, index) {
                             final cat = _categories[index];
                             final catName = cat['label'] as String;
@@ -358,7 +358,7 @@ class _AdminDashboardScreenState extends ConsumerState<AdminDashboardScreen> {
               SizedBox(width: 10),
 
               Text(
-                1030.toString(),
+                count.toString(),
                 style: GoogleFonts.inter(
                   fontSize: 22,
                   fontWeight: FontWeight.w500,

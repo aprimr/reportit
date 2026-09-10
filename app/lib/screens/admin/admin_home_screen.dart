@@ -5,7 +5,6 @@ import 'package:app/providers/user_provider.dart';
 import 'package:app/screens/admin/complaints/admin_complaints_screen.dart';
 import 'package:app/screens/admin/dashboard/admin_dashboard_screen.dart';
 import 'package:app/screens/admin/profile/admin_profile_screen.dart';
-import 'package:app/screens/admin/users/admin_users_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hugeicons/hugeicons.dart';
@@ -23,7 +22,6 @@ class _HomeScreenState extends ConsumerState<AdminHomeScreen> {
   final List<Widget> _screens = const [
     AdminDashboardScreen(),
     AdminComplaintsScreen(),
-    AdminUsersScreen(),
     AdminProfileScreen(),
   ];
 
@@ -119,20 +117,6 @@ class _ReportItAdminNavBar extends StatelessWidget {
           ),
           activeIcon: HugeIcon(
             icon: HugeIcons.strokeRoundedReceiptText,
-            size: 22,
-            strokeWidth: 1.6,
-          ),
-          label: '',
-        ),
-
-        BottomNavigationBarItem(
-          icon: HugeIcon(
-            icon: HugeIcons.strokeRoundedUserMultiple,
-            size: 22,
-            strokeWidth: 1.5,
-          ),
-          activeIcon: HugeIcon(
-            icon: HugeIcons.strokeRoundedUserMultiple,
             size: 22,
             strokeWidth: 1.6,
           ),

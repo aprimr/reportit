@@ -7,6 +7,7 @@ class MapMarker {
     required double longitude,
     required String status,
     required String title,
+    String desc = "",
     bool showInfoWindow = false,
   }) {
     String assetPath = 'assets/icon/splash_ic.png';
@@ -37,7 +38,7 @@ class MapMarker {
       position: LatLng(latitude, longitude),
       icon: customIcon,
       infoWindow: showInfoWindow
-          ? InfoWindow(title: title, snippet: status.toUpperCase())
+          ? InfoWindow(title: title, snippet: desc)
           : InfoWindow.noText,
     );
   }
