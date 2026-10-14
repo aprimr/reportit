@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"log/slog"
 
+	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
@@ -16,9 +17,11 @@ type ComplaintRepository interface {
 	Delete(ctx context.Context, id string) error
 	ToggleVisibility(ctx context.Context, id string) error
 	FetchUserComplaints(ctx context.Context, params ComplaintFetchParams) ([]Complaint, error)
-	FetchAllComplaints(ctx context.Context, params ComplaintFetchParams) ([]FeedComplaint, error)
+	FetchAllComplaints(ctx context.Context, params ComplaintFetchParams) (any, error)
 
 	GetDashboardStats(ctx context.Context, params DashboardStatsParams) (DashboardStatsResponse, error)
+	UpdateComplaintStatus(ctx context.Context, id uuid.UUID, status string, timestampCol string, remarks string) error
+	AdminDeleteComplaint(ctx context.Context, id uuid.UUID) error
 }
 
 type complaintRepository struct {
@@ -215,20 +218,38 @@ func (cr *complaintRepository) FetchUserComplaints(ctx context.Context, params C
 }
 
 // Fetches all complaints
-func (cr *complaintRepository) FetchAllComplaints(ctx context.Context, params ComplaintFetchParams) ([]FeedComplaint, error) {
-	query := `SELECT c.id, c.uid, c.title, c.description, c.category, c.image_urls, c.longitude, c.latitude, c.is_public, c.status, u.fullname, u.email, c.verified_at, c.rejected_at, c.resolved_at, c.created_at FROM complaints c INNER JOIN users u ON c.uid = u.uid WHERE 1=1`
+func (cr *complaintRepository) FetchAllComplaints(ctx context.Context, params ComplaintFetchParams) (any, error) {
+	var query string
+
+	// Select columns based on role
+	if params.IsAdmin {
+		query = `SELECT c.id, c.uid, c.title, c.description, c.category, c.image_urls, c.longitude, c.latitude, c.is_public, c.status, c.admin_remarks, u.fullname, u.email, u.phone, c.verified_at, c.rejected_at, c.resolved_at, c.created_at 
+                 FROM complaints c 
+                 INNER JOIN users u ON c.uid = u.uid 
+                 WHERE 1=1`
+	} else {
+		query = `SELECT c.id, c.uid, c.title, c.description, c.category, c.image_urls, c.longitude, c.latitude, c.is_public, c.status, u.fullname, u.email, c.verified_at, c.rejected_at, c.resolved_at, c.created_at 
+                 FROM complaints c 
+                 INNER JOIN users u ON c.uid = u.uid 
+                 WHERE 1=1`
+	}
 
 	args := []any{}
 	argIdx := 1
 
-	// If not an admin, restrict to public complaints only
+	// If not an admin, select public complaints only
 	if !params.IsAdmin {
 		query += ` AND c.is_public = true`
 	}
 
 	// Append search to the query
 	if params.Search != "" {
-		query += fmt.Sprintf(` AND (c.title ILIKE $%d OR c.description ILIKE $%d)`, argIdx, argIdx)
+		if params.IsAdmin {
+			// Admins can search by title, description, or ID (UUID cast to text)
+			query += fmt.Sprintf(` AND (c.title ILIKE $%d OR c.description ILIKE $%d OR c.id::text ILIKE $%d)`, argIdx, argIdx, argIdx)
+		} else {
+			query += fmt.Sprintf(` AND (c.title ILIKE $%d OR c.description ILIKE $%d)`, argIdx, argIdx)
+		}
 		args = append(args, "%"+params.Search+"%")
 		argIdx++
 	}
@@ -272,36 +293,74 @@ func (cr *complaintRepository) FetchAllComplaints(ctx context.Context, params Co
 	}
 	defer rows.Close()
 
-	// Scan rows
-	var complaints []FeedComplaint
-	for rows.Next() {
-		var complaint FeedComplaint
-		err := rows.Scan(
-			&complaint.Id,
-			&complaint.Uid,
-			&complaint.Title,
-			&complaint.Description,
-			&complaint.Category,
-			&complaint.ImageUrls,
-			&complaint.Longitude,
-			&complaint.Latitude,
-			&complaint.IsPublic,
-			&complaint.Status,
-			&complaint.Fullname,
-			&complaint.Email,
-			&complaint.VerifiedAt,
-			&complaint.RejectedAt,
-			&complaint.ResolvedAt,
-			&complaint.CreatedAt,
-		)
-		if err != nil {
-			cr.logger.Error("failed to scan complaint row", "error", err)
-			return nil, ErrInternalError
+	// Scan rows conditionally
+	if params.IsAdmin {
+		var complaints []AdminComplaint
+		for rows.Next() {
+			var c AdminComplaint
+			err := rows.Scan(
+				&c.Id,
+				&c.Uid,
+				&c.Title,
+				&c.Description,
+				&c.Category,
+				&c.ImageUrls,
+				&c.Longitude,
+				&c.Latitude,
+				&c.IsPublic,
+				&c.Status,
+				&c.AdminRemarks,
+				&c.Fullname,
+				&c.Email,
+				&c.Phone,
+				&c.VerifiedAt,
+				&c.RejectedAt,
+				&c.ResolvedAt,
+				&c.CreatedAt,
+			)
+			if err != nil {
+				cr.logger.Error("failed to scan admin complaint row", "error", err)
+				return nil, ErrInternalError
+			}
+			complaints = append(complaints, c)
 		}
-
-		complaints = append(complaints, complaint)
+		if complaints == nil {
+			complaints = []AdminComplaint{}
+		}
+		return complaints, nil
 	}
 
+	// Non-admin scan
+	var complaints []FeedComplaint
+	for rows.Next() {
+		var c FeedComplaint
+		err := rows.Scan(
+			&c.Id,
+			&c.Uid,
+			&c.Title,
+			&c.Description,
+			&c.Category,
+			&c.ImageUrls,
+			&c.Longitude,
+			&c.Latitude,
+			&c.IsPublic,
+			&c.Status,
+			&c.Fullname,
+			&c.Email,
+			&c.VerifiedAt,
+			&c.RejectedAt,
+			&c.ResolvedAt,
+			&c.CreatedAt,
+		)
+		if err != nil {
+			cr.logger.Error("failed to scan feed complaint row", "error", err)
+			return nil, ErrInternalError
+		}
+		complaints = append(complaints, c)
+	}
+	if complaints == nil {
+		complaints = []FeedComplaint{}
+	}
 	return complaints, nil
 }
 
@@ -375,4 +434,55 @@ func (cr *complaintRepository) GetDashboardStats(ctx context.Context, params Das
 	}
 
 	return stats, nil
+}
+
+func (cr *complaintRepository) UpdateComplaintStatus(ctx context.Context, id uuid.UUID, status string, timestampCol string, remarks string) error {
+	var requiredPrevStatus string
+	switch status {
+	case "verified", "rejected":
+		requiredPrevStatus = "open"
+	case "resolved":
+		requiredPrevStatus = "verified"
+	default:
+		return fmt.Errorf("invalid target status: %s", status)
+	}
+
+	query := fmt.Sprintf(`
+        UPDATE complaints 
+        SET status = $1, %s = NOW(), admin_remarks = $2 
+        WHERE id = $3 AND status = $4
+    `, timestampCol)
+
+	var remarksArg any = remarks
+	if remarks == "" {
+		remarksArg = nil
+	}
+
+	cmd, err := cr.db.Exec(ctx, query, status, remarksArg, id, requiredPrevStatus)
+	if err != nil {
+		cr.logger.Error("failed to update complaint status in database", "error", err, "complaint_id", id)
+		return ErrInternalError
+	}
+
+	if cmd.RowsAffected() == 0 {
+		return fmt.Errorf("complaint not found or not in '%s' state", requiredPrevStatus)
+	}
+
+	return nil
+}
+
+func (cr *complaintRepository) AdminDeleteComplaint(ctx context.Context, id uuid.UUID) error {
+	query := `DELETE FROM complaints WHERE id = $1`
+
+	cmd, err := cr.db.Exec(ctx, query, id)
+	if err != nil {
+		cr.logger.Error("failed to delete complaint from database", "error", err, "complaint_id", id)
+		return ErrInternalError
+	}
+
+	if cmd.RowsAffected() == 0 {
+		return fmt.Errorf("complaint not found")
+	}
+
+	return nil
 }

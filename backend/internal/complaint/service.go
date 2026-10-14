@@ -5,6 +5,7 @@ import (
 	"log/slog"
 
 	"github.com/aprimr/reportit/internal/utils"
+	"github.com/google/uuid"
 )
 
 type ComplaintService interface {
@@ -13,9 +14,13 @@ type ComplaintService interface {
 	UpdateComplaintVisibility(ctx context.Context, id string) error
 	GetComplaint(ctx context.Context, id string) (*Complaint, error)
 	GetMyComplaints(ctx context.Context, params ComplaintFetchParams) ([]Complaint, error)
-	GetAllComplaints(ctx context.Context, params ComplaintFetchParams) ([]FeedComplaint, error)
+	GetAllComplaints(ctx context.Context, params ComplaintFetchParams) (any, error)
 
 	GetDashboardStats(ctx context.Context, params DashboardStatsParams) (DashboardStatsResponse, error)
+	VerifyComplaint(ctx context.Context, id uuid.UUID) error
+	RejectComplaint(ctx context.Context, id uuid.UUID, reason string) error
+	ResolveComplaint(ctx context.Context, id uuid.UUID, remarks string) error
+	AdminDeleteComplaint(ctx context.Context, id uuid.UUID) error
 }
 
 type complaintService struct {
@@ -102,15 +107,15 @@ func (cs *complaintService) GetMyComplaints(ctx context.Context, params Complain
 	return complaint, nil
 }
 
-func (cs *complaintService) GetAllComplaints(ctx context.Context, params ComplaintFetchParams) ([]FeedComplaint, error) {
+func (cs *complaintService) GetAllComplaints(ctx context.Context, params ComplaintFetchParams) (any, error) {
 	// Call repository
-	complaint, err := cs.complaintRepo.FetchAllComplaints(ctx, params)
+	complaints, err := cs.complaintRepo.FetchAllComplaints(ctx, params)
 	if err != nil {
 		cs.logger.Error("failed to get user complaints", "error", err, "uid", params.Uid)
 		return nil, err
 	}
 
-	return complaint, nil
+	return complaints, nil
 }
 
 // ADMIN ---
@@ -122,4 +127,44 @@ func (cs *complaintService) GetDashboardStats(ctx context.Context, params Dashbo
 	}
 
 	return stats, nil
+}
+
+func (cs *complaintService) VerifyComplaint(ctx context.Context, id uuid.UUID) error {
+	err := cs.complaintRepo.UpdateComplaintStatus(ctx, id, "verified", "verified_at", "")
+	if err != nil {
+		cs.logger.Error("failed to verify complaint", "error", err, "complaint_id", id)
+		return ErrInternalError
+	}
+
+	return nil
+}
+
+func (cs *complaintService) RejectComplaint(ctx context.Context, id uuid.UUID, reason string) error {
+	err := cs.complaintRepo.UpdateComplaintStatus(ctx, id, "rejected", "rejected_at", reason)
+	if err != nil {
+		cs.logger.Error("failed to reject complaint", "error", err, "complaint_id", id)
+		return ErrInternalError
+	}
+
+	return nil
+}
+
+func (cs *complaintService) ResolveComplaint(ctx context.Context, id uuid.UUID, remarks string) error {
+	err := cs.complaintRepo.UpdateComplaintStatus(ctx, id, "resolved", "resolved_at", remarks)
+	if err != nil {
+		cs.logger.Error("failed to resolve complaint", "error", err, "complaint_id", id)
+		return ErrInternalError
+	}
+
+	return nil
+}
+
+func (cs *complaintService) AdminDeleteComplaint(ctx context.Context, id uuid.UUID) error {
+	err := cs.complaintRepo.AdminDeleteComplaint(ctx, id)
+	if err != nil {
+		cs.logger.Error("failed to delete complaint", "error", err, "complaint_id", id)
+		return ErrInternalError
+	}
+
+	return nil
 }

@@ -1,7 +1,9 @@
 package complaint
 
 import (
+	"encoding/json"
 	"errors"
+	"io"
 	"net/http"
 	"strconv"
 	"strings"
@@ -9,6 +11,7 @@ import (
 	"github.com/aprimr/reportit/internal/middlewares"
 	"github.com/aprimr/reportit/internal/utils"
 	"github.com/go-chi/chi/v5"
+	"github.com/google/uuid"
 )
 
 type ComplaintHandler interface {
@@ -20,6 +23,10 @@ type ComplaintHandler interface {
 	GetAllComplaints(w http.ResponseWriter, r *http.Request)
 
 	GetDashboardStats(w http.ResponseWriter, r *http.Request)
+	VerifyComplaint(w http.ResponseWriter, r *http.Request)
+	RejectComplaint(w http.ResponseWriter, r *http.Request)
+	ResolveComplaint(w http.ResponseWriter, r *http.Request)
+	AdminDeleteComplaint(w http.ResponseWriter, r *http.Request)
 }
 
 type complaintHandler struct {
@@ -316,10 +323,6 @@ func (ch *complaintHandler) GetAllComplaints(w http.ResponseWriter, r *http.Requ
 		return
 	}
 
-	if complaints == nil {
-		complaints = []FeedComplaint{}
-	}
-
 	utils.WriteJSON(w, http.StatusOK, complaints, "complaints fetch successful")
 }
 
@@ -356,4 +359,113 @@ func (ch *complaintHandler) GetDashboardStats(w http.ResponseWriter, r *http.Req
 	}
 
 	utils.WriteJSON(w, http.StatusOK, stats, "dashboard stats fetch successful")
+}
+
+func (ch *complaintHandler) VerifyComplaint(w http.ResponseWriter, r *http.Request) {
+	role := middlewares.GetRoleFromContext(r.Context())
+	if role != "admin" {
+		utils.WriteError(w, http.StatusForbidden, "Admin access required")
+		return
+	}
+
+	idStr := chi.URLParam(r, "id")
+	complaintID, err := uuid.Parse(idStr)
+	if err != nil {
+		utils.WriteError(w, http.StatusBadRequest, "Invalid complaint ID format")
+		return
+	}
+
+	err = ch.complaintService.VerifyComplaint(r.Context(), complaintID)
+	if err != nil {
+		utils.WriteError(w, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	utils.WriteJSON(w, http.StatusOK, nil, "Complaint verified successfully")
+}
+
+func (ch *complaintHandler) RejectComplaint(w http.ResponseWriter, r *http.Request) {
+	role := middlewares.GetRoleFromContext(r.Context())
+	if role != "admin" {
+		utils.WriteError(w, http.StatusForbidden, "Admin access required")
+		return
+	}
+
+	idStr := chi.URLParam(r, "id")
+	complaintID, err := uuid.Parse(idStr)
+	if err != nil {
+		utils.WriteError(w, http.StatusBadRequest, "Invalid complaint ID format")
+		return
+	}
+
+	var req AdminActionRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		utils.WriteError(w, http.StatusBadRequest, "Invalid request body")
+		return
+	}
+	if req.Remarks == "" {
+		utils.WriteError(w, http.StatusBadRequest, "Rejection reason is required")
+		return
+	}
+
+	err = ch.complaintService.RejectComplaint(r.Context(), complaintID, req.Remarks)
+	if err != nil {
+		utils.WriteError(w, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	utils.WriteJSON(w, http.StatusOK, nil, "Complaint rejected successfully")
+}
+
+func (ch *complaintHandler) ResolveComplaint(w http.ResponseWriter, r *http.Request) {
+	role := middlewares.GetRoleFromContext(r.Context())
+	if role != "admin" {
+		utils.WriteError(w, http.StatusForbidden, "Admin access required")
+		return
+	}
+
+	idStr := chi.URLParam(r, "id")
+	complaintID, err := uuid.Parse(idStr)
+	if err != nil {
+		utils.WriteError(w, http.StatusBadRequest, "Invalid complaint ID format")
+		return
+	}
+
+	var req AdminActionRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil && err != io.EOF {
+		utils.WriteError(w, http.StatusBadRequest, "Invalid request body")
+		return
+	}
+
+	// 4. Call Service
+	err = ch.complaintService.ResolveComplaint(r.Context(), complaintID, req.Remarks)
+	if err != nil {
+		utils.WriteError(w, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	utils.WriteJSON(w, http.StatusOK, nil, "Complaint resolved successfully")
+}
+
+func (ch *complaintHandler) AdminDeleteComplaint(w http.ResponseWriter, r *http.Request) {
+	role := middlewares.GetRoleFromContext(r.Context())
+	if role != "admin" {
+		utils.WriteError(w, http.StatusForbidden, "Admin access required")
+		return
+	}
+
+	idStr := chi.URLParam(r, "id")
+	complaintID, err := uuid.Parse(idStr)
+	if err != nil {
+		utils.WriteError(w, http.StatusBadRequest, "Invalid complaint ID format")
+		return
+	}
+
+	err = ch.complaintService.AdminDeleteComplaint(r.Context(), complaintID)
+	if err != nil {
+		utils.WriteError(w, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	utils.WriteJSON(w, http.StatusOK, nil, "Complaint deleted successfully")
 }

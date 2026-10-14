@@ -105,8 +105,14 @@ func main() {
 			r.Get("/dashboard", complaintHandler.GetDashboardStats)
 
 			// admin complaints route
-			r.Get("/complaints", complaintHandler.GetAllComplaints)
+			r.Route("/complaints", func(r chi.Router) {
+				r.Get("/", complaintHandler.GetAllComplaints)
+				r.Patch("/{id}/verify", complaintHandler.VerifyComplaint)
+				r.Patch("/{id}/reject", complaintHandler.RejectComplaint)
+				r.Patch("/{id}/resolve", complaintHandler.ResolveComplaint)
 
+				r.Delete("/{id}", complaintHandler.AdminDeleteComplaint)
+			})
 		})
 
 		// complaint routes
