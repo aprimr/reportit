@@ -1,3 +1,6 @@
+import 'dart:async'; // Added for Timer
+
+import 'package:app/core/routes/app_routes.dart';
 import 'package:app/core/theme/app_theme.dart';
 import 'package:app/core/utils/app_snackbar.dart';
 import 'package:app/helpers/complaint_helper.dart';
@@ -20,6 +23,8 @@ class _AdminComplaintsScreenState extends ConsumerState<AdminComplaintsScreen> {
   final TextEditingController searchController = TextEditingController();
   final ScrollController scrollController = ScrollController();
 
+  Timer? _debounce; // Added for search debouncing
+
   String? selectedStatus;
   String? selectedSort;
 
@@ -39,6 +44,7 @@ class _AdminComplaintsScreenState extends ConsumerState<AdminComplaintsScreen> {
 
   @override
   void dispose() {
+    _debounce?.cancel(); // Cancel timer on dispose
     searchController.dispose();
     scrollController.dispose();
     super.dispose();
@@ -50,7 +56,8 @@ class _AdminComplaintsScreenState extends ConsumerState<AdminComplaintsScreen> {
       final notifier = ref.read(adminComplaintProvider.notifier);
 
       if (notifier.hasMore) {
-        notifier.fetchAdminAllComplaints(
+        // FIX: Changed from fetchAdminAllComplaints to fetchMoreAdminComplaints
+        notifier.fetchMoreAdminComplaints(
           search: searchController.text.isEmpty ? null : searchController.text,
           status: selectedStatus,
           sort: selectedSort,
@@ -88,7 +95,11 @@ class _AdminComplaintsScreenState extends ConsumerState<AdminComplaintsScreen> {
   }
 
   void onSearchChanged(String query) {
-    _fetchAdminComplaints();
+    // FIX: Debounce search so it doesn't spam the API on every keystroke
+    _debounce?.cancel();
+    _debounce = Timer(const Duration(milliseconds: 500), () {
+      _fetchAdminComplaints();
+    });
   }
 
   void onSortSelected(String sortStr) {
@@ -150,7 +161,7 @@ class _AdminComplaintsScreenState extends ConsumerState<AdminComplaintsScreen> {
                             ),
                             decoration: InputDecoration(
                               hintText:
-                                  "Search complaints by title or description",
+                                  "Search by ID, title or description", // Updated hint
                               hintStyle: GoogleFonts.poppins(
                                 fontSize: 13,
                                 color: AppTheme.textHint,
@@ -170,16 +181,26 @@ class _AdminComplaintsScreenState extends ConsumerState<AdminComplaintsScreen> {
                                   ),
                                 ),
                               ),
-                              suffixIcon: searchController.text.isNotEmpty
-                                  ? IconButton(
-                                      icon: const Icon(Icons.clear, size: 18),
-                                      color: Colors.grey.shade600,
-                                      onPressed: () {
-                                        searchController.clear();
-                                        _fetchAdminComplaints();
-                                      },
-                                    )
-                                  : null,
+                              // FIX: Live clear button using ValueListenableBuilder
+                              suffixIcon:
+                                  ValueListenableBuilder<TextEditingValue>(
+                                    valueListenable: searchController,
+                                    builder: (context, value, child) {
+                                      return value.text.isNotEmpty
+                                          ? IconButton(
+                                              icon: const Icon(
+                                                Icons.clear,
+                                                size: 18,
+                                              ),
+                                              color: Colors.grey.shade600,
+                                              onPressed: () {
+                                                searchController.clear();
+                                                _fetchAdminComplaints();
+                                              },
+                                            )
+                                          : const SizedBox.shrink();
+                                    },
+                                  ),
                               border: InputBorder.none,
                               contentPadding: const EdgeInsets.fromLTRB(
                                 16,
@@ -428,11 +449,11 @@ class _AdminComplaintsScreenState extends ConsumerState<AdminComplaintsScreen> {
                           final complaint = complaints[index];
                           return GestureDetector(
                             onTap: () {
-                              // Navigator.pushNamed(
-                              //   context,
-                              //   AppRoutes.myComplaintDetail,
-                              //   arguments: complaint,
-                              // );
+                              Navigator.pushNamed(
+                                context,
+                                AppRoutes.adminComplaintDetail,
+                                arguments: complaint,
+                              );
                             },
                             child: Container(
                               padding: const EdgeInsets.symmetric(

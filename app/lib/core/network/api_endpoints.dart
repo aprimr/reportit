@@ -34,5 +34,15 @@ class ApiEndpoints {
   // admin dashboard routes
   static const String adminDashboardStats = '$apiVersion/admin/dashboard';
 
-  static const String getAdminAllComplaints = '$apiVersion/admin/complaints';
+  static const String getAdminAllComplaints = '$apiVersion/admin/complaints/';
+
+  // complaint actions
+  static String adminVerifyComplaint(String id) =>
+      '$apiVersion/admin/complaints/$id/verify';
+  static String adminRejectComplaint(String id) =>
+      '$apiVersion/admin/complaints/$id/reject';
+  static String adminResolveComplaint(String id) =>
+      '$apiVersion/admin/complaints/$id/resolve';
+  static String adminDeleteComplaint(String id) =>
+      '$apiVersion/admin/complaints/$id';
 }

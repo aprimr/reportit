@@ -123,6 +123,19 @@ class _ReportItAdminNavBar extends StatelessWidget {
           label: '',
         ),
 
+        // BottomNavigationBarItem(
+        //   icon: HugeIcon(
+        //     icon: HugeIcons.strokeRoundedSearch01,
+        //     size: 22,
+        //     strokeWidth: 1.5,
+        //   ),
+        //   activeIcon: HugeIcon(
+        //     icon: HugeIcons.strokeRoundedSearch01,
+        //     size: 22,
+        //     strokeWidth: 1.6,
+        //   ),
+        //   label: '',
+        // ),
         BottomNavigationBarItem(
           icon: HugeIcon(
             icon: HugeIcons.strokeRoundedUserCircle,

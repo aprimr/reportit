@@ -1,5 +1,6 @@
 import 'package:app/core/model/complaint_model.dart';
 import 'package:app/screens/admin/admin_home_screen.dart';
+import 'package:app/screens/admin/complaints/admin_complaints_detail_screen.dart';
 import 'package:app/screens/user/complaint/create_complaint.dart';
 import 'package:app/screens/user/feed/feed_comlaint_detail.dart';
 import 'package:app/screens/user/home_screen.dart';
@@ -25,6 +26,7 @@ class AppRoutes {
 
   // admin routes
   static const String adminHome = '/admin/home';
+  static const String adminComplaintDetail = '/admin/complaint-detail';
 
   static Map<String, WidgetBuilder> routes = {
     splash: (context) => const SplashScreen(),
@@ -51,5 +53,11 @@ class AppRoutes {
 
     // admin
     adminHome: (context) => const AdminHomeScreen(),
+    adminComplaintDetail: (context) {
+      final complaint =
+          ModalRoute.of(context)!.settings.arguments as AdminComplaintModel;
+
+      return AdminComplaintsDetailScreen(complaint: complaint);
+    },
   };
 }

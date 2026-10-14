@@ -260,3 +260,111 @@ class DashboardStatsModel {
     );
   }
 }
+
+class AdminComplaintModel {
+  final String id;
+  final String uid;
+  final String title;
+  final String description;
+  final String category;
+  final List<String> imageUrls;
+  final double latitude;
+  final double longitude;
+  final bool isPublic;
+  final String status;
+  final String? phone;
+  final String? email;
+  final String? adminRemarks;
+  final String fullname;
+  final String? verifiedAt;
+  final String? rejectedAt;
+  final String? resolvedAt;
+  final String createdAt;
+
+  AdminComplaintModel({
+    required this.id,
+    required this.uid,
+    required this.title,
+    required this.description,
+    required this.category,
+    required this.imageUrls,
+    required this.latitude,
+    required this.longitude,
+    required this.isPublic,
+    required this.status,
+    this.phone,
+    this.email,
+    this.adminRemarks,
+    required this.fullname,
+    this.verifiedAt,
+    this.rejectedAt,
+    this.resolvedAt,
+    required this.createdAt,
+  });
+
+  factory AdminComplaintModel.fromJson(Map<String, dynamic> json) {
+    return AdminComplaintModel(
+      id: json['id'] ?? '',
+      uid: json['uid'] ?? '',
+      title: json['title'] ?? '',
+      description: json['description'] ?? '',
+      category: json['category'] ?? '',
+      imageUrls: List<String>.from(json['image_urls'] ?? []),
+      latitude: (json['latitude'] as num?)?.toDouble() ?? 0.0,
+      longitude: (json['longitude'] as num?)?.toDouble() ?? 0.0,
+      isPublic: json['is_public'] as bool? ?? true,
+      status: json['status'] ?? 'open',
+      phone: json['phone'] as String?,
+      email: json['email'] as String?,
+      adminRemarks: json['admin_remarks'] as String?,
+      fullname: json['fullname'] ?? '',
+      verifiedAt: json['verified_at'] as String?,
+      rejectedAt: json['rejected_at'] as String?,
+      resolvedAt: json['resolved_at'] as String?,
+      createdAt: json['created_at'] ?? '',
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'uid': uid,
+      'title': title,
+      'description': description,
+      'category': category,
+      'image_urls': imageUrls,
+      'latitude': latitude,
+      'longitude': longitude,
+      'is_public': isPublic,
+      'status': status,
+      'phone': phone,
+      'email': email,
+      'admin_remarks': adminRemarks,
+      'fullname': fullname,
+      'verified_at': verifiedAt,
+      'rejected_at': rejectedAt,
+      'resolved_at': resolvedAt,
+      'created_at': createdAt,
+    };
+  }
+}
+
+class AdminComplaintListResponse {
+  final List<AdminComplaintModel> data;
+  final String? message;
+
+  AdminComplaintListResponse({required this.data, this.message});
+
+  factory AdminComplaintListResponse.fromJson(Map<String, dynamic> json) {
+    return AdminComplaintListResponse(
+      message: json['message'] as String?,
+      data:
+          (json['data'] as List<dynamic>?)
+              ?.map(
+                (e) => AdminComplaintModel.fromJson(e as Map<String, dynamic>),
+              )
+              .toList() ??
+          [],
+    );
+  }
+}

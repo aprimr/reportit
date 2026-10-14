@@ -26,7 +26,7 @@ final feedComplaintProvider =
 final isFetchingMoreAdminProvider = StateProvider<bool>((ref) => false);
 
 final adminComplaintProvider =
-    StateNotifierProvider<AdminComplaintNotifier, List<FeedComplaintModel>>((
+    StateNotifierProvider<AdminComplaintNotifier, List<AdminComplaintModel>>((
       ref,
     ) {
       return AdminComplaintNotifier(ref.watch(complaintServiceProvider), ref);
@@ -231,7 +231,7 @@ class FeedComplaintNotifier extends StateNotifier<List<FeedComplaintModel>> {
   }
 }
 
-class AdminComplaintNotifier extends StateNotifier<List<FeedComplaintModel>> {
+class AdminComplaintNotifier extends StateNotifier<List<AdminComplaintModel>> {
   final ComplaintService _complaintService;
   final Ref _ref;
 
@@ -258,6 +258,7 @@ class AdminComplaintNotifier extends StateNotifier<List<FeedComplaintModel>> {
         sort: sort,
         limit: limit,
       );
+
       state = response.data;
 
       if (response.data.isNotEmpty) {
@@ -303,6 +304,42 @@ class AdminComplaintNotifier extends StateNotifier<List<FeedComplaintModel>> {
       rethrow;
     } finally {
       _ref.read(isFetchingMoreAdminProvider.notifier).state = false;
+    }
+  }
+
+  Future<void> verifyComplaint(String id) async {
+    try {
+      await _complaintService.adminVerifyComplaint(id: id);
+      state = state.where((c) => c.id != id).toList();
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  Future<void> rejectComplaint(String id, String reason) async {
+    try {
+      await _complaintService.adminRejectComplaint(id: id, reason: reason);
+      state = state.where((c) => c.id != id).toList();
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  Future<void> resolveComplaint(String id, String remarks) async {
+    try {
+      await _complaintService.adminResolveComplaint(id: id, remarks: remarks);
+      state = state.where((c) => c.id != id).toList();
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  Future<void> deleteAdminComplaint(String id) async {
+    try {
+      await _complaintService.adminDeleteComplaint(id: id);
+      state = state.where((c) => c.id != id).toList();
+    } catch (e) {
+      rethrow;
     }
   }
 

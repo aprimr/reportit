@@ -138,7 +138,7 @@ class ComplaintService {
   }
 
   // ADMIN ---
-  Future<FeedComplaintListResponse> getAdminAllComplaints({
+  Future<AdminComplaintListResponse> getAdminAllComplaints({
     String? search,
     String? status,
     String? sort,
@@ -157,11 +157,11 @@ class ComplaintService {
         ApiEndpoints.getAdminAllComplaints,
         queryParameters: queryParameters.isNotEmpty ? queryParameters : null,
       );
-      return FeedComplaintListResponse.fromJson(response.data);
+      return AdminComplaintListResponse.fromJson(response.data);
     } on DioException catch (e) {
       throw e.error is ApiError
           ? e.error as ApiError
-          : ApiError(message: e.message ?? 'Failed to fetch all complaints');
+          : ApiError(message: e.message ?? 'Failed to fetch admin complaints');
     }
   }
 
@@ -180,6 +180,58 @@ class ComplaintService {
       throw e.error is ApiError
           ? e.error as ApiError
           : ApiError(message: e.message ?? 'Failed to fetch dashboard stats');
+    }
+  }
+
+  Future<void> adminVerifyComplaint({required String id}) async {
+    try {
+      await _client.patch(ApiEndpoints.adminVerifyComplaint(id));
+    } on DioException catch (e) {
+      throw e.error is ApiError
+          ? e.error as ApiError
+          : ApiError(message: e.message ?? 'Failed to verify complaint');
+    }
+  }
+
+  Future<void> adminRejectComplaint({
+    required String id,
+    required String reason,
+  }) async {
+    try {
+      await _client.patch(
+        ApiEndpoints.adminRejectComplaint(id),
+        data: {'remarks': reason},
+      );
+    } on DioException catch (e) {
+      throw e.error is ApiError
+          ? e.error as ApiError
+          : ApiError(message: e.message ?? 'Failed to reject complaint');
+    }
+  }
+
+  Future<void> adminResolveComplaint({
+    required String id,
+    String? remarks,
+  }) async {
+    try {
+      await _client.patch(
+        ApiEndpoints.adminResolveComplaint(id),
+        data: {'remarks': remarks ?? ''},
+      );
+    } on DioException catch (e) {
+      throw e.error is ApiError
+          ? e.error as ApiError
+          : ApiError(message: e.message ?? 'Failed to resolve complaint');
+    }
+  }
+
+  Future<void> adminDeleteComplaint({required String id}) async {
+    try {
+      await _client.delete(ApiEndpoints.adminDeleteComplaint(id));
+    } on DioException catch (e) {
+      throw e.error is ApiError
+          ? e.error as ApiError
+          : ApiError(message: e.message ?? 'Failed to delete complaint');
     }
   }
 }
