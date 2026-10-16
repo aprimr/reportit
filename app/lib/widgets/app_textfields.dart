@@ -94,12 +94,9 @@ class AppTextfields {
     int maxLines = 1,
     int? maxChars,
   }) {
-    return StatefulBuilder(
-      builder: (context, setState) {
-        controller.addListener(() {
-          setState(() {});
-        });
-
+    return ValueListenableBuilder<TextEditingValue>(
+      valueListenable: controller,
+      builder: (context, value, child) {
         return TextFormField(
           controller: controller,
           obscureText: obscure,
@@ -117,7 +114,7 @@ class AppTextfields {
           decoration: InputDecoration(
             hintText: hint,
             counterText: maxChars != null
-                ? '${controller.text.length}/$maxChars'
+                ? '${value.text.length}/$maxChars'
                 : null,
             counterStyle: GoogleFonts.inter(
               fontSize: 10.5,

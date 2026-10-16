@@ -438,7 +438,7 @@ class _CreateComplaintScreenState extends ConsumerState<CreateComplaintScreen> {
                     readOnly: _isLoading,
                     validator: (v) {
                       if (v!.trim().isEmpty) return 'Please enter a title';
-                      if (v.trim().length <= 15) {
+                      if (v.trim().length < 15) {
                         return 'Title must be at least  15 characters.';
                       }
                       return null;
